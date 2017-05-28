@@ -1,0 +1,32 @@
+{
+  "name": "webcoder31/ezxmldsig",
+  "type": "library",
+  "description": "An easy-to-use PHP class library for common use cases of XML Digital Signatures",
+  "license": "CeCILL-C",
+  "keywords": [
+    "xml",
+    "xmldsig",
+    "signature",
+    "security",
+    "authentication",
+    "token",
+    "SSO"
+  ],
+  "homepage": "https://github.com/webcoder31/ezxmldsig",
+  "authors": [
+    {
+      "name": "Thierry Thiers",
+      "email": "webcoder31@gmail.com",
+      "role": "WEB Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "webcoder31\\ezxmldsig\\": "src"
+    }
+  },
+  "require": {
+    "php": ">= 5.6",
+    "robrichards/xmlseclibs": "2.0.1"
+  }
+}
