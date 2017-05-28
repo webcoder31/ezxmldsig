@@ -67,7 +67,7 @@ More classes will be provided soon, in order to support other useful usages of X
 
 ## How to use?
 
-NOTE: The **ezxmldsig** is designed to work with cryptographic material in PEM format.
+**NOTE:** The library **ezxmldsig** is designed to work with cryptographic material in PEM format.
 
 
 ### XMLDSigToken: Creating a signed XML token
@@ -348,8 +348,10 @@ var_dump($token->getData());
 
 ## Examples
 
-Ready-to-use examples are provided in the `examples` directory along with cryptographic material.
+Similar examples are provided in the `examples` directory along with cryptographic material.
 Simply visit the file `index.html` to see them in action (need to be hosted on an HTTP / PHP server).
+
+**NOTE:** To work out of the box, theses examples require that you've installed the library **ezxmldsig** using **composer**.
 
 
 ## How to Contribute?

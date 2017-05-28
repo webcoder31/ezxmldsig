@@ -3,10 +3,6 @@
  * File: post-xml-token.php
  */
 
-// Load required classes manualy.
-// require(dirname(__DIR__) . '/vendor/robrichards/xmlseclibs/xmlseclibs.php');
-// require(dirname(__DIR__) . '/ezxmldsig.php');
-
 // Autoload required classes.
 require dirname(__DIR__) . '/vendor/autoload.php';
 

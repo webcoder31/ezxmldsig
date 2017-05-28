@@ -3,10 +3,6 @@
  * File: parse-xml-token.php
  */
 
-// Load required classes manualy.
-// require(dirname(__DIR__) . '/vendor/robrichards/xmlseclibs/xmlseclibs.php');
-// require(dirname(__DIR__) . '/ezxmldsig.php');
-
 // Autoload required classes.
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -49,8 +45,9 @@ $token = XMLDSigToken::parseSecureXMLToken($sig, $cryptKey, $cryptKeyPassword);
 // then use the following method:
 // $token = XMLDSigToken::parseXMLToken($sig);
 
-// Display analysis results.
-echo '<html><body><h1>XMLDSig Token Analysis</h1>';
+// Send back response to POST request.
+echo '<html><body>';
+echo '<h1>XMLDSig Token Analysis</h1>';
 
 // Verify that:
 // - the XML digital signature meets the XMLDSIG specifications.
@@ -62,9 +59,6 @@ echo '<html><body><h1>XMLDSig Token Analysis</h1>';
 if (!$token->isValid()) 
 {
     echo "<h2>ERROR: Invalid XML Digital Signature!</h2>";
-    echo "<h3>Token details:</h3>";
-    echo $token->getHTMLDump();
-    exit();
 }
 
 // Verify that the X.509 certificate included in 
@@ -72,9 +66,6 @@ if (!$token->isValid())
 else if ($token->isCertOutOfDate()) 
 {
     echo "<h2>ERROR: Signing certificate is out of date!</h2>";
-    echo "<h3>Token details:</h3>";
-    echo $token->getHTMLDump();
-    exit();
 }
 
 // Verify that the issuer of the X.509 certificate included 
@@ -82,9 +73,6 @@ else if ($token->isCertOutOfDate())
 else if (!$token->checkCertIssuer($expectedIssuer)) 
 {
     echo "<h2>ERROR: Issuer of signing certificate is not valid!</h2>";
-    echo "<h3>Token details:</h3>";
-    echo $token->getHTMLDump();
-    exit();
 }
 
 // Verify that the X.509 certificate included in the XML
@@ -92,18 +80,12 @@ else if (!$token->checkCertIssuer($expectedIssuer))
 else if (!$token->checkCertCA($caCertPath)) 
 {
     echo "<h2>ERROR: Signing certificate not issued by the expected CA!</h2>";
-    echo "<h3>Token details:</h3>";
-    echo $token->getHTMLDump();
-    exit();
 }
 
 // Verify that the XML token was issued less than 2 minutes ago.
 else if ($token->isOutOfDate(120)) 
 {
     echo "<h2>ERROR: Token is out of date!</h2>";
-    echo "<h3>Token details:</h3>";
-    echo $token->getHTMLDump();
-    exit();
 }
 
 // All is fine ! We can trust user data.
@@ -119,4 +101,6 @@ else
 // Dump token object.
 echo "<h3>Token details:</h3>";
 echo $token->getHTMLDump();
+
+// Close HTML tags.
 echo '</body></html>';
