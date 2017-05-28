@@ -27,6 +27,8 @@ You can also clone it (or download it as a ZIP archive) from its [GitHub reposit
 
 The ``XMLDSigToken`` class allows creating and analyzing enveloping XML Digital Signature containing timestamped user data that may also be encrypted, also called XML token. With such tokens, you may create your own Single Sign On solution. You can secure access to your Web Services, as with JSON Web Token. You can transmit data in a secure way without having SSL connection. Or anything you can think of that requires such kind of features.
 
+**The ``XMLDSigToken`` class offers the following features:**
+
 1) It build an XML token from a flat or multidimensional associative array representing the user data and retrieve it in the same way.
 
 2) It allows chossing the various algorithms that should be used to build the XML Digital Signature. The ones used by default are the following:
