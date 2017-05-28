@@ -1,24 +1,27 @@
 # EZXMLDSIG: An easy-to-use set of PHP classes for common use cases of XML Digital Signatures
 
-The **ezxmldsig** provides several handy classes for working with XML Digital Signatures in an easy way.
-It is built over the **xmlseclibs** library developed by Rob Richards (https://github.com/robrichards/xmlseclibs).
+Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the **ezxmldsig** library is designed to make it easy to use XML digital signatures for various purposes such as Single Sign On login, token based authentication, electronic document signature, data integrity guarantee, and so on.
+
 The author of the **ezxmldsig** library is Thierry Thiers.
 
 
 ## Requirements
 
-**ezxmldsig** requires PHP version 5.6 or greater and the **xmlseclibs** version 2.0.1 developed by Rob Richards.
+The library **ezxmldsig** requires PHP version 5.6 or greater and the version 2.0.1 of the library **xmlseclibs** developed by Rob Richards.
 
 
-## How to Install
+## How to Install?
 
-Install with [`composer.phar`](http://getcomposer.org).
+The library **ezxmldsig** is available on [www.pakagist.org](https://www.pakagist.org) and you can nstall it for your project with [`composer.phar`](http://getcomposer.org).
 
 ```sh
 php composer.phar require "webcoder31/ezxmldsig"
 ```
 
-## Library overview
+You can also clone it (or download it as a ZIP archive) from its [GitHub repositary](https://github.com/webcoder31/ezxmldsig.git) and load it the way you want in your project. In this case, you will have to do the same from the [**xmlseclib** GitHub repositary](https://github.com/robrichards/xmlseclibs) of Rob Richards.
+
+
+## What's in the box?
 
 ### XMLDSigToken class
 
@@ -60,9 +63,9 @@ The ``X509Cert`` class provides a set of convenient methods for extracting essen
 More classes will be provided soon, in order to support other useful usages of XML Digital Signatures, i.e. signing an internet resource or a mail attachment.
 
 
-## Basic usage
+## How to use?
 
-NOTE: The **ezxmldsig** uses cryptographic material in PEM format.
+NOTE: The **ezxmldsig** is designed to work with cryptographic material in PEM format.
 
 
 ### XMLDSigToken: Creating a signed XML token
@@ -341,7 +344,7 @@ echo "Token data:";
 var_dump($token->getData());
 ```
 
-## How to Contribute
+## How to Contribute?
 
 * [Open Issues](https://github.com/webcoder31/ezxmldsig/issues)
 * [Open Pull Requests](https://github.com/webcoder31/ezxmldsig/pulls)
