@@ -12,7 +12,7 @@ The library **ezxmldsig** requires PHP version 5.6 or greater and the version 2.
 
 ## How to Install?
 
-The library **ezxmldsig** is available on [www.pakagist.org](https://www.pakagist.org) and you can nstall it for your project with [`composer.phar`](http://getcomposer.org).
+The library **ezxmldsig** is available on [www.pakagist.org](https://packagist.org/packages/webcoder31/ezxmldsig) and you can nstall it for your project with [`composer.phar`](http://getcomposer.org).
 
 ```sh
 php composer.phar require "webcoder31/ezxmldsig"
