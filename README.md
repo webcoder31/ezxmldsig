@@ -94,8 +94,8 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 use webcoder31\ezxmldsig\XMLDSigToken;
 
 // Asymmetric cryptographic key pair for signing (in PEM format).
-$signKey = 'path/to/private/key';
-$signCert = 'path/to/public/certificate';
+$signKey = 'path/to/signing/private/key';
+$signCert = 'path/to/signing/public/certificate';
 $signKeyPassword = 'signing-key-password'; // Use null if it is not needed.
 
 // User data.
@@ -345,6 +345,12 @@ if ($token->isOutOfDate(120))
 echo "Token data:";
 var_dump($token->getData());
 ```
+
+## Examples
+
+Ready-to-use examples are provided in the `examples` directory along with cryptographic material.
+Simply visit the file `index.html` to see them in action (need to be hosted on an HTTP / PHP server).
+
 
 ## How to Contribute?
 
