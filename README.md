@@ -1,6 +1,6 @@
 # EZXMLDSIG: An easy-to-use set of PHP classes for common use cases of XML Digital Signatures
 
-Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the **ezxmldsig** library is designed to make it easy to use XML digital signatures for various purposes such as Single Sign On login, token based authentication, electronic document signature, data integrity guarantee, and so on.
+Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** is designed to make it easy to use XML digital signatures for various purposes such as Single Sign On login, token based authentication, electronic document signature, data integrity guarantee, and so on.
 
 The author of the **ezxmldsig** library is Thierry Thiers.
 
