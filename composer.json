@@ -4,13 +4,13 @@
   "description": "An easy-to-use set of PHP classes for common use cases of XML Digital Signatures",
   "license": "CeCILL-C",
   "keywords": [
-    "xml",
+    "xml digital signature",
+    "single sign on",
+    "sso",
+    "token based authentication",
+    "document electronic signature",
     "xmldsig",
-    "signature",
-    "security",
-    "authentication",
-    "token",
-    "SSO"
+    "xmlseclibs"
   ],
   "homepage": "https://github.com/webcoder31/ezxmldsig",
   "authors": [

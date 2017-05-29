@@ -1,6 +1,6 @@
 # EZXMLDSIG: An easy-to-use set of PHP classes for common use cases of XML Digital Signatures
 
-Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** is designed to make it easy to use XML digital signatures for various purposes such as Single Sign On login, token based authentication, electronic document signature, data integrity guarantee, and so on.
+Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** is designed to make it easy to use XML digital signatures for various purposes such as Single Sign On login, token based authentication, document electronic signature, data integrity guarantee, and so on.
 
 The author of the **ezxmldsig** library is Thierry Thiers.
 
@@ -14,8 +14,15 @@ The library **ezxmldsig** requires PHP version 5.6 or greater and the version 2.
 
 The library **ezxmldsig** is available on [www.pakagist.org](https://packagist.org/packages/webcoder31/ezxmldsig) and you can nstall it for your project with [`composer.phar`](http://getcomposer.org).
 
+
 ```sh
 php composer.phar require "webcoder31/ezxmldsig"
+```
+
+**NOTE:** As long as the library **ezxmldsig** is still a BETA version you should indicate the desired version tag to avoid **composer** issues due to stability requirements on package installation:
+
+```sh
+php composer.phar require "webcoder31/ezxmldsig:<beta-version-tag>" (i.e. v0.1.0-beta)
 ```
 
 You can also clone it (or download it as a ZIP archive) from its [GitHub repositary](https://github.com/webcoder31/ezxmldsig.git) and load it the way you want in your project. In this case, you will have to do the same from the [**xmlseclib** GitHub repositary](https://github.com/robrichards/xmlseclibs) of Rob Richards.
