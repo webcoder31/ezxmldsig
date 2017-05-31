@@ -1,0 +1,2379 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Class webcoder31\ezxmldsig\XMLDSigToken</title>
+
+	<link rel="stylesheet" href="resources/style.css?c2f33731c1948fbed7c333554678bfa68d4817da">
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+				<h3>Namespaces</h3>
+			<ul>
+				<li class="active">
+					<a href="namespace-webcoder31.html">
+						webcoder31<span></span>
+					</a>
+
+						<ul>
+				<li class="active">
+					<a href="namespace-webcoder31.ezxmldsig.html">
+						ezxmldsig					</a>
+
+						</li>
+							</ul></li>
+			</ul>
+		</div>
+
+		<hr>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li><a href="class-webcoder31.ezxmldsig.X509Cert.html">X509Cert</a></li>
+				<li class="active"><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">XMLDSigToken</a></li>
+			</ul>
+
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="">
+		<input type="hidden" name="ie" value="UTF-8">
+		<input type="text" name="q" class="text" placeholder="Search">
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-webcoder31.ezxmldsig.html" title="Summary of webcoder31\ezxmldsig"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class XMLDSigToken</h1>
+
+
+	<div class="description">
+	<p>Build or analyze an XML token.</p>
+
+<p>An XML token is an enveloping XML Digital Signature (cf. RFC 3275)
+containing signed and timestamped user data. These data may also be
+encrypted. In this case we talk about Secure XML token.</p>
+
+<p><strong>This class uses the following default algorithms to operate:</strong></p>
+
+<ul>
+<li><p>Algorithm used to canonalize data before signing is: http://www.w3.org/TR/2001/REC-xml-c14n-20010315.</p></li>
+<li><p>Algorithm used to generate the signature is: http://www.w3.org/2000/09/xmldsig#rsa-sha1.</p></li>
+<li><p>Algorithm used to compute the hash of token data is: http://www.w3.org/2000/09/xmldsig#sha1.</p></li>
+<li><p>Algorithm used to encode data's values is: Base64.</p></li>
+</ul>
+
+<p><strong>An XML token looks like this:</strong></p>
+
+<pre><span class="xlang">&lt;?</span>xml version=<span class="php-quote">&quot;1.0&quot;</span><span class="xlang">?&gt;</span>
+&lt;ds:Signature xmlns:ds=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#&quot;</span>&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:CanonicalizationMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;</span>/&gt;
+    &lt;ds:SignatureMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#rsa-sha1&quot;</span>/&gt;
+    &lt;ds:Reference URI=<span class="php-quote">&quot;#Token&quot;</span>&gt;
+      &lt;ds:Transforms&gt;
+        &lt;ds:Transform Algorithm=<span class="php-quote">&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;</span>/&gt;
+      &lt;/ds:Transforms&gt;
+      &lt;ds:DigestMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#sha1&quot;</span>/&gt;
+      &lt;ds:DigestValue&gt;---- TOKEN <span class="php-keyword2">HASH</span> ----&lt;/ds:DigestValue&gt;
+    &lt;/ds:Reference&gt;
+  &lt;/ds:SignedInfo&gt;
+  &lt;ds:SignatureValue&gt;---- SIGNATURE VALUE ----&lt;/ds:SignatureValue&gt;
+  &lt;ds:KeyInfo&gt;
+    &lt;ds:X509Data&gt;
+      &lt;ds:X509Certificate&gt;---- X<span class="php-num">.509</span> CERTIFICATE ----&lt;/ds:X509Certificate&gt;
+    &lt;/ds:X509Data&gt;
+  &lt;/ds:KeyInfo&gt;
+  &lt;ds:Object Id=<span class="php-quote">&quot;Token&quot;</span>&gt;
+    &lt;Token&gt;
+      &lt;TokenTimestamp&gt;<span class="php-num">2016</span>-<span class="php-num">10</span>-<span class="php-num">24</span>T08:<span class="php-num">33</span>:<span class="php-num">14</span>Z&lt;/TokenTimestamp&gt;
+      &lt;TokenData&gt;
+        &lt;data1 Algorithm=<span class="php-quote">&quot;base64&quot;</span>&gt;---- BASE64 ENCODED DATA ----&lt;/data1&gt;
+        &lt;data2 Algorithm=<span class="php-quote">&quot;base64&quot;</span>&gt;---- BASE64 ENCODED DATA ----&lt;/data2&gt;
+        &lt;data3&gt;
+          &lt;data31 Algorithm=<span class="php-quote">&quot;base64&quot;</span>&gt;---- BASE64 ENCODED DATA ----&lt;/data31&gt;
+          &lt;data32 Algorithm=<span class="php-quote">&quot;base64&quot;</span>&gt;---- BASE64 ENCODED DATA ----&lt;/data32&gt;
+        &lt;/data3&gt;
+        &lt;data4 Algorithm=<span class="php-quote">&quot;base64&quot;</span>&gt;---- BASE64 ENCODED DATA ----&lt;/data4&gt;
+      &lt;/TokenData&gt;
+    &lt;/Token&gt;
+  &lt;/ds:Object&gt;
+&lt;/ds:Signature&gt;</pre>
+
+<p><strong>The signing process consists in the following actions:</strong></p>
+
+<ul>
+<li><p>Load data from an associative array.</p></li>
+<li><p>Encode data values using Base64.</p></li>
+<li><p>Build a node from the encoded array of data (cf. node <code>&lt;TokenData /&gt;</code>).</p></li>
+<li><p>Compute an UTC timestamp and store it in a node <code>&lt;TokenTimestamp /&gt;</code>.</p></li>
+<li><p>Aggregate the nodes <code>&lt;TokenTimestamp /&gt;</code> and <code>&lt;TokenData /&gt;</code> inside a node <code>&lt;Token /&gt;</code>.</p></li>
+<li><p>Load the base DOM document representing an XML digital signature:</p></li>
+</ul>
+
+<pre>&lt;ds:Signature xmlns=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#&quot;</span>&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:SignatureMethod /&gt;
+  &lt;/ds:SignedInfo&gt;
+&lt;/ds:Signature&gt;</pre>
+
+<ul>
+<li><p>Create a node <code>&lt;ds:Object Id="Token" /&gt;</code> and append it to the node <code>&lt;ds:Signature /&gt;</code>.</p></li>
+<li><p>Add the node <code>&lt;Token /&gt;</code> to the node <code>&lt;ds:Object Id="Token" /&gt;</code>.</p></li>
+<li><p>NOTE : If data encryption is requested, this process will take place here (this will be described later).</p></li>
+<li><p>Build a node <code>&lt;ds:Reference URI="#Token" /&gt;</code> and append it to the node <code>&lt;ds:SignedInfo /&gt;</code>. This consists in:</p>
+
+<ul>
+<li>Canonicalizing the content of the node <code>&lt;ds:Object Id="Token" /&gt;</code>.</li>
+<li>Computing the SHA1 hash of the canonicalized node and storing it in the node <code>&lt;ds:DigestValue /&gt;</code>.</li>
+</ul></li>
+<li><p>Includes, in the the XML token, the X.509 certificate associated to the private key that will be used to perform the signing (see the next steps below). This cerficate will be used to perform the signature validation process, avoiding the need, for the receiver of the XML Digital Signature to own it on its side.</p></li>
+<li><p>Canonicalize the content of the node <code>&lt;ds:SignedInfo /&gt;</code>.</p></li>
+<li><p>Compute the signature of the canonicalized node using the private key dedicated to perform signing.</p></li>
+<li><p>Store the result in the node <code>&lt;ds:SignatureValue /&gt;</code>.</p></li>
+<li><p>Save the DOM document in XML format.</p></li>
+</ul>
+
+<p><strong>The signature validation process consist in the following actions:</strong></p>
+
+<ul>
+<li><p>Load the XML Digital Singature in a DOM document.</p></li>
+<li><p>Compute the SHA1 hash of the content of the node <code>&lt;ds:Object Id="Token" /&gt;</code>.</p></li>
+<li><p>Compare the computed hash with the one stored in the node <code>&lt;ds:DigestValue /&gt;</code>. If the hash are different, this means that the content of the node <code>&lt;ds:Object Id="Token" /&gt;</code> has been altered.</p></li>
+<li><p>Canonicalize the content of the node <code>&lt;ds:SignedInfo /&gt;</code>.</p></li>
+<li><p>Compute the signature of the node <code>&lt;ds:SignedInfo /&gt;</code> using the X.509 certificate included in the XML token.</p></li>
+<li><p>Compare the computed signature with the one stored in the node <code>&lt;ds:SignatureValue&gt;</code>. If the signatures are different, this means that content the node <code>&lt;ds:SignedInfo /&gt;</code> has not been signed using the private key associated to the X.509 certificate included in the XML Digital Signature.</p></li>
+<li><p>NOTE: If data decryption is required, this process will take place here (this will be described later).</p></li>
+<li><p>Extract the timestamp stored in the content of the node <code>&lt;ds:Object Id="Token" /&gt;</code> and memorise it.</p></li>
+<li><p>Extract the data stored in the content of the node <code>&lt;ds:Object Id="Token" /&gt;</code>.</p></li>
+<li><p>Decode data values using Base64.</p></li>
+<li><p>Buid an associative array containing the decoded data.</p></li>
+</ul>
+
+<p><strong>Token data encryption / decryption:</strong></p>
+
+<p>The token data may also be encrypted before signing. In this case the class
+will use the following default algorithms to perform encryption and
+decryption of data:</p>
+
+<ul>
+<li><p>Algorithm used to encrypt / decrypt data is: http://www.w3.org/2001/04/xmlenc#aes128-cbc (symetric ciphering).</p></li>
+<li><p>Algorithm used to encrypt / decrypt the session key is: http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymetric ciphering).</p></li>
+</ul>
+
+<p><strong>A secure (crypted) XML token looks like this:</strong></p>
+
+<pre><span class="xlang">&lt;?</span>xml version=<span class="php-quote">&quot;1.0&quot;</span><span class="xlang">?&gt;</span>
+&lt;ds:Signature xmlns:ds=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#&quot;</span>&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:CanonicalizationMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;</span>/&gt;
+    &lt;ds:SignatureMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#rsa-sha1&quot;</span>/&gt;
+    &lt;ds:Reference URI=<span class="php-quote">&quot;#Token&quot;</span>&gt;
+      &lt;ds:Transforms&gt;
+        &lt;ds:Transform Algorithm=<span class="php-quote">&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;</span>/&gt;
+      &lt;/ds:Transforms&gt;
+      &lt;ds:DigestMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#sha1&quot;</span>/&gt;
+      &lt;ds:DigestValue&gt;---- TOKEN <span class="php-keyword2">HASH</span> ----&lt;/ds:DigestValue&gt;
+    &lt;/ds:Reference&gt;
+  &lt;/ds:SignedInfo&gt;
+  &lt;ds:SignatureValue&gt;---- SIGNATURE VALUE ----&lt;/ds:SignatureValue&gt;
+  &lt;ds:KeyInfo&gt;
+    &lt;ds:X509Data&gt;
+      &lt;ds:X509Certificate&gt;---- X<span class="php-num">.509</span> CERTIFICATE ----&lt;/ds:X509Certificate&gt;
+    &lt;/ds:X509Data&gt;
+  &lt;/ds:KeyInfo&gt;
+  &lt;ds:Object Id=<span class="php-quote">&quot;Token&quot;</span>&gt;
+    &lt;xenc:EncryptedData xmlns:xenc=<span class="php-quote">&quot;http://www.w3.org/2001/04/xmlenc#&quot;</span> Type=<span class="php-quote">&quot;http://www.w3.org/2001/04/xmlenc#Content&quot;</span>&gt;
+      &lt;xenc:EncryptionMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/2001/04/xmlenc#aes128-cbc&quot;</span>/&gt;
+      &lt;ds:KeyInfo xmlns:dsig=<span class="php-quote">&quot;http://www.w3.org/2000/09/xmldsig#&quot;</span>&gt;
+        &lt;xenc:EncryptedKey&gt;
+          &lt;xenc:EncryptionMethod Algorithm=<span class="php-quote">&quot;http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p&quot;</span>/&gt;
+          &lt;xenc:CipherData&gt;
+            &lt;xenc:CipherValue&gt;---- CIPHERED SESSION <span class="php-keyword2">KEY</span> ----&lt;/xenc:CipherValue&gt;
+          &lt;/xenc:CipherData&gt;
+        &lt;/xenc:EncryptedKey&gt;
+      &lt;/ds:KeyInfo&gt;
+      &lt;xenc:CipherData&gt;
+        &lt;xenc:CipherValue&gt;---- ENCRYPTED DATA ----&lt;/xenc:CipherValue&gt;
+      &lt;/xenc:CipherData&gt;
+    &lt;/xenc:EncryptedData&gt;
+  &lt;/ds:Object&gt;
+&lt;/ds:Signature&gt;</pre>
+
+<p><strong>The encryption process is the following:</strong></p>
+
+<ul>
+<li><p>Randomly generate a session key.</p></li>
+<li><p>Cipher the session key using the X.509 certificate dedicated to the encryption process, in order to transmit it safely in the XML Digital Signature.</p></li>
+<li><p>Store the ciphered session key in the node <code>&lt;xenc:CipherValue /&gt;</code> which is located inside the node <code>&lt;xenc:EncryptedKey /&gt;</code>.</p></li>
+<li><p>Encrypt the content of the node <code>&lt;ds:Object Id="Token" /&gt;</code> using the non-ciphered session key and store the result in the last node <code>&lt;xenc:CipherValue /&gt;</code>.</p></li>
+</ul>
+
+<p><strong>The decryption process is the following:</strong></p>
+
+<ul>
+<li><p>Retrieve the node <code>&lt;xenc:EncryptedData /&gt;</code>.</p></li>
+<li><p>Decipher the ciphered session key stored in the node <code>&lt;xenc:CipherValue /&gt;</code> (the one which is located inside the node <code>&lt;xenc:EncryptedKey /&gt;</code>) using the private key associated to the X.509 certificate that has been used to perform the encryption.</p></li>
+<li><p>Decrypt the content of the last node <code>&lt;xenc:CipherValue /&gt;</code> using the deciphered session key.</p></li>
+</ul>
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		<b>Namespace:</b> <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a><br>
+		
+
+				<b>Copyright:</b>
+				2017 - Thierry Thiers <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a><br>
+				<b>License:</b>
+				<a href="http://www.cecill.info">CeCILL-C License</a><br>
+				<b>Author:</b>
+				Thierry Thiers <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a><br>
+			<b>Located at</b> <a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#55-2618" title="Go to source code">XMLDSigToken.php</a>
+		<br>
+	</div>
+
+
+
+	<table class="summary methods" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="__debugInfo" id="___debugInfo">
+
+		<td class="attributes"><code>
+			 public 
+
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___debugInfo">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#446-463" title="Go to source code">__debugInfo</a>( )</code>
+
+		<div class="description short">
+			<p>Defines a custom output for <code>print_r()</code> and <code>var_dump()</code> functions,
+in order to hide cryptographic material used by the object for
+security reasons.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Defines a custom output for <code>print_r()</code> and <code>var_dump()</code> functions,
+in order to hide cryptographic material used by the object for
+security reasons.</p>
+
+
+
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="__construct" id="___construct">
+
+		<td class="attributes"><code>
+			 protected 
+
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___construct">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#466-1006" title="Go to source code">__construct</a>( <span>mixed <var>$xmlOrData</var></span>, <span>string <var>$signKeyPath</var> = <span class="php-keyword1">null</span></span>, <span>string <var>$signKeyPassword</var> = <span class="php-keyword1">null</span></span>, <span>string <var>$signCertPath</var> = <span class="php-keyword1">null</span></span>, <span>string <var>$cryptKeyPath</var> = <span class="php-keyword1">null</span></span>, <span>string <var>$cryptKeyPassword</var> = <span class="php-keyword1">null</span></span>, <span>string <var>$cryptCertPath</var> = <span class="php-keyword1">null</span></span>, <span>array <var>$options</var> = [] </span> )</code>
+
+		<div class="description short">
+			<p>Instantiate an XMLDSigToken object.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Instantiate an XMLDSigToken object.</p>
+
+<p>This constructor is <code>protected</code>. To get an instance of an XMLDSigToken
+object use one of the following <code>static</code> functions according to what the
+object is intended for:</p>
+
+<ul>
+<li><p><code>createXMLToken()</code></p></li>
+<li><p><code>createSecureXMLToken()</code></p></li>
+<li><p><code>analyzeXMLToken()</code></p></li>
+<li><p><code>analyzeSecureXMLToken()</code></p></li>
+</ul>
+
+<p>An XMLDSigToken object allows creating an XML token and also analyzing an
+existing XML token. The type of the <code>$xmlOrData</code> parameter determine how
+the object behave.</p>
+
+<p><strong>XML token creation:</strong></p>
+
+<p>If <code>$xmlOrData</code> is an array (a flat or multidimensional associative
+array), the object will create an enveloping XML digital signature
+containing an XML token that holds the provided data and a timestamp
+generated automatically. The envoloped XML token will be encrypted if an
+X.509 certificate is provided for that. In this case, the <code>$signKeyPath</code>
+and <code>$signCertPath</code> parameters are required. If the <code>$cryptCertPath</code>
+parameter is also provided, the XML token will be encrypted. If the
+<code>$cryptCertPath</code> parameter is also provided, the $cryptKeyPath parameter
+must be provided too, in order to verify that the created XML Digital
+Signature is well formed. If the X.509 certificate used for encryption
+(cf. <code>$cryptCertPath</code> parameter) is protected by a password, this
+password may be passed using the <code>$cryptKeyPassword</code> parameter.</p>
+
+<p><strong>XML token analysis:</strong></p>
+
+<p>If <code>$xmlOrData</code> is a string, the object will treat it as an enveloping
+XML digital signature containing a token:</p>
+
+<ul>
+<li><p>It will check that the signature is valid.</p></li>
+<li><p>It will decrypt the token if this one is encrypted.</p></li>
+<li><p>It will extract timestamp and data from the token.</p></li>
+</ul>
+
+<p>In this case, only the <code>$xmlOrData</code> parameters is required. If the XML
+token is encrypted, the <code>$cryptKeyPath</code> parameter must also be provided.
+If the private key used for encryption (cf. <code>$cryptKeyPath</code> parameter) is
+protected by a password this password may be passed using the
+<code>$cryptKeyPassword</code> parameter.</p>
+
+<p><strong>Configuring the object:</strong></p>
+
+<p>The <code>$options</code> parameter of this function allows to override the default
+configuration of the object passing it the desired options via an
+associative array.</p>
+
+<p>Example:</p>
+
+<pre><span class="php-var">$options</span> = [
+  <span class="php-quote">'base64Encode'</span> =&gt; <span class="php-keyword1">false</span>,
+  <span class="php-quote">'xmldsigNsPrefix'</span> =&gt; <span class="php-quote">''</span>,
+  <span class="php-quote">'checkSigningAlgorithms'</span> =&gt; <span class="php-keyword1">false</span>
+];</pre>
+
+<p>Available options are the following:</p>
+
+<ul>
+<li><p><strong><code>base64Encode</code></strong> [boolean] Whether to base64 encode token data or not. <br/>Default value: <strong><code>TRUE</code></strong>.</p></li>
+<li><p><strong><code>xmldsigNsPrefix</code></strong> [string] The XML namespace (xmlns) prefix to use in the XML digital signature tags. Set it to empty string to avoid prefix usage. <br/>Default value: <strong><code>'ds'</code></strong>.</p></li>
+<li><p><strong><code>checkSigningAlgorithms</code></strong> [boolean] Whether to check that the algorithms used to sign the token are the expected ones or not. <br/>Default value: <strong><code>TRUE</code></strong>.</p></li>
+<li><p><strong><code>checkCryptingAlgorithms</code></strong> [boolean] Whether to check that the algorithms used to crypt the token are the expected ones or not. <br/>Default value: <strong><code>TRUE</code></strong>.</p></li>
+<li><p><strong><code>canonicalizationAlgorithm</code></strong> [string] The algorithm used to canonicalize the XMLdigital signature and to canonicalize token data before computing its hash. <br/>Possible values:</p>
+
+<ul>
+<li><strong><code>C14N</code></strong> (Default value) <br/>cf. http://www.w3.org/TR/2001/REC-xml-c14n-20010315</li>
+<li><code>C14N_COMMENTS</code> <br/>cf. http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments</li>
+<li><code>EXC_C14N</code> <br/>cf. http://www.w3.org/2001/10/xml-exc-c14n#</li>
+<li><code>EXC_C14N_COMMENTS</code> <br/>cf. http://www.w3.org/2001/10/xml-exc-c14n#WithComments</li>
+</ul></li>
+<li><p><strong><code>signatureAlgorithm</code></strong> [string] The asymmetric algorithm used to sign the hash of token data. <br/>Possible values:</p>
+
+<ul>
+<li><code>RSA_1_5</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-1_5</li>
+<li><code>RSA_OAEP_MGF1P</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</li>
+<li><code>DSA_SHA1</code> (Does not work) <br/>cf. http://www.w3.org/2000/09/xmldsig#dsa-sha1)</li>
+<li><strong><code>RSA_SHA1</code></strong> (Default value) <br/>cf. http://www.w3.org/2000/09/xmldsig#rsa-sha1</li>
+<li><code>RSA_SHA256</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</li>
+<li><code>RSA_SHA384</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</li>
+<li><code>RSA_SHA512</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</li>
+<li><code>HMAC_SHA1</code> (Does not work) <br/>cf. http://www.w3.org/2000/09/xmldsig#hmac-sha1</li>
+</ul></li>
+<li><p><strong><code>digestAlgorithm</code></strong> [string] The algorithm used to compute the hash of token data. <br/>Possible values:</p>
+
+<ul>
+<li><strong><code>SHA1</code></strong> (Default value) <br/>cf. http://www.w3.org/2000/09/xmldsig#sha1</li>
+<li><code>SHA256</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#sha256</li>
+<li><code>SHA384</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#sha384</li>
+<li><code>SHA512</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#sha512</li>
+<li><code>RIPEMD160</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#ripemd160</li>
+</ul></li>
+<li><p><strong><code>sessionKeyCipheringAlgorithm</code></strong> [string] The symmetric algorithm used to cipher the session key which will be used to encrypt token date. <br/>Possible values:</p>
+
+<ul>
+<li><code>TRIPLEDES_CBC</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#tripledes-cbc</li>
+<li><strong><code>AES128_CBC</code></strong> (Default value) <br/>cf. http://www.w3.org/2001/04/xmlenc#aes128-cbc</li>
+<li><code>AES192_CBC</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#aes192-cbc</li>
+<li><code>AES256_CBC</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#aes256-cbc</li>
+</ul></li>
+<li><p><strong><code>cryptAlgorithm</code></strong> [string] The asymmetric algorithm used to encrypt token data with the ciphered session key. <br/>Possible values:</p>
+
+<ul>
+<li><code>RSA_1_5</code> <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-1_5</li>
+<li><strong><code>RSA_OAEP_MGF1P</code></strong> (Default value) <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</li>
+<li><code>DSA_SHA1</code> (Does not work) <br/>cf. http://www.w3.org/2000/09/xmldsig#dsa-sha1</li>
+<li><code>RSA_SHA1</code> (Does not work) <br/>cf. http://www.w3.org/2000/09/xmldsig#rsa-sha1</li>
+<li><code>RSA_SHA256</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</li>
+<li><code>RSA_SHA384</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</li>
+<li><code>RSA_SHA512</code> <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</li>
+<li><code>HMAC_SHA1</code> (Does not work) <br/>cf. http://www.w3.org/2000/09/xmldsig#hmac-sha1</li>
+</ul></li>
+</ul>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$xmlOrData</var></dt>
+					<dd><p>An XML token (string) or token data (associative
+    array).</p></dd>
+					<dt><var>$signKeyPath</var></dt>
+					<dd><p>The path to the PEM private key file that will
+    be used to sign the token.</p></dd>
+					<dt><var>$signKeyPassword</var></dt>
+					<dd><p>The password, if needed, to access the
+    private key that will be used to sign the token. Use NULL if no
+    password needed.</p></dd>
+					<dt><var>$signCertPath</var></dt>
+					<dd><p>The path to the PEM X.509 certificate file
+    that will be included in the XML digital signature, in order to
+    verify the signature.</p></dd>
+					<dt><var>$cryptKeyPath</var></dt>
+					<dd><p>The path to the PEM private key file that
+    will be used to decrypt the session key which was used to encrypt the
+    token.</p></dd>
+					<dt><var>$cryptKeyPassword</var></dt>
+					<dd><p>The password to access the private key
+    that will be used to decrypt the session key which was used to
+    encrypt the token. Use NULL if no password needed.</p></dd>
+					<dt><var>$cryptCertPath</var></dt>
+					<dd><p>The path to the PEM X.509 certificate file
+    that will be used to encrypt the session key which will be used to
+    encrypt the token.</p></dd>
+					<dt><var>$options</var></dt>
+					<dd>Configuration options.</dd>
+				</dl></div>
+
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+				<h4>See</h4>
+				<div class="list">
+						<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#_createXMLToken">webcoder31\ezxmldsig\XMLDSigToken::createXMLToken()</a></code>, <code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#_createSecureXMLToken">webcoder31\ezxmldsig\XMLDSigToken::createSecureXMLToken()</a></code>, <code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#_analyzeXMLToken">webcoder31\ezxmldsig\XMLDSigToken::analyzeXMLToken()</a></code>, <code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#_analyzeSecureXMLToken">webcoder31\ezxmldsig\XMLDSigToken::analyzeSecureXMLToken()</a></code><br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="createXMLToken" id="_createXMLToken">
+
+		<td class="attributes"><code>
+			 public static
+
+			<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_createXMLToken">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1009-1052" title="Go to source code">createXMLToken</a>( <span>array <var>$data</var></span>, <span>string <var>$signKeyPath</var></span>, <span>string <var>$signCertPath</var></span>, <span>string <var>$signKeyPassword</var> = <span class="php-keyword1">null</span></span>, <span>array <var>$options</var> = [] </span> )</code>
+
+		<div class="description short">
+			<p>Creates an XML token for the given user data.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Creates an XML token for the given user data.</p>
+
+<p>The created XML token can be retrieved using the fucnction <code>getXML()</code>.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$data</var></dt>
+					<dd><p>Token data (an associative array that may be
+    multi-dimensional).</p></dd>
+					<dt><var>$signKeyPath</var></dt>
+					<dd><p>The path to the PEM private key file that will
+    be used to sign the token.</p></dd>
+					<dt><var>$signCertPath</var></dt>
+					<dd><p>The path to the PEM X.509 certificate file
+    that will be included in the XML digital signature, in order to
+    verify the signature.</p></dd>
+					<dt><var>$signKeyPassword</var></dt>
+					<dd><p>The password to access the  private key
+    that will be used to sign the token. Use NULL if no password needed.</p></dd>
+					<dt><var>$options</var></dt>
+					<dd><p>Configuration options
+    (see <code>__construct()</code> for details).</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code><br><p>An XMLDSigToken object or NULL if the object
+    creation failed.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+				<h4>See</h4>
+				<div class="list">
+						<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#___construct">webcoder31\ezxmldsig\XMLDSigToken::__construct()</a></code><br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="createSecureXMLToken" id="_createSecureXMLToken">
+
+		<td class="attributes"><code>
+			 public static
+
+			<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_createSecureXMLToken">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1055-1116" title="Go to source code">createSecureXMLToken</a>( <span>array <var>$data</var></span>, <span>string <var>$signKeyPath</var></span>, <span>string <var>$signCertPath</var></span>, <span>string <var>$cryptKeyPath</var></span>, <span>string <var>$cryptCertPath</var></span>, <span>string <var>$signKeyPassword</var> = <span class="php-keyword1">null</span></span>, <span>string <var>$cryptKeyPassword</var> = <span class="php-keyword1">null</span></span>, <span>array <var>$options</var> = [] </span> )</code>
+
+		<div class="description short">
+			<p>Creates a secure (crypted) XML token for the given user data.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Creates a secure (crypted) XML token for the given user data.</p>
+
+<p>The created XML token can be retrieved using the function <code>getXML()</code>.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$data</var></dt>
+					<dd><p>Token data (an associative array that may be
+    multi-dimensional).</p></dd>
+					<dt><var>$signKeyPath</var></dt>
+					<dd><p>The path to the PEM private key file that will
+    be used to sign the token.</p></dd>
+					<dt><var>$signCertPath</var></dt>
+					<dd><p>The path to the PEM X.509 certificate file
+    that will be included in the XML digital signature, in order to
+    verify the signature.</p></dd>
+					<dt><var>$cryptKeyPath</var></dt>
+					<dd><p>The path to the PEM private key file that
+    will be used to decrypt the session key which was used to encrypt the
+    token.</p></dd>
+					<dt><var>$cryptCertPath</var></dt>
+					<dd><p>The path to the PEM X.509 certificate file
+    that will be used to encrypt the session key which will be used to
+    encrypt the token.</p></dd>
+					<dt><var>$signKeyPassword</var></dt>
+					<dd><p>The password to access the private key
+    that will be used to sign the token. Use NULL if no password needed.</p></dd>
+					<dt><var>$cryptKeyPassword</var></dt>
+					<dd><p>The password to access the private key
+    that will be used to decrypt the session key which was used to
+    encrypt the token. Use NULL if no password needed.</p></dd>
+					<dt><var>$options</var></dt>
+					<dd><p>Configuration options
+    (see <code>__construct()</code> for details).</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code><br><p>An XMLDSigToken object or NULL if the object
+    creation failed.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+				<h4>See</h4>
+				<div class="list">
+						<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#___construct">webcoder31\ezxmldsig\XMLDSigToken::__construct()</a></code><br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="analyzeXMLToken" id="_analyzeXMLToken">
+
+		<td class="attributes"><code>
+			 public static
+
+			<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_analyzeXMLToken">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1119-1149" title="Go to source code">analyzeXMLToken</a>( <span>string <var>$xml</var></span>, <span>array <var>$options</var> = [] </span> )</code>
+
+		<div class="description short">
+			<p>Parse an XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Parse an XML token.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$xml</var></dt>
+					<dd>An XML token.</dd>
+					<dt><var>$options</var></dt>
+					<dd><p>Configuration options
+    (see <code>__construct()</code> for details).</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code><br><p>An XMLDSigToken object or NULL if the object
+    creation failed.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+				<h4>See</h4>
+				<div class="list">
+						<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#___construct">webcoder31\ezxmldsig\XMLDSigToken::__construct()</a></code><br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="analyzeSecureXMLToken" id="_analyzeSecureXMLToken">
+
+		<td class="attributes"><code>
+			 public static
+
+			<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code>
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_analyzeSecureXMLToken">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1152-1194" title="Go to source code">analyzeSecureXMLToken</a>( <span>string <var>$xml</var></span>, <span>string <var>$cryptKeyPath</var></span>, <span>string <var>$cryptKeyPassword</var> = <span class="php-keyword1">null</span></span>, <span>array <var>$options</var> = [] </span> )</code>
+
+		<div class="description short">
+			<p>Parse an XML token whose data are crypted.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Parse an XML token whose data are crypted.</p>
+
+<p>NOTE: Uncrypted token can also be parsed using this function.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$xml</var></dt>
+					<dd>An XML token.</dd>
+					<dt><var>$cryptKeyPath</var></dt>
+					<dd><p>The path to the PEM private key file that
+    will be used to decrypt the session key which was used to encrypt
+    token data.</p></dd>
+					<dt><var>$cryptKeyPassword</var></dt>
+					<dd><p>The password to access the private key
+    that will be used to decrypt the session key which was used to
+    encrypt the token. Use NULL if no password needed.</p></dd>
+					<dt><var>$options</var></dt>
+					<dd><p>Configuration options
+    (see <code>__construct()</code> for details).</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">webcoder31\ezxmldsig\XMLDSigToken</a></code><br><p>An XMLDSigToken object or NULL if the object
+    creation failed.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+				<h4>See</h4>
+				<div class="list">
+						<code><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html#___construct">webcoder31\ezxmldsig\XMLDSigToken::__construct()</a></code><br>
+				</div>
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isSignatureValid" id="_isSignatureValid">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isSignatureValid">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1915-1937" title="Go to source code">isSignatureValid</a>( )</code>
+
+		<div class="description short">
+			<p>Indicates whether XML token signature is valid or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether XML token signature is valid or not.</p>
+
+<p>This means that:</p>
+
+<ul>
+<li><p>No error occured during the analysis of the XML digital signature.</p></li>
+<li><p>No anomaly detected during the analysis of the XML digital signature.</p></li>
+<li><p>The token hash has been verified and is valid.</p></li>
+<li><p>The token hash signature has been verified and is valid.</p></li>
+</ul>
+
+<p>NOTE: This function only guarantee the integrity of the token regarding
+the X.509 certificate included in the XML token. It does not verify
+whether this certificate is valid or not.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br>TRUE if XML token is valid, FALSE otherwise.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isOutOfDate" id="_isOutOfDate">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isOutOfDate">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1940-1977" title="Go to source code">isOutOfDate</a>( <span>integer <var>$ttl</var> = self::TOKEN_DEFAULT_TTL</span> )</code>
+
+		<div class="description short">
+			<p>Indicates whether the XML token is out of date or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether the XML token is out of date or not.</p>
+
+<p>NOTE: If token timestamp is over the current date/time, we assume token
+is peremted too.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$ttl</var></dt>
+					<dd>The time to live (in seconds) allowed for the token.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br>TRUE if token is out of date, FALSE otherwise.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isDataEncrypted" id="_isDataEncrypted">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isDataEncrypted">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1980-1991" title="Go to source code">isDataEncrypted</a>( )</code>
+
+		<div class="description short">
+			<p>Indicates whether token data is encrypted or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether token data is encrypted or not.</p>
+
+<p>NOTE: If not evaluated (because an error occured before), this function
+return NULL.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br>TRUE if token data is encrypted, FALSE otherwise.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isDigestValueOk" id="_isDigestValueOk">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isDigestValueOk">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#1994-2007" title="Go to source code">isDigestValueOk</a>( )</code>
+
+		<div class="description short">
+			<p>Indicates whether the digest of token data (a hash) has been verified and
+is valid or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether the digest of token data (a hash) has been verified and
+is valid or not.</p>
+
+<p>NOTE: If not evaluated (because an error occured before), this function
+return NULL.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean|null<br><p>TRUE if token hash has been verified and is valid,
+    FALSE otherwise, NULL if cannot be evaluated.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isSignatureValueOk" id="_isSignatureValueOk">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isSignatureValueOk">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2010-2023" title="Go to source code">isSignatureValueOk</a>( )</code>
+
+		<div class="description short">
+			<p>Indicates whether signature of the digest of the token data has been
+verified and is valid or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether signature of the digest of the token data has been
+verified and is valid or not.</p>
+
+<p>NOTE: If not evaluated (because an error occured before), this function
+return NULL.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean|null<br><p>TRUE if token hash signature has been verified and
+    is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getXML" id="_getXML">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getXML">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2026-2034" title="Go to source code">getXML</a>( )</code>
+
+		<div class="description short">
+			<p>Get the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null<br>The XML token, NULL if not available.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getData" id="_getData">
+
+		<td class="attributes"><code>
+			 public 
+
+			array|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getData">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2037-2046" title="Go to source code">getData</a>( )</code>
+
+		<div class="description short">
+			<p>Get the user data contained in the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the user data contained in the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					array|null<br><p>The associative array containing token data, NULL if
+    not available.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getTimestamp" id="_getTimestamp">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getTimestamp">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2049-2057" title="Go to source code">getTimestamp</a>( )</code>
+
+		<div class="description short">
+			<p>Get the timestamp of the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the timestamp of the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null<br>The token timestamp, NULL if not available.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getError" id="_getError">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getError">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2060-2068" title="Go to source code">getError</a>( )</code>
+
+		<div class="description short">
+			<p>Get the message of the error that occured while parsing the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the message of the error that occured while parsing the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null<br>The error message. If no error, NULL is returned.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getAnomalies" id="_getAnomalies">
+
+		<td class="attributes"><code>
+			 public 
+
+			array|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getAnomalies">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2071-2079" title="Go to source code">getAnomalies</a>( )</code>
+
+		<div class="description short">
+			<p>Get the list of anomalies that occured while parsing the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the list of anomalies that occured while parsing the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					array|null<br>The list of anomalies if any, NULL otherwise.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getCertificate" id="_getCertificate">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getCertificate">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2082-2096" title="Go to source code">getCertificate</a>( )</code>
+
+		<div class="description short">
+			<p>Get the X.509 certificate that is included in the XML token (PEM format).</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the X.509 certificate that is included in the XML token (PEM format).</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null<br><p>The content of the X.509 certificate, NULL if not
+    available.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getCertIssuer" id="_getCertIssuer">
+
+		<td class="attributes"><code>
+			 public 
+
+			array|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getCertIssuer">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2099-2114" title="Go to source code">getCertIssuer</a>( )</code>
+
+		<div class="description short">
+			<p>Get the issuer information of the X.509 certificate that is included in
+the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the issuer information of the X.509 certificate that is included in
+the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					array|null<br><p>The issuer information of the X.509 certificate, NULL
+    if not available.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getCertSubject" id="_getCertSubject">
+
+		<td class="attributes"><code>
+			 public 
+
+			array|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getCertSubject">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2117-2132" title="Go to source code">getCertSubject</a>( )</code>
+
+		<div class="description short">
+			<p>Get the subject information of the X.509 certificate that is included in
+the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the subject information of the X.509 certificate that is included in
+the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					array|null<br><p>The subject information of the X.509 certificate, NULL
+    if not available.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getCertDN" id="_getCertDN">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getCertDN">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2135-2150" title="Go to source code">getCertDN</a>( )</code>
+
+		<div class="description short">
+			<p>Get the Distinguished Name of the X.509 certificate that is included in
+the XML token.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the Distinguished Name of the X.509 certificate that is included in
+the XML token.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null<br><p>The Distinguished Name of the X.509 certificate, NULL
+    if not available.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getCertValidFrom" id="_getCertValidFrom">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getCertValidFrom">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2153-2171" title="Go to source code">getCertValidFrom</a>( <span>string <var>$dateFormat</var> = self::TOKEN_TIMESTAMP_FORMAT</span> )</code>
+
+		<div class="description short">
+			<p>Get the UTC date from which the X.509 certificate that is included in the
+XML token is valid.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the UTC date from which the X.509 certificate that is included in the
+XML token is valid.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateFormat</var></dt>
+					<dd><p>format of the returned date (Default:
+    XMLDSigToken::TOKEN_TIMESTAMP_FORMAT).</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null|false<br><p>The date from which the X.509 certificate is
+    valid, NULL if not available, FALSE if $dateFormat is invalid.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getCertValidTo" id="_getCertValidTo">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|null|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getCertValidTo">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2174-2192" title="Go to source code">getCertValidTo</a>( <span>string <var>$dateFormat</var> = self::TOKEN_TIMESTAMP_FORMAT</span> )</code>
+
+		<div class="description short">
+			<p>Get the UTC date to which the X.509 certificate that is included in the
+XML token is valid.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the UTC date to which the X.509 certificate that is included in the
+XML token is valid.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateFormat</var></dt>
+					<dd><p>format of the returned date (Default:
+    XMLDSigToken::TOKEN_TIMESTAMP_FORMAT).</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|null|false<br><p>The date to which the X.509 certificate, NULL
+    if not available, FALSE if $dateFormat is invalid.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isCertOutOfDate" id="_isCertOutOfDate">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isCertOutOfDate">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2195-2210" title="Go to source code">isCertOutOfDate</a>( )</code>
+
+		<div class="description short">
+			<p>Indicates whether the X.509 certificate included in the XML token is out
+of date or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether the X.509 certificate included in the XML token is out
+of date or not.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br><p>TRUE if X.509 certificate is out of date, FALSE
+    otherwise.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isValidCertIssuer" id="_isValidCertIssuer">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isValidCertIssuer">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2213-2268" title="Go to source code">isValidCertIssuer</a>( <span>array <var>$expectedIssuerInfo</var></span> )</code>
+
+		<div class="description short">
+			<p>Check that the issuer information of the X.509 certificate that is
+included in the XML token matches the expected one.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Check that the issuer information of the X.509 certificate that is
+included in the XML token matches the expected one.</p>
+
+<p>The expected issuer information must me passed as an array to the
+function:</p>
+
+<pre><span class="php-var">$ExpectedIssuerInfo</span> = [
+    <span class="php-quote">'C'</span> =&gt; <span class="php-quote">'DK'</span>,
+    <span class="php-quote">'ST'</span> =&gt; <span class="php-quote">'Jylland'</span>,
+    <span class="php-quote">'O'</span> =&gt; <span class="php-quote">'Lothbrok Ltd'</span>,
+    <span class="php-quote">'OU'</span> =&gt; <span class="php-quote">'Jarl Dept'</span>,
+    <span class="php-quote">'CN'</span> =&gt; <span class="php-quote">'www.Lothbrok.dk'</span>,
+    <span class="php-quote">'emailAddress'</span> =&gt; <span class="php-quote">'ragnar@Lothbrok.dk'</span>
+];</pre>
+
+<p>NOTE: Character case of data is significant.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$expectedIssuerInfo</var></dt>
+					<dd><p>The issuer information that the X.509
+certificate should match.</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br><p>TRUE if the X.509 certificate has been signed with the
+provided CA certificate, FALSE otherwise.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isValidCertCA" id="_isValidCertCA">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isValidCertCA">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2271-2303" title="Go to source code">isValidCertCA</a>( <span>string <var>$caCertPath</var></span> )</code>
+
+		<div class="description short">
+			<p>Check that the X.509 certificate included in the XML token comes from the
+expected CA.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Check that the X.509 certificate included in the XML token comes from the
+expected CA.</p>
+
+<p>Note that more than one CA certificate can give a positive result, some
+certificates re-issue signing certificates after having only changed the
+expiration dates.</p>
+
+<p>Note that it also works with self-signed certificates. In this case,
+passes the X.509 certificate that is supposed been included in the XML
+token to the function.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$caCertPath</var></dt>
+					<dd><p>The PEM certificate (public key) that is
+    supposed been used by CA to sign the X.509 certificate included in
+    the XML token.</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br><p>TRUE if the X.509 certificate has been signed by the
+    expected CA, FALSE otherwise.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="alterXML" id="_alterXML">
+
+		<td class="attributes"><code>
+			 public static
+
+			string|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_alterXML">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2401-2489" title="Go to source code">alterXML</a>( <span>string <var>&amp; $xml</var></span>, <span>string <var>$nodePath</var></span>, <span>string <var>$nodeAttribute</var></span>, <span>string <var>$newValue</var></span>, <span>boolean <var>$delete</var> = <span class="php-keyword1">false</span></span> )</code>
+
+		<div class="description short">
+			<p>Utility function for modifying a node of an XML content.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Utility function for modifying a node of an XML content.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$xml</var></dt>
+					<dd>XML content, passed by reference.</dd>
+					<dt><var>$nodePath</var></dt>
+					<dd><p>The xpath query to select the node to modify.
+    This should be a full path that identifies a single node.</p></dd>
+					<dt><var>$nodeAttribute</var></dt>
+					<dd><p>In case you want to modify an attribute of
+    the specified node, provide its name here, otherwise set this
+    parameter to NULL.</p></dd>
+					<dt><var>$newValue</var></dt>
+					<dd><p>The value that will replace original the value of
+    the node or of the attribute of the node if $nodeAttribute parameter
+    is provided.</p></dd>
+					<dt><var>$delete</var></dt>
+					<dd>If TRUE delete the specified node or attribute.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|false<br><p>The value of the node or attribute before
+    modification or deletion, FALSE otherwise.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getPrettyXML" id="_getPrettyXML">
+
+		<td class="attributes"><code>
+			 public 
+
+			string
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getPrettyXML">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2492-2572" title="Go to source code">getPrettyXML</a>( )</code>
+
+		<div class="description short">
+			<p>Return the XML token in a pretty readable format.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Return the XML token in a pretty readable format.</p>
+
+<p>This function is intented for display purpose only. Use the <code>getXML()</code>
+function to obtain the raw XML token you want to work with.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string<br>The pretty formatted XMLDSigToken signature.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getHTMLDump" id="_getHTMLDump">
+
+		<td class="attributes"><code>
+			 public 
+
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getHTMLDump">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#2575-2617" title="Go to source code">getHTMLDump</a>( )</code>
+
+		<div class="description short">
+			<p>Utility function that returns information on the XML token in HTML
+format.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Utility function that returns information on the XML token in HTML
+format.</p>
+
+
+
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+	<table class="summary constants" id="constants">
+	<caption>Constants summary</caption>
+	<tr data-order="XMLDSIG_NS_PREFIX" id="XMLDSIG_NS_PREFIX">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#287-289" title="Go to source code"><b>XMLDSIG_NS_PREFIX</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							<p>string The default XMLDSIG namespace prefix used in the XML digital
+signature.</p><br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#XMLDSIG_NS_PREFIX" class="anchor">#</a>
+				<code><span class="php-quote">'ds'</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="TOKEN_NAME" id="TOKEN_NAME">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#291-292" title="Go to source code"><b>TOKEN_NAME</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							string The name of the token node.<br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#TOKEN_NAME" class="anchor">#</a>
+				<code><span class="php-quote">'Token'</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="TOKEN_DATA_NAME" id="TOKEN_DATA_NAME">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#294-295" title="Go to source code"><b>TOKEN_DATA_NAME</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							string The name of the token data node.<br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#TOKEN_DATA_NAME" class="anchor">#</a>
+				<code><span class="php-quote">'TokenData'</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="TOKEN_TIMESTAMP_NAME" id="TOKEN_TIMESTAMP_NAME">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#297-298" title="Go to source code"><b>TOKEN_TIMESTAMP_NAME</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							string The name of the token timestamp node.<br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#TOKEN_TIMESTAMP_NAME" class="anchor">#</a>
+				<code><span class="php-quote">'TokenTimestamp'</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="TOKEN_TIMESTAMP_FORMAT" id="TOKEN_TIMESTAMP_FORMAT">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#300-302" title="Go to source code"><b>TOKEN_TIMESTAMP_FORMAT</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							<p>string The format of the token timestamp (YYYY-MM-DDThh:mm:ssZ).
+NOTE: The timestamp should always be expressed in UTC.</p><br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#TOKEN_TIMESTAMP_FORMAT" class="anchor">#</a>
+				<code><span class="php-quote">'Y-m-d\TH:i:s\Z'</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="TOKEN_DEFAULT_TTL" id="TOKEN_DEFAULT_TTL">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#304-306" title="Go to source code"><b>TOKEN_DEFAULT_TTL</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							<p>int The default time to live (in seconds) used to check token
+peremption.</p><br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#TOKEN_DEFAULT_TTL" class="anchor">#</a>
+				<code><span class="php-num">60</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="DESYNC_TOLERANCE" id="DESYNC_TOLERANCE">
+
+		<td class="attributes"><code>integer</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#308-310" title="Go to source code"><b>DESYNC_TOLERANCE</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+					<h4>Const</h4>
+					<div class="list">
+							<p>int The synchronization offset (in seconds) allowed for verifying
+if token is out of date.</p><br>
+					</div>
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#DESYNC_TOLERANCE" class="anchor">#</a>
+				<code><span class="php-num">30</span></code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="C14N" id="C14N">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#313" title="Go to source code"><b>C14N</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#C14N" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::C14N</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="C14N_COMMENTS" id="C14N_COMMENTS">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#314" title="Go to source code"><b>C14N_COMMENTS</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#C14N_COMMENTS" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::C14N_COMMENTS</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="EXC_C14N" id="EXC_C14N">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#315" title="Go to source code"><b>EXC_C14N</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#EXC_C14N" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::EXC_C14N</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="EXC_C14N_COMMENTS" id="EXC_C14N_COMMENTS">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#316" title="Go to source code"><b>EXC_C14N_COMMENTS</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#EXC_C14N_COMMENTS" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::EXC_C14N_COMMENTS</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="SHA1" id="SHA1">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#318" title="Go to source code"><b>SHA1</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#SHA1" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::SHA1</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="SHA256" id="SHA256">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#319" title="Go to source code"><b>SHA256</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#SHA256" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::SHA256</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="SHA384" id="SHA384">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#320" title="Go to source code"><b>SHA384</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#SHA384" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::SHA384</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="SHA512" id="SHA512">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#321" title="Go to source code"><b>SHA512</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#SHA512" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::SHA512</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RIPEMD160" id="RIPEMD160">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#322" title="Go to source code"><b>RIPEMD160</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RIPEMD160" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityDSig::RIPEMD160</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="TRIPLEDES_CBC" id="TRIPLEDES_CBC">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#324" title="Go to source code"><b>TRIPLEDES_CBC</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#TRIPLEDES_CBC" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::TRIPLEDES_CBC</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="AES128_CBC" id="AES128_CBC">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#325" title="Go to source code"><b>AES128_CBC</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#AES128_CBC" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::AES128_CBC</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="AES192_CBC" id="AES192_CBC">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#326" title="Go to source code"><b>AES192_CBC</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#AES192_CBC" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::AES192_CBC</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="AES256_CBC" id="AES256_CBC">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#327" title="Go to source code"><b>AES256_CBC</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#AES256_CBC" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::AES256_CBC</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RSA_1_5" id="RSA_1_5">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#328" title="Go to source code"><b>RSA_1_5</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RSA_1_5" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::RSA_1_5</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RSA_OAEP_MGF1P" id="RSA_OAEP_MGF1P">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#329" title="Go to source code"><b>RSA_OAEP_MGF1P</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RSA_OAEP_MGF1P" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::RSA_OAEP_MGF1P</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="DSA_SHA1" id="DSA_SHA1">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#330" title="Go to source code"><b>DSA_SHA1</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#DSA_SHA1" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::DSA_SHA1</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RSA_SHA1" id="RSA_SHA1">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#331" title="Go to source code"><b>RSA_SHA1</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RSA_SHA1" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::RSA_SHA1</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RSA_SHA256" id="RSA_SHA256">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#332" title="Go to source code"><b>RSA_SHA256</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RSA_SHA256" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::RSA_SHA256</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RSA_SHA384" id="RSA_SHA384">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#333" title="Go to source code"><b>RSA_SHA384</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RSA_SHA384" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::RSA_SHA384</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="RSA_SHA512" id="RSA_SHA512">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#334" title="Go to source code"><b>RSA_SHA512</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#RSA_SHA512" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::RSA_SHA512</code>
+			</div>
+		</td>
+	</tr>
+	<tr data-order="HMAC_SHA1" id="HMAC_SHA1">
+
+		<td class="attributes"><code>string</code></td>
+		<td class="name">
+			<code>
+				<a href="source-class-webcoder31.ezxmldsig.XMLDSigToken.html#335" title="Go to source code"><b>HMAC_SHA1</b></a>
+			</code>
+
+			<div class="description short">
+				
+			</div>
+
+			<div class="description detailed hidden">
+				
+
+			</div>
+		</td>
+		<td class="value">
+			<div>
+				<a href="#HMAC_SHA1" class="anchor">#</a>
+				<code>webcoder31\ezxmldsig\XMLSecurityKey::HMAC_SHA1</code>
+			</div>
+		</td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen</a>
+	</div>
+</div>
+</div>
+<script src="resources/combined.js"></script>
+<script src="elementlist.js"></script>
+</body>
+</html>

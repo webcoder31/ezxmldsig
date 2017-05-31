@@ -297,12 +297,12 @@ $expectedIssuer = [
 $caCertPath = 'path/to/ca/intermediate/certificate';
 
 // Create token object from the XML Digital Signature 
-$token = XMLDSigToken::parseSecureXMLToken($sig, $cryptKey, $cryptKeyPassword);
+$token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword);
 
 // NOTE: The above instruction works even if user data is not encrypted.
 // However, if user data is not encrypted and you don't own a private key 
 // then use the following method:
-// $token = XMLDSigToken::parseXMLToken($sig);
+// $token = XMLDSigToken::analyzeXMLToken($sig);
 
 // Verify that:
 // - the XML digital signature meets the XMLDSIG specifications.

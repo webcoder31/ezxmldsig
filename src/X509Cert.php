@@ -44,12 +44,18 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 
-
+/**
+ * Analyze an X.509 certificate.
+ *
+ * The `X509Cert` class provides a set of convenient methods for extracting 
+ * essential information contained in an X.509 certificate and for performing 
+ * some useful checkings. In particular, it can verify the origin of the X.509 
+ * certificate by using the intermediate certificate used by the CA to perform 
+ * its signature (CSR). This class is used internaly by the `XMLDSigToken` 
+ * class.
+ */
 class X509Cert
 {
-    /** @const int The category used for XMLDSigToken class exceptions */
-    const X509CERT_CATEGORY_ERROR = 9998;
-
     /** @var string The X.509 certificate in PEM format. */
     private $cert;
 
@@ -66,7 +72,8 @@ class X509Cert
     /**
      * Create a new X509Cert object.
      *
-     * @param string $pemCert An X.509 certificate (public key) in PEM format.
+     * @param string $cert An X.509 certificate (public key) in PEM format.
+     *
      * @throws Exception
      */
     public function __construct($cert)
@@ -167,6 +174,7 @@ class X509Cert
      *
      * @param string The format of the returned date.
      *        Default: 'ymdHise'
+     *
      * @return string|false The date from which the certificate is valid, 
      *         FALSE if $dateFormat is invalid.
      */
@@ -184,6 +192,7 @@ class X509Cert
      *
      * @param string The format of the returned date.
      *        Default: 'ymdHise'
+     *
      * @return string|false The date to which the certificate is valid, 
      *         FALSE if $dateFormat is invalid.
      */
@@ -227,6 +236,8 @@ class X509Cert
 
 
     /**
+     * Check the origin of the certificate.
+     *
      * Verify that the X.509 certificate has been signed with the private key 
      * correcsponding to the given CA certificate to validate its origin.
      * NOTE : Note that more than one CA certificate can give a positive result, 
@@ -239,11 +250,13 @@ class X509Cert
      * @param string $caCert The certificate (in PEM format) corresponding to 
      *        the private key that is supposed been used by CA to sign the X.509 
      *        certificate.
+     *
      * @return boolean TRUE if origin of the X.509 certificate has been 
      *         validated, FALSE otherwise.
+     *
      * @throws Exception
      */
-    public function checkCA($caCert)
+    public function isValidCA($caCert)
     {
         // Get the public key from the CA certificate, which is supposed been
         // used to encrypt the signature in the X.509 embedded certificate.
@@ -331,6 +344,7 @@ class X509Cert
      *         BITSTREAM (Encrypted signature)
      *
      * @param string $derCertificate DER encoded certificate.
+     *
      * @return string|false The encrypted signature on success, 
      *         FALSE on failure.
      */
@@ -418,6 +432,7 @@ class X509Cert
      *         BITSTREAM (Encrypted signature)
      *
      * @param string $derCertificate DER encoded certificate.
+     *
      * @return string|false DER certificate with issuer and signature sections 
      *         stripped on success, FALSE on failure.
      */
@@ -458,6 +473,7 @@ class X509Cert
      *     OCTET STRING (Signature hash)
      *
      * @param string $derSignatureData DER encoded signature data.
+     *
      * @return string|false The signature algorithm OID, FALSE on failure.
      */
     static private function getSignatureAlgorithmOid($derSignatureData)
@@ -540,6 +556,7 @@ class X509Cert
      *     OCTET STRING (Signature hash)
      *
      * @param string $derSignatureData Decrypted DER encoded signature data.
+     *
      * @return string|false The signature hash, FALSE on failure.
      */
     static private function getSignatureHash($derSignatureData)
@@ -610,6 +627,7 @@ class X509Cert
      * Convert PEM encoded X.509 certificate to DER encoding.
      *
      * @param string $pemCertificate PEM encoded X.509 certificate.
+     *
      * @return string|false DER encoded X.509 certificate on success, 
      *         FALSE on failure.
      */
@@ -638,6 +656,7 @@ class X509Cert
      * Convert DER encoded X.509 certificate to PEM encoding.
      *
      * @param string $derCertificate DER encoded X.509 certificate.
+     *
      * @return string|false PEM encoded X.509 certificate on success, 
      *         FALSE on failure.
      */

@@ -38,12 +38,12 @@ $expectedIssuer = [
 $caCertPath = './certs/intermediate.cert.pem';
 
 // Create token object from the XML Digital Signature 
-$token = XMLDSigToken::parseSecureXMLToken($sig, $cryptKey, $cryptKeyPassword);
+$token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword);
 
 // NOTE: The above instruction works even if user data is not encrypted.
 // However, if user data is not encrypted and you don't own a private key 
 // then use the following method:
-// $token = XMLDSigToken::parseXMLToken($sig);
+// $token = XMLDSigToken::analyzeXMLToken($sig);
 
 // Send back response to POST request.
 echo '<html><body>';
@@ -56,7 +56,7 @@ echo '<h1>XMLDSig Token Analysis</h1>';
 // - the token contained in the XML digital signature has not been altered.
 // - the token contained in the XML digital signature is correctly timestamped
 //   and contains user data.
-if (!$token->isValid()) 
+if (!$token->isSignatureValid()) 
 {
     echo "<h2>ERROR: Invalid XML Digital Signature!</h2>";
 }
@@ -70,14 +70,14 @@ else if ($token->isCertOutOfDate())
 
 // Verify that the issuer of the X.509 certificate included 
 // in the XML digital signature is indeed the one we expect.
-else if (!$token->checkCertIssuer($expectedIssuer)) 
+else if (!$token->isValidCertIssuer($expectedIssuer)) 
 {
     echo "<h2>ERROR: Issuer of signing certificate is not valid!</h2>";
 }
 
 // Verify that the X.509 certificate included in the XML
 // digital signature actualy comes from the CA we expect.
-else if (!$token->checkCertCA($caCertPath)) 
+else if (!$token->isValidCertCA($caCertPath)) 
 {
     echo "<h2>ERROR: Signing certificate not issued by the expected CA!</h2>";
 }

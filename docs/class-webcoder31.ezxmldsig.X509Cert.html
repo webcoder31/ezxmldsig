@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Class webcoder31\ezxmldsig\X509Cert</title>
+
+	<link rel="stylesheet" href="resources/style.css?c2f33731c1948fbed7c333554678bfa68d4817da">
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+				<h3>Namespaces</h3>
+			<ul>
+				<li class="active">
+					<a href="namespace-webcoder31.html">
+						webcoder31<span></span>
+					</a>
+
+						<ul>
+				<li class="active">
+					<a href="namespace-webcoder31.ezxmldsig.html">
+						ezxmldsig					</a>
+
+						</li>
+							</ul></li>
+			</ul>
+		</div>
+
+		<hr>
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li class="active"><a href="class-webcoder31.ezxmldsig.X509Cert.html">X509Cert</a></li>
+				<li><a href="class-webcoder31.ezxmldsig.XMLDSigToken.html">XMLDSigToken</a></li>
+			</ul>
+
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="">
+		<input type="hidden" name="ie" value="UTF-8">
+		<input type="text" name="q" class="text" placeholder="Search">
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-webcoder31.ezxmldsig.html" title="Summary of webcoder31\ezxmldsig"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class X509Cert</h1>
+
+
+	<div class="description">
+	<p>Analyze an X.509 certificate.</p>
+
+<p>The <code>X509Cert</code> class provides a set of convenient methods for extracting
+essential information contained in an X.509 certificate and for performing
+some useful checkings. In particular, it can verify the origin of the X.509
+certificate by using the intermediate certificate used by the CA to perform
+its signature (CSR). This class is used internaly by the <code>XMLDSigToken</code>
+class.</p>
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		<b>Namespace:</b> <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a><br>
+		
+
+				<b>Copyright:</b>
+				2017 - Thierry Thiers <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a><br>
+				<b>License:</b>
+				<a href="http://www.cecill.info">CeCILL-C License</a><br>
+				<b>Author:</b>
+				Thierry Thiers <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x77;&#101;&#98;&#99;&#111;&#100;&#101;&#114;&#51;&#49;&#64;g&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a><br>
+			<b>Located at</b> <a href="source-class-webcoder31.ezxmldsig.X509Cert.html#47-678" title="Go to source code">X509Cert.php</a>
+		<br>
+	</div>
+
+
+
+	<table class="summary methods" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="__construct" id="___construct">
+
+		<td class="attributes"><code>
+			 public 
+
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___construct">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#72-125" title="Go to source code">__construct</a>( <span>string <var>$cert</var></span> )</code>
+
+		<div class="description short">
+			<p>Create a new X509Cert object.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Create a new X509Cert object.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$cert</var></dt>
+					<dd>An X.509 certificate (public key) in PEM format.</dd>
+				</dl></div>
+
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getPem" id="_getPem">
+
+		<td class="attributes"><code>
+			 public 
+
+			String
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getPem">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#128-136" title="Go to source code">getPem</a>( )</code>
+
+		<div class="description short">
+			<p>Get the certificate (public key) in PEM format.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the certificate (public key) in PEM format.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					String<br>The certificate (public key) in PEM format.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getIssuer" id="_getIssuer">
+
+		<td class="attributes"><code>
+			 public 
+
+			array
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getIssuer">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#139-147" title="Go to source code">getIssuer</a>( )</code>
+
+		<div class="description short">
+			<p>Get the issuer information of the certificate.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the issuer information of the certificate.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					array<br>The issuer information of the certificate.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getSubject" id="_getSubject">
+
+		<td class="attributes"><code>
+			 public 
+
+			array
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getSubject">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#150-158" title="Go to source code">getSubject</a>( )</code>
+
+		<div class="description short">
+			<p>Get the subject information of the certificate.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the subject information of the certificate.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					array<br>The subject information of the certificate.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getDN" id="_getDN">
+
+		<td class="attributes"><code>
+			 public 
+
+			string
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getDN">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#161-169" title="Go to source code">getDN</a>( )</code>
+
+		<div class="description short">
+			<p>Get the Distinguished Name of the certificate.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the Distinguished Name of the certificate.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					string<br>The Distinguished Name of the certificate.
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getValidFrom" id="_getValidFrom">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getValidFrom">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#172-187" title="Go to source code">getValidFrom</a>( <span>string <var>$dateFormat</var> = <span class="php-quote">'ymdHise'</span></span> )</code>
+
+		<div class="description short">
+			<p>Get the UTC date from which the certificate is valid.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the UTC date from which the certificate is valid.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateFormat</var></dt>
+					<dd><p>format of the returned date.
+       Default: 'ymdHise'</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|false<br><p>The date from which the certificate is valid,
+        FALSE if $dateFormat is invalid.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getValidTo" id="_getValidTo">
+
+		<td class="attributes"><code>
+			 public 
+
+			string|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getValidTo">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#190-205" title="Go to source code">getValidTo</a>( <span>string <var>$dateFormat</var> = <span class="php-quote">'ymdHise'</span></span> )</code>
+
+		<div class="description short">
+			<p>Get the UTC date to which the certificate is valid.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Get the UTC date to which the certificate is valid.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$dateFormat</var></dt>
+					<dd><p>format of the returned date.
+       Default: 'ymdHise'</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|false<br><p>The date to which the certificate is valid,
+        FALSE if $dateFormat is invalid.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isOutOfDate" id="_isOutOfDate">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isOutOfDate">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#208-235" title="Go to source code">isOutOfDate</a>( )</code>
+
+		<div class="description short">
+			<p>Indicates whether the certificate is out of date or not.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Indicates whether the certificate is out of date or not.</p>
+
+
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br><p>TRUE if embedded certificate is out of date,
+        FALSE otherwise.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="isValidCA" id="_isValidCA">
+
+		<td class="attributes"><code>
+			 public 
+
+			boolean
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_isValidCA">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#238-328" title="Go to source code">isValidCA</a>( <span>string <var>$caCert</var></span> )</code>
+
+		<div class="description short">
+			<p>Check the origin of the certificate.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Check the origin of the certificate.</p>
+
+<p>Verify that the X.509 certificate has been signed with the private key
+correcsponding to the given CA certificate to validate its origin.
+NOTE : Note that more than one CA certificate can give a positive result, some certificates re-issue signing certificates after having only changed the expiration dates. Note that it also works with self-signed certificates. In this case, passes the the X.509 certificate that is supposed been included in the XML digital signature to the function.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$caCert</var></dt>
+					<dd><p>The certificate (in PEM format) corresponding to
+       the private key that is supposed been used by CA to sign the X.509
+       certificate.</p></dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					boolean<br><p>TRUE if origin of the X.509 certificate has been
+        validated, FALSE otherwise.</p>
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					Exception
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="pemToDer" id="_pemToDer">
+
+		<td class="attributes"><code>
+			 public static
+
+			string|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_pemToDer">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#626-652" title="Go to source code">pemToDer</a>( <span>string <var>$pemCertificate</var></span> )</code>
+
+		<div class="description short">
+			<p>Convert PEM encoded X.509 certificate to DER encoding.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Convert PEM encoded X.509 certificate to DER encoding.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$pemCertificate</var></dt>
+					<dd>PEM encoded X.509 certificate.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|false<br><p>DER encoded X.509 certificate on success,
+        FALSE on failure.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="derToPem" id="_derToPem">
+
+		<td class="attributes"><code>
+			 public static
+
+			string|false
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_derToPem">#</a>
+		<code><a href="source-class-webcoder31.ezxmldsig.X509Cert.html#655-677" title="Go to source code">derToPem</a>( <span>string <var>$derCertificate</var></span> )</code>
+
+		<div class="description short">
+			<p>Convert DER encoded X.509 certificate to PEM encoding.</p>
+		</div>
+
+		<div class="description detailed hidden">
+			<p>Convert DER encoded X.509 certificate to PEM encoding.</p>
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$derCertificate</var></dt>
+					<dd>DER encoded X.509 certificate.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					string|false<br><p>PEM encoded X.509 certificate on success,
+        FALSE on failure.</p>
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		 API documentation generated by <a href="http://apigen.org">ApiGen</a>
+	</div>
+</div>
+</div>
+<script src="resources/combined.js"></script>
+<script src="elementlist.js"></script>
+</body>
+</html>
