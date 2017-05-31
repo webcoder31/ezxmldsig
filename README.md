@@ -361,6 +361,11 @@ Simply visit the file `index.html` to see them in action (need to be hosted on a
 **NOTE:** To work out of the box, theses examples require that you've installed the library **ezxmldsig** using **composer**.
 
 
+## Documentation
+
+Online documentation is available here : [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig/).
+
+
 ## How to Contribute?
 
 * [Open Issues](https://github.com/webcoder31/ezxmldsig/issues)
