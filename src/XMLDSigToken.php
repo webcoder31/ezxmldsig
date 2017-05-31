@@ -32,7 +32,7 @@
  * @author    Thierry Thiers <webcoder31@gmail.com>
  * @copyright 2017 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
- * @version   1.0.0
+ * @version   v0.1.1
  */
 
  
