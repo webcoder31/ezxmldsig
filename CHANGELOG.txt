@@ -1,4 +1,11 @@
 Unreleased
+----------
+- Add a PHPUnit test suite covering the creation and analysis of signed and
+  encrypted tokens, run in Docker under PHP 7.4 and PHP 8.3 with `bin/test`.
+- Add `bin/gen-test-certs`, which generates the test certificate chain in
+  `tests/fixtures/certs/` and the example certificates in `examples/certs/`.
+- Regenerate the example certificates: the signing certificate had expired.
+
 Security:
 - Require robrichards/xmlseclibs ^3.1.5 instead of 2.0.1, which is affected by
   CVE-2019-3465 (multiple SignedInfo elements), CVE-2025-66578 (failed

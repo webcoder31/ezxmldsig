@@ -360,6 +360,25 @@ Simply visit the file `index.html` to see them in action (need to be hosted on a
 
 **NOTE:** To work out of the box, theses examples require that you've installed the library **ezxmldsig** using **composer**.
 
+The certificates of the examples are valid for 10 years from their generation. To issue new ones, run `bin/gen-test-certs --examples`.
+
+
+## Tests
+
+The PHPUnit test suite runs in Docker, so neither PHP nor PHPUnit has to be installed locally. Requirements: a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory), `curl` and a POSIX shell.
+
+```
+bin/test                        # PHP 7.4, then PHP 8.3
+bin/test 8.3                    # one PHP version
+bin/test 7.4 -- --filter Secure # arguments after -- go to PHPUnit
+```
+
+The script uses the official `php:<version>-cli` images. On first run, it downloads the PHPUnit 9.6 PHAR into `tests/.cache/` (checked against a pinned SHA-256) and, when `vendor/` is missing, runs `composer install` in the `composer:2` image.
+
+Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
+
+The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, an intermediate CA, signing and encryption certificates issued by the intermediate, and a certificate signed by its own key that copies the subject and issuer names of the signing certificate. Run `bin/gen-test-certs` to generate them again (it uses the local OpenSSL, or Docker when OpenSSL is not available).
+
 
 ## Documentation
 
