@@ -46,7 +46,7 @@ The ``XMLDSigToken`` class allows creating and analyzing enveloping XML Digital 
 
 3) It is also capable of encrypting / decrypting token data for safe use with an unsecured HTTP connection, providing the same level of security as an SSL connection. 
 The class allows chosing the algorithms that should be used to perform data encryption. By default it uses the following ones:
-    * Algorithm used to encrypt data is: http://www.w3.org/2001/04/xmlenc#aes128-cbc (symmetric ciphering).
+    * Algorithm used to encrypt data is: http://www.w3.org/2009/xmlenc11#aes256-gcm (authenticated symmetric ciphering).
     * Algorithm used to encrypt the session key that will be used to cypher data is: http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymmetric ciphering).
 
 4) It guarantees the integrity and the origin of the user data stored in the XMLDSig token by verifying that:
@@ -233,7 +233,7 @@ echo htmlentities($sig);
   </ds:KeyInfo>
   <ds:Object Id="Token">
     <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Content">
-      <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+      <xenc:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>
       <ds:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
         <xenc:EncryptedKey>
           <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
@@ -370,6 +370,25 @@ Only the signing certificate is taken from the token, never intermediate certifi
 When a token is created, it is analyzed right away to check it, with the certificate of its own signing key as trust anchor.
 
 
+### Encryption
+
+The token data are encrypted with a session key generated for each token, and the session key is encrypted for the recipient with the encryption certificate (key transport). The encryption takes place before the signature, which therefore covers the encrypted data.
+
+* **Default algorithms.** The data are encrypted with AES-256-GCM (``AES256_GCM``) and the session key with RSA-OAEP (``RSA_OAEP_MGF1P``, http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p). AES-GCM checks an authentication tag before returning any data: altered data are rejected as a whole. A 256-bit key costs no more than a 128-bit one for data of this size.
+* **Decryption after verification.** A token is only decrypted once its digest, its signature, the trust in its certificate (see [Trust anchor](#trust-anchor)) and its algorithms have been verified. A token that fails one of these checks is never decrypted.
+* **One error for every decryption failure.** Whatever fails once the decryption starts (session key, data, parsing of the decrypted XML), ``getError()`` returns ``Token decryption failed!``, with no reason, no anomaly and no PHP warning. A distinct message per failure would let someone who can submit altered tokens tell which step failed, which is what padding oracle attacks need. Failures that do not depend on the encrypted content keep their own message (no decryption key, a key that cannot be loaded, a malformed ``xenc:EncryptedData``).
+* **RSA 1.5 is refused.** The key transport algorithm http://www.w3.org/2001/04/xmlenc#rsa-1_5 (PKCS #1 v1.5 padding) is accepted neither at creation nor at analysis, and no option allows it: whether the padding of a submitted session key is valid can be told from its decryption (Bleichenbacher's attack), depending on the OpenSSL version PHP is built with. ezxmldsig always used RSA-OAEP by default; tokens created with RSA 1.5 on purpose must be created again with RSA-OAEP.
+* **CBC is accepted only when declared.** AES-CBC and Triple DES CBC (``AES128_CBC``, ``AES192_CBC``, ``AES256_CBC``, ``TRIPLEDES_CBC``) have no integrity: altered data are decrypted all the same, and how the decrypted content fails can tell what the data hold (Jager and Somorovsky's attack on XML Encryption). Only the signature protects them, so that the decryption is the only obstacle left to a signer you trust who can submit altered tokens. An analysis decrypts a CBC token only if its option ``sessionKeyCipheringAlgorithm`` names this very algorithm, even when ``checkCryptingAlgorithms`` is ``FALSE``. Declare it only to read tokens of peers that cannot use AES-GCM yet:
+
+  ```php
+  $options = [
+      'caCertPath' => ['path/to/ca/intermediate/certificate', 'path/to/ca/root/certificate'],
+      'sessionKeyCipheringAlgorithm' => XMLDSigToken::AES128_CBC,
+  ];
+  $token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword, $options);
+  ```
+
+
 ### Options
 
 Each factory takes an associative array ``$options`` as its last parameter. Each option applies to a context: token creation (``createXMLToken()``, ``createSecureXMLToken()``), token analysis (``analyzeXMLToken()``, ``analyzeSecureXMLToken()``) or both. The encryption options only apply when an encryption certificate (``createSecureXMLToken()``) or a decryption key (``analyzeSecureXMLToken()``) is given. An unknown option (a misspelt name, for instance), an option given out of its context, or an option whose value is ``NULL`` or invalid throws an exception: none is ignored.
@@ -383,7 +402,7 @@ Each factory takes an associative array ``$options`` as its last parameter. Each
 | ``digestAlgorithm`` | creation and analysis | string | ``SHA256`` |
 | ``checkSigningAlgorithms`` | analysis | boolean | ``TRUE`` |
 | ``caCertPath``, ``signerCertPath``, ``expectedSubject`` | analysis | see [Trust anchor](#trust-anchor) | none |
-| ``sessionKeyCipheringAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``AES128_CBC`` |
+| ``sessionKeyCipheringAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``AES256_GCM`` |
 | ``cryptAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``RSA_OAEP_MGF1P`` |
 | ``checkCryptingAlgorithms`` | analysis with a decryption key | boolean | ``TRUE`` |
 
@@ -392,12 +411,12 @@ The algorithms are given with the constants of the ``XMLDSigToken`` class (e.g. 
 * ``canonicalizationAlgorithm``: ``C14N``, ``C14N_COMMENTS``, ``EXC_C14N``, ``EXC_C14N_COMMENTS``.
 * ``signatureAlgorithm``: ``RSA_SHA1``, ``RSA_SHA256``, ``RSA_SHA384``, ``RSA_SHA512``.
 * ``digestAlgorithm``: ``SHA1``, ``SHA256``, ``SHA384``, ``SHA512``, ``RIPEMD160``.
-* ``sessionKeyCipheringAlgorithm`` (symmetric encryption of the token data): ``TRIPLEDES_CBC``, ``AES128_CBC``, ``AES192_CBC``, ``AES256_CBC``.
-* ``cryptAlgorithm`` (encryption of the session key with the encryption certificate, or key transport): ``RSA_1_5``, ``RSA_OAEP_MGF1P``.
+* ``sessionKeyCipheringAlgorithm`` (symmetric encryption of the token data): ``AES128_GCM``, ``AES192_GCM``, ``AES256_GCM``, and the algorithms without integrity ``TRIPLEDES_CBC``, ``AES128_CBC``, ``AES192_CBC``, ``AES256_CBC``, which an analysis only accepts when this option names them (see [Encryption](#encryption)).
+* ``cryptAlgorithm`` (encryption of the session key with the encryption certificate, or key transport): ``RSA_OAEP_MGF1P``. RSA 1.5 is refused (see [Encryption](#encryption)).
 
 Signature and key transport algorithms are both asymmetric, but a key transport algorithm is refused as a signature algorithm, and the reverse, whether given as an option or read from a token.
 
-At creation, the algorithm options are the algorithms the token is built with. At analysis, they are the algorithms the token must have been built with: a token built with other algorithms is rejected, and ``getError()`` names them (``Unauthorized Signature algorithm! Expected: ..., Used: ...``). ``checkSigningAlgorithms`` (signature, digest, canonicalization) and ``checkCryptingAlgorithms`` (session key, key transport) set to ``FALSE`` turn this check off; an algorithm out of the lists above is rejected all the same.
+At creation, the algorithm options are the algorithms the token is built with. At analysis, they are the algorithms the token must have been built with: a token built with other algorithms is rejected, and ``getError()`` names them (``Unauthorized Signature algorithm! Expected: ..., Used: ...``). ``checkSigningAlgorithms`` (signature, digest, canonicalization) and ``checkCryptingAlgorithms`` (session key, key transport) set to ``FALSE`` turn this check off; an algorithm out of the lists above is rejected all the same, and so is an undeclared CBC algorithm.
 
 ```php
 // Create a token signed with RSA-SHA512 and an SHA-512 digest...
@@ -428,11 +447,12 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
   ];
   ```
 
-  Conversely, a 0.x analysis that expects the 0.x defaults rejects the tokens of this version: upgrade the receiver first, or pass ``'signatureAlgorithm' => XMLDSigToken::RSA_SHA1`` and ``'digestAlgorithm' => XMLDSigToken::SHA1`` to the creation until it is upgraded. The default encryption algorithms (AES-128-CBC, RSA-OAEP) are unchanged.
+  Conversely, a 0.x analysis that expects the 0.x defaults rejects the tokens of this version: upgrade the receiver first, or pass ``'signatureAlgorithm' => XMLDSigToken::RSA_SHA1`` and ``'digestAlgorithm' => XMLDSigToken::SHA1`` to the creation until it is upgraded.
 * **Options of ``createXMLToken()``.** Its ``$options`` were ignored: they now apply. Check that the options you pass to it are the ones you want.
 * **Option checks.** An unknown option, an option out of its context (``checkSigningAlgorithms``, ``checkCryptingAlgorithms`` or a trust option at creation, ``base64Encode`` or ``xmldsigNsPrefix`` at analysis, an encryption option without an encryption certificate or a decryption key), or an option whose value is ``NULL`` or of the wrong type now throws an exception instead of being ignored. Remove such options.
 * **Algorithm lists.** ``signatureAlgorithm`` no longer accepts ``RSA_1_5`` and ``RSA_OAEP_MGF1P``, ``cryptAlgorithm`` no longer accepts the ``RSA_SHA*`` algorithms, and ``sessionKeyCipheringAlgorithm``, which used to refuse every encryption algorithm, now accepts them.
 * **``createSecureXMLToken()``** throws an exception when ``$cryptCertPath`` is ``NULL``, instead of creating an unencrypted token.
+* **Encryption.** The data are encrypted with AES-256-GCM (AES-128-CBC before), and the analysis rejects a token encrypted with CBC unless it declares the algorithm (see [Encryption](#encryption)). A 0.x analysis rejects AES-GCM (``Session Key Ciphering algorithm is invalid!``): upgrade the receivers first, declaring ``'sessionKeyCipheringAlgorithm' => XMLDSigToken::AES128_CBC`` while the senders create tokens with the 0.x defaults, then upgrade the senders and remove the option. With ``'checkCryptingAlgorithms' => false`` too, a receiver accepts both the declared CBC algorithm and AES-GCM during the transition. A sender upgraded first can pass the same option to ``createSecureXMLToken()`` until its receivers are upgraded. RSA 1.5 is refused and the constant ``XMLDSigToken::RSA_1_5`` is removed: use ``RSA_OAEP_MGF1P``, the default. A decryption failure gives ``Token decryption failed!`` instead of ``Session key decryption failed! Reason: ...`` or ``Token data decryption failed! Reason: ...``.
 
 
 ## Examples
