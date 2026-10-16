@@ -1,0 +1,182 @@
+#!/bin/sh
+#
+# Generates the X.509 certificates and keys used by the test suite and by the
+# examples.
+#
+# Usage:
+#   bin/gen-test-certs              writes tests/fixtures/certs/
+#   bin/gen-test-certs --examples   writes examples/certs/
+#
+# tests/fixtures/certs/ receives:
+#   root.cert.pem, root.key.pem                  root CA (self-signed)
+#   intermediate.cert.pem, intermediate.key.pem  intermediate CA, issued by root
+#   sign.cert.pem, sign.key.pem                  signing certificate, issued by
+#                                                the intermediate; key protected
+#                                                by the password "signKeyPassword"
+#   crypt.cert.pem, crypt.key.pem                encryption certificate, issued by
+#                                                the intermediate; key unprotected
+#   attacker.cert.pem, attacker.key.pem          certificate signed by its own key,
+#                                                whose subject and issuer DN copy
+#                                                those of sign.cert.pem
+#
+# examples/certs/ receives the files the examples use: intermediate.cert.pem,
+# sign.cert.pem, sign.key.pem (password "signKeyPassword"), crypt.cert.pem and
+# crypt.key.pem (password "cryptKeyPassword").
+#
+# Every certificate is valid for 10 years from the time of generation.
+#
+# The local openssl binary is used when it is OpenSSL; otherwise (missing, or
+# LibreSSL) the script runs itself again inside an Alpine Docker container.
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+MODE=tests
+case "${1:-}" in
+    "") ;;
+    --examples) MODE=examples ;;
+    *) echo "Usage: $0 [--examples]" >&2; exit 2 ;;
+esac
+
+if ! openssl version 2>/dev/null | grep -q '^OpenSSL'; then
+    if [ "${GEN_CERTS_IN_DOCKER:-}" = 1 ]; then
+        echo "OpenSSL is not available in the container." >&2
+        exit 1
+    fi
+    echo "No local OpenSSL binary: running in Docker (alpine:3.22)." >&2
+    exec docker run --rm -e GEN_CERTS_IN_DOCKER=1 \
+        -u "$(id -u):$(id -g)" \
+        -v "$ROOT_DIR:/work" -w /work \
+        --entrypoint sh alpine:3.22 -c \
+        'apk add --no-cache -q openssl >/dev/null 2>&1 || true; sh bin/gen-test-certs "$@"' \
+        sh "$@"
+fi
+
+if [ "$MODE" = examples ]; then
+    OUT_DIR="$ROOT_DIR/examples/certs"
+    CRYPT_KEY_PASSWORD=cryptKeyPassword
+else
+    OUT_DIR="$ROOT_DIR/tests/fixtures/certs"
+    CRYPT_KEY_PASSWORD=
+fi
+SIGN_KEY_PASSWORD=signKeyPassword
+DAYS=3650
+
+# Distinguished names. The examples check the issuer of the signing
+# certificate against INTERMEDIATE_DN (see examples/parse-xml-token.php).
+ROOT_DN="/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Jarl Dept/CN=www.lothbrok.dk/emailAddress=ragnar@lothbrok.dk"
+INTERMEDIATE_DN="/C=DK/ST=Jylland/O=Lothbrok Ltd/OU=Shield Wall Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk"
+SIGN_DN="/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk"
+CRYPT_DN="/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Cryptography Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk"
+
+WORK_DIR=$(mktemp -d)
+trap 'rm -rf "$WORK_DIR"' EXIT
+
+cat > "$WORK_DIR/ext.cnf" <<'EOF'
+[root]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+
+[intermediate]
+basicConstraints = critical, CA:TRUE, pathlen:0
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+
+[sign]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, nonRepudiation
+extendedKeyUsage = clientAuth, emailProtection
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+
+[crypt]
+basicConstraints = CA:FALSE
+keyUsage = critical, keyEncipherment, dataEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+EOF
+
+# genkey <file> <bits> [password]
+genkey() {
+    if [ -n "${3:-}" ]; then
+        openssl genpkey -algorithm RSA -pkeyopt "rsa_keygen_bits:$2" \
+            -aes-256-cbc -pass "pass:$3" -out "$1" 2>/dev/null
+    else
+        openssl genpkey -algorithm RSA -pkeyopt "rsa_keygen_bits:$2" \
+            -out "$1" 2>/dev/null
+    fi
+}
+
+# issue <name> <subject DN> <extension section> <CA cert> <CA key> [key password]
+# Signs a CSR for $WORK_DIR/<name>.key.pem with the given CA.
+issue() {
+    openssl req -new -key "$WORK_DIR/$1.key.pem" -passin "pass:${6:-}" \
+        -subj "$2" -out "$WORK_DIR/$1.csr"
+    openssl x509 -req -in "$WORK_DIR/$1.csr" -sha256 -days "$DAYS" \
+        -CA "$4" -CAkey "$5" -set_serial "0x$(openssl rand -hex 16)" \
+        -extfile "$WORK_DIR/ext.cnf" -extensions "$3" \
+        -out "$WORK_DIR/$1.cert.pem" 2>/dev/null
+}
+
+# Root CA.
+genkey "$WORK_DIR/root.key.pem" 4096
+openssl req -new -x509 -sha256 -days "$DAYS" -key "$WORK_DIR/root.key.pem" \
+    -subj "$ROOT_DN" -set_serial "0x$(openssl rand -hex 16)" \
+    -config "$WORK_DIR/ext.cnf" -extensions root \
+    -out "$WORK_DIR/root.cert.pem" 2>/dev/null
+
+# Intermediate CA, issued by the root.
+genkey "$WORK_DIR/intermediate.key.pem" 4096
+issue intermediate "$INTERMEDIATE_DN" intermediate \
+    "$WORK_DIR/root.cert.pem" "$WORK_DIR/root.key.pem"
+
+# Signing and encryption certificates, issued by the intermediate.
+genkey "$WORK_DIR/sign.key.pem" 2048 "$SIGN_KEY_PASSWORD"
+issue sign "$SIGN_DN" sign \
+    "$WORK_DIR/intermediate.cert.pem" "$WORK_DIR/intermediate.key.pem" \
+    "$SIGN_KEY_PASSWORD"
+genkey "$WORK_DIR/crypt.key.pem" 2048 "$CRYPT_KEY_PASSWORD"
+issue crypt "$CRYPT_DN" crypt \
+    "$WORK_DIR/intermediate.cert.pem" "$WORK_DIR/intermediate.key.pem" \
+    "$CRYPT_KEY_PASSWORD"
+
+# Attacker certificate: signed by its own key, with the subject DN of the
+# signing certificate and the DN of the intermediate as issuer. A throwaway CA
+# certificate carrying the intermediate DN and the attacker key provides the
+# issuer name.
+genkey "$WORK_DIR/attacker.key.pem" 2048
+openssl req -new -x509 -sha256 -days "$DAYS" -key "$WORK_DIR/attacker.key.pem" \
+    -subj "$INTERMEDIATE_DN" -config "$WORK_DIR/ext.cnf" -extensions intermediate \
+    -out "$WORK_DIR/attacker-issuer.cert.pem" 2>/dev/null
+issue attacker "$SIGN_DN" sign \
+    "$WORK_DIR/attacker-issuer.cert.pem" "$WORK_DIR/attacker.key.pem"
+
+# Consistency checks.
+openssl verify -CAfile "$WORK_DIR/root.cert.pem" \
+    "$WORK_DIR/intermediate.cert.pem" >/dev/null
+for name in sign crypt; do
+    openssl verify -CAfile "$WORK_DIR/root.cert.pem" \
+        -untrusted "$WORK_DIR/intermediate.cert.pem" \
+        "$WORK_DIR/$name.cert.pem" >/dev/null
+done
+
+if [ "$MODE" = examples ]; then
+    FILES="intermediate.cert.pem sign.cert.pem sign.key.pem crypt.cert.pem crypt.key.pem"
+else
+    FILES="root.cert.pem root.key.pem intermediate.cert.pem intermediate.key.pem
+           sign.cert.pem sign.key.pem crypt.cert.pem crypt.key.pem
+           attacker.cert.pem attacker.key.pem"
+fi
+
+mkdir -p "$OUT_DIR"
+for f in $FILES; do
+    cp "$WORK_DIR/$f" "$OUT_DIR/$f"
+done
+echo "Certificates written to ${OUT_DIR#$ROOT_DIR/}:"
+for f in $FILES; do
+    echo "  $f"
+done

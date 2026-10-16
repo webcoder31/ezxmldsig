@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+# Runs the PHPUnit test suite in Docker.
+#
+# Usage:
+#   bin/test [PHP_VERSION...] [-- PHPUNIT_ARGS...]
+#
+# Examples:
+#   bin/test                  runs the suite under PHP 7.4, then PHP 8.3
+#   bin/test 8.3              runs the suite under PHP 8.3 only
+#   bin/test 7.4 -- --filter Secure
+#
+# The PHP versions can also be given by the PHP_VERSIONS environment variable
+# (space-separated). Each version runs in the official php:<version>-cli image.
+#
+# PHPUnit is not a composer dependency: its PHAR is downloaded once into
+# tests/.cache/ (ignored by git) and checked against a pinned SHA-256.
+# When vendor/ is missing, dependencies are installed first with
+# `composer install`, in the composer:2 image.
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+PHPUNIT_VERSION=9.6.22
+PHPUNIT_SHA256=9618d52015c9b06b4979a8e481ca9567be6be20e711e98926c61378a400e1f2e
+PHPUNIT_PHAR="tests/.cache/phpunit-$PHPUNIT_VERSION.phar"
+
+VERSIONS=
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --) shift; break ;;
+        -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) VERSIONS="$VERSIONS $1"; shift ;;
+    esac
+done
+VERSIONS=${VERSIONS:-${PHP_VERSIONS:-7.4 8.3}}
+
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not reachable (with Colima: colima start)." >&2
+    exit 1
+fi
+
+DOCKER_USER="$(id -u):$(id -g)"
+
+# Dependencies.
+if [ ! -f "$ROOT_DIR/vendor/autoload.php" ]; then
+    echo "vendor/ is missing: running composer install (composer:2 image)." >&2
+    if ! docker run --rm -u "$DOCKER_USER" -e COMPOSER_HOME=/tmp/composer \
+        -e COMPOSER_NO_BLOCKING \
+        -v "$ROOT_DIR:/app" -w /app composer:2 \
+        install --no-interaction --no-progress --ignore-platform-reqs; then
+        echo "composer install failed. If it refused a dependency because of a" >&2
+        echo "security advisory, COMPOSER_NO_BLOCKING=1 bin/test overrides the" >&2
+        echo "refusal, at your own risk." >&2
+        exit 1
+    fi
+fi
+
+# PHPUnit PHAR.
+sha256() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$1" | cut -d' ' -f1
+    else
+        shasum -a 256 "$1" | cut -d' ' -f1
+    fi
+}
+if [ ! -f "$ROOT_DIR/$PHPUNIT_PHAR" ]; then
+    echo "Downloading PHPUnit $PHPUNIT_VERSION." >&2
+    mkdir -p "$ROOT_DIR/tests/.cache"
+    curl -fsSL -o "$ROOT_DIR/$PHPUNIT_PHAR.part" \
+        "https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar"
+    mv "$ROOT_DIR/$PHPUNIT_PHAR.part" "$ROOT_DIR/$PHPUNIT_PHAR"
+fi
+if [ "$(sha256 "$ROOT_DIR/$PHPUNIT_PHAR")" != "$PHPUNIT_SHA256" ]; then
+    echo "SHA-256 mismatch for $PHPUNIT_PHAR: file removed, run again." >&2
+    rm -f "$ROOT_DIR/$PHPUNIT_PHAR"
+    exit 1
+fi
+
+# Test runs.
+STATUS=0
+for version in $VERSIONS; do
+    echo "==> PHP $version" >&2
+    docker run --rm -u "$DOCKER_USER" \
+        -v "$ROOT_DIR:/app" -w /app "php:$version-cli" \
+        php "$PHPUNIT_PHAR" "$@" || STATUS=1
+done
+exit $STATUS
