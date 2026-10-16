@@ -1,3 +1,4 @@
 /apigen.phar
 /composer.lock
 /vendor
+/tests/.cache
