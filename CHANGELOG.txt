@@ -1,0 +1,13 @@
+Unreleased
+Security:
+- Require robrichards/xmlseclibs ^3.1.5 instead of 2.0.1, which is affected by
+  CVE-2019-3465 (multiple SignedInfo elements), CVE-2025-66578 (failed
+  canonicalization hashed as an empty string) and GHSA-2g98-f9jv-w8c5 (XPath
+  injection). 3.1.5 also fixes CVE-2026-32313 (AES-GCM authentication tag not
+  verified), which affects 3.x versions before 3.1.5.
+- Token analysis fails when the canonicalization of the node "ds:SignedInfo"
+  or of a referenced node fails or yields an empty string, whatever the
+  xmlseclibs version.
+
+Requirements:
+- PHP 7.4 or greater (was PHP 5.6).
