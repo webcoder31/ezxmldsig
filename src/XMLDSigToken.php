@@ -1615,8 +1615,9 @@ class XMLDSigToken
             }
         }
 
-        // Create an XMLSecurityDSig object.
-        $XMLDSig = new XMLSecurityDSig();
+        // Create an XMLSecurityDSig object that rejects empty or failed
+        // canonicalizations (see _createVerifier()).
+        $XMLDSig = self::_createVerifier();
 
         // Locate the node "ds:Signature".
         $nodeSignature = $XMLDSig->locateSignature($xmlDoc);
@@ -1663,7 +1664,9 @@ class XMLDSigToken
             $this->anomalies[] = "Token hash verification failed!";
         }
 
-        // Canonicalize the node "ds:Signature/ds:SignedInfo".
+        // Canonicalize the node "ds:Signature/ds:SignedInfo". The signature is
+        // verified against this canonical form; the verifier throws an
+        // exception if it is empty (see _createVerifier()).
         $XMLDSig->canonicalizeSignedInfo();
 
         // Verifies that the signature held in the node
@@ -2300,6 +2303,64 @@ class XMLDSigToken
         }
 
         return $this->x509Certificate->isValidCA($caCert);
+    }
+
+
+    /**
+     * Create the XMLSecurityDSig object used to verify an XML token.
+     *
+     * Digests and signatures are computed over canonicalized XML. If the
+     * canonicalization fails, `DOMNode::C14N()` returns FALSE (on PHP 8, some
+     * XPath failures throw an Error instead), and an XPath transform that
+     * selects nothing yields an empty string. Depending on its version,
+     * xmlseclibs then hashes an empty string: a forged reference only has to
+     * carry the digest of the empty string to validate, whatever the content
+     * of the referenced node. The returned object therefore makes the
+     * canonicalization of the node "ds:SignedInfo" and of each referenced node
+     * throw an exception unless it produces a non-empty string.
+     *
+     * This check is deliberately independent of the xmlseclibs version and
+     * must not be removed, even if xmlseclibs performs a similar check.
+     *
+     * @return XMLSecurityDSig The verifier.
+     */
+    static private function _createVerifier()
+    {
+        return new class() extends XMLSecurityDSig
+        {
+            public function canonicalizeSignedInfo()
+            {
+                return $this->guard(function () {
+                    return parent::canonicalizeSignedInfo();
+                }, "ds:SignedInfo");
+            }
+
+            public function processTransforms($refNode, $objData, $includeCommentNodes = true)
+            {
+                return $this->guard(function () use ($refNode, $objData, $includeCommentNodes) {
+                    return parent::processTransforms($refNode, $objData, $includeCommentNodes);
+                }, "referenced node");
+            }
+
+            private function guard(callable $canonicalize, $what)
+            {
+                try
+                {
+                    $data = $canonicalize();
+                }
+                catch (\Throwable $e)
+                {
+                    throw new Exception("Canonicalization of " . $what . " failed! Reason: " . $e->getMessage());
+                }
+
+                if (!is_string($data) || '' === $data)
+                {
+                    throw new Exception("Canonicalization of " . $what . " failed or is empty!");
+                }
+
+                return $data;
+            }
+        };
     }
 
 
