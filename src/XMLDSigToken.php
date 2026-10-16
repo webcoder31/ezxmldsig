@@ -187,6 +187,13 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   key associated to the X.509 certificate included in the XML Digital
  *   Signature.
  *
+ * - Verify that the X.509 certificate included in the XML Digital Signature
+ *   is trusted, against the trust anchor given to the analysis: CA
+ *   certificates up to which OpenSSL verifies the chain of the certificate,
+ *   and/or the pinned certificate the token must be signed with. Without a
+ *   trust anchor, no token is valid: anyone can sign a token with a
+ *   certificate of their own.
+ *
  * - NOTE: If data decryption is required, this process will take place here
  *   (this will be described later).
  *
@@ -423,6 +430,23 @@ class XMLDSigToken
     Signature. */
     private $x509Certificate = null;
 
+    /** @var array|null The paths of the PEM files holding the trusted CA
+    certificates (option "caCertPath"). */
+    private $trustedCACertPaths = null;
+
+    /** @var string|null The pinned signing certificate, in PEM format (option
+    "signerCertPath"), or, when the object creates a token, the certificate
+    of its own signing key. */
+    private $pinnedSignerCert = null;
+
+    /** @var array|string|null The subject expected for the signing
+    certificate (option "expectedSubject"). */
+    private $expectedSubject = null;
+
+    /** @var boolean Flag that indicates whether the X.509 certificate included
+    in the XML Digital Signature is trusted or not. */
+    private $isCertTrusted = null;
+
     /** @var boolean Flag that indicates whether the token is encrypted or
     not. */
     private $isDataEncrypted = null;
@@ -454,6 +478,7 @@ class XMLDSigToken
             'isValid'                => $this->isSignatureValid(),
             'isDigestValueOk'        => $this->isDigestValueOk,
             'isSignatureValueOk'     => $this->isSignatureValueOk,
+            'isCertTrusted'          => $this->isCertTrusted,
             'isDataEncrypted'        => $this->isDataEncrypted,
             'timestamp'              => $this->timestamp,
             'data'                   => $this->data,
@@ -508,11 +533,17 @@ class XMLDSigToken
      *
      * - It will extract timestamp and data from the token.
      *
-     * In this case, only the `$xmlOrData` parameters is required. If the XML
+     * In this case, the `$xmlOrData` parameter and a trust anchor (the
+     * options `caCertPath` and/or `signerCertPath`, see below) are required:
+     * without a trust anchor, no token is valid. If the XML
      * token is encrypted, the `$cryptKeyPath` parameter must also be provided.
      * If the private key used for encryption (cf. `$cryptKeyPath` parameter) is
      * protected by a password this password may be passed using the
      * `$cryptKeyPassword` parameter.
+     *
+     * When the object creates a token, it analyzes it right away to check it,
+     * and trusts the certificate of its own signing key (`$signCertPath`) for
+     * that: the trust options are ignored.
      *
      * **Configuring the object:**
      *
@@ -531,6 +562,51 @@ class XMLDSigToken
      * </code>
      *
      * Available options are the following:
+     *
+     * - **`caCertPath`** [string|array] Analysis only. The path, or the list
+     *   of paths, of PEM files holding the trusted CA certificates. The
+     *   signing certificate is only trusted if OpenSSL builds and verifies
+     *   its chain, from these certificates only, up to a self-signed
+     *   certificate of these files (see `X509Cert::isTrustedBy()`). To trust
+     *   the certificates issued by an intermediate CA, give its certificate
+     *   and the certificates up to its root, in one file or in several:
+     *   `['intermediate.cert.pem', 'root.cert.pem']`. A chain that stops at
+     *   an intermediate CA is rejected: with the intermediate CA alone,
+     *   `isSignatureValid()` returns FALSE and `getError()` returns "Signing
+     *   certificate is not issued by a trusted CA: its chain could not be
+     *   verified up to the CA certificates of the option 'caCertPath', which
+     *   must hold the issuing CA and the certificates up to its root!".
+     *   Only the signing certificate is taken from the token, so a
+     *   certificate issued by another intermediate CA of the same root is
+     *   rejected; a certificate issued directly by a CA of the files (the
+     *   root included) is accepted.
+     *   <br/>Default value: none.
+     *
+     * - **`signerCertPath`** [string] Analysis only. The path to the PEM
+     *   certificate the token must be signed with (certificate pinning): the
+     *   signing certificate must be this very certificate. Given alone, it is
+     *   the trust anchor; given with `caCertPath`, both are required.
+     *   <br/>Default value: none.
+     *
+     * - **`expectedSubject`** [string|array] Analysis only. The subject the
+     *   signing certificate must have, either:
+     *
+     *   - an array of the subject fields to check, as returned by
+     *     `getCertSubject()`: `['O' => 'Lothbrok Ltd', 'OU' => 'Jarl Dept']`.
+     *     Fields that are not given are not checked.
+     *
+     *   - or a string, compared as is with the full Distinguished Name
+     *     returned by `getCertDN()`. This is the OpenSSL "oneline" format
+     *     (`openssl_x509_parse()`, key `name`): every field of the subject,
+     *     in the order of the certificate, each written `/<short name>=<value>`
+     *     with no space and no escaping, e.g.
+     *     `'/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk'`.
+     *     It is neither the RFC 2253 form (`CN=...,O=...`) nor the form
+     *     printed by the `openssl` command line (`C=DK, ST=...`): copy it
+     *     from `getCertDN()` or `X509Cert::getDN()`.
+     *
+     *   Character case is significant. It does not replace a trust anchor.
+     *   <br/>Default value: none.
      *
      * - **`base64Encode`** [boolean] Whether to base64 encode token data or
      *   not.
@@ -829,6 +905,10 @@ class XMLDSigToken
             }
             $this->signCert = $signCert;
 
+            // The created token is analyzed to check it (see _writeXML()): it
+            // must be signed with this very certificate.
+            $this->pinnedSignerCert = $signCert;
+
             // If provided, store the prefix namespace to use in the XML digital
             // signature tags.
             if (!is_null($xmldsigNsPrefix))
@@ -932,6 +1012,11 @@ class XMLDSigToken
         {
             // $xmlOrData is a string, so we have to analyze the XML token.
 
+            // Load the trust anchor. Its absence is not an error here: the
+            // analysis then reports that no certificate can be trusted (see
+            // _verifyCertTrust()).
+            $this->_loadTrustOptions($options);
+
             // If provided, get and store the private key that will be used
             // to decrypt the session key which was used to encrypt the token.
             if (!is_null($cryptKeyPath))
@@ -1002,6 +1087,63 @@ class XMLDSigToken
         else
         {
             throw new Exception("Invalid parameter 'xmlOrData'! Parameter must be either an array or a string!");
+        }
+    }
+
+
+    /**
+     * Load and check the trust options of an analysis ("caCertPath",
+     * "signerCertPath" and "expectedSubject", see `__construct()`).
+     *
+     * A trust option of the wrong type, or naming a file that cannot be read,
+     * throws an exception instead of being ignored: ignoring it would leave
+     * the token without the constraint the caller asked for.
+     *
+     * @param array $options Configuration options.
+     *
+     * @throws Exception
+     */
+    private function _loadTrustOptions($options)
+    {
+        if (isset($options['caCertPath']))
+        {
+            $caCertPaths = $options['caCertPath'];
+            if (is_string($caCertPaths))
+            {
+                $caCertPaths = [$caCertPaths];
+            }
+            if (!is_array($caCertPaths) || empty($caCertPaths))
+            {
+                throw new Exception("Invalid option 'caCertPath'! It must be a path or a non-empty list of paths.");
+            }
+            foreach ($caCertPaths as $caCertPath)
+            {
+                if (!is_string($caCertPath) || !is_file($caCertPath) || !is_readable($caCertPath))
+                {
+                    throw new Exception("Invalid option 'caCertPath'! Cannot read CA certificate file: " . (is_string($caCertPath) ? $caCertPath : gettype($caCertPath)) . ".");
+                }
+            }
+            $this->trustedCACertPaths = array_values($caCertPaths);
+        }
+
+        if (isset($options['signerCertPath']))
+        {
+            $signerCert = is_string($options['signerCertPath']) ? @file_get_contents($options['signerCertPath']) : false;
+            if (false === $signerCert || false === @openssl_x509_read($signerCert))
+            {
+                throw new Exception("Invalid option 'signerCertPath'! Cannot read the pinned X.509 certificate.");
+            }
+            $this->pinnedSignerCert = $signerCert;
+        }
+
+        if (isset($options['expectedSubject']))
+        {
+            $expectedSubject = $options['expectedSubject'];
+            if (!(is_string($expectedSubject) || is_array($expectedSubject)) || empty($expectedSubject))
+            {
+                throw new Exception("Invalid option 'expectedSubject'! It must be a non-empty string or array.");
+            }
+            $this->expectedSubject = $expectedSubject;
         }
     }
 
@@ -1119,9 +1261,18 @@ class XMLDSigToken
     /**
      * Parse an XML token.
      *
+     * The options must hold a trust anchor, `caCertPath` and/or
+     * `signerCertPath`; without it, `isSignatureValid()` returns FALSE.
+     *
+     * <code>
+     * $token = XMLDSigToken::analyzeXMLToken($xml, [
+     *     'caCertPath' => ['path/to/intermediate.cert.pem', 'path/to/root.cert.pem'],
+     * ]);
+     * </code>
+     *
      * @param string $xml An XML token.
      *
-     * @param array $options Configuration options
+     * @param array $options Configuration options, trust anchor included
      *     (see `__construct()` for details).
      *
      * @return XMLDSigToken An XMLDSigToken object or NULL if the object
@@ -1154,6 +1305,9 @@ class XMLDSigToken
      *
      * NOTE: Uncrypted token can also be parsed using this function.
      *
+     * The options must hold a trust anchor, `caCertPath` and/or
+     * `signerCertPath`; without it, `isSignatureValid()` returns FALSE.
+     *
      * @param string $xml An XML token.
      *
      * @param string $cryptKeyPath The path to the PEM private key file that
@@ -1164,7 +1318,7 @@ class XMLDSigToken
      *     that will be used to decrypt the session key which was used to
      *     encrypt the token. Use NULL if no password needed.
      *
-     * @param array $options Configuration options
+     * @param array $options Configuration options, trust anchor included
      *     (see `__construct()` for details).
      *
      * @return XMLDSigToken An XMLDSigToken object or NULL if the object
@@ -1382,13 +1536,13 @@ class XMLDSigToken
      * Read the XML Digital Signature representing an XML token.
      *
      * This function will check that the provided XML Digital Signature is
-     * valid, will decrypt the token data it contains if this one is encrypted
+     * valid and that its certificate is trusted (see `_verifyCertTrust()`),
+     * will decrypt the token data it contains if this one is encrypted
      * and then will extract timestamp and data.
      *
      * The data can then be obtained using the `getData()` function. Neverless,
-     * you have to ensure that you can trust it using functions provided for
-     * that (i.e. `isSignatureValid()`, `isOutOfDate()`, `isValidIssuer()`,
-     * `isValidCA()` and so on).
+     * you have to ensure that you can trust it using `isSignatureValid()` and
+     * `isOutOfDate()`.
      *
      * NOTE: This function is called by the `_writeXML()` function to ensure the
      * XML token it built is correct and because this function set most of the
@@ -1743,6 +1897,11 @@ class XMLDSigToken
             $this->_throwAnomalies();
         }
 
+        // The signature has only been verified with the certificate the token
+        // carries, which anyone can produce. Neither decrypt nor read a token
+        // whose certificate is not trusted.
+        $this->_verifyCertTrust();
+
         // Create an XMLSecEnc object.
         $objXMLSecEnc = new XMLSecEnc();
 
@@ -1974,6 +2133,113 @@ class XMLDSigToken
 
 
     /**
+     * Verify that the X.509 certificate included in the XML token is trusted.
+     *
+     * The signature of the token is verified with the certificate the token
+     * carries: any key pair can produce a valid one, with a certificate that
+     * copies the names of a legitimate one. The token is only valid if the
+     * certificate is also trusted:
+     *
+     * - A trust anchor is required: CA certificates (option `caCertPath`)
+     *   and/or a pinned certificate (option `signerCertPath`). Without it, no
+     *   certificate is trusted.
+     *
+     * - The certificate must be valid at the current date and its key usage
+     *   must allow signing (see `X509Cert::canSign()`).
+     *
+     * - If a certificate is pinned, the certificate must be this very
+     *   certificate (same fingerprint).
+     *
+     * - If CA certificates are given, OpenSSL must verify the chain of the
+     *   certificate up to them (see `X509Cert::isTrustedBy()`). Only the
+     *   signing certificate is taken from the token: the token cannot supply
+     *   intermediate certificates.
+     *
+     * - If a subject is expected (option `expectedSubject`), the subject of
+     *   the certificate must match it.
+     *
+     * Sets the flag returned by `isCertTrusted()`.
+     *
+     * @throws Exception If the certificate is not trusted, with the reason.
+     */
+    private function _verifyCertTrust()
+    {
+        $this->isCertTrusted = false;
+        $cert = $this->x509Certificate;
+
+        if (is_null($this->trustedCACertPaths) && is_null($this->pinnedSignerCert))
+        {
+            throw new Exception("No trust anchor! Pass the option 'caCertPath' (trusted CA certificates) and/or 'signerCertPath' (pinned signing certificate) to analyze a token: without them, no signing certificate can be trusted.");
+        }
+
+        if ($cert->isOutOfDate())
+        {
+            throw new Exception("Signing certificate is not valid at the current date (valid from " . $cert->getValidFrom(self::TOKEN_TIMESTAMP_FORMAT) . " to " . $cert->getValidTo(self::TOKEN_TIMESTAMP_FORMAT) . ")!");
+        }
+
+        if (!$cert->canSign())
+        {
+            throw new Exception("Signing certificate is not allowed to sign (key usage)!");
+        }
+
+        if (!is_null($this->pinnedSignerCert))
+        {
+            $pinned = new X509Cert($this->pinnedSignerCert);
+            if (!hash_equals($pinned->getFingerprint(), $cert->getFingerprint()))
+            {
+                throw new Exception("Signing certificate is not the pinned certificate!");
+            }
+        }
+
+        if (!is_null($this->trustedCACertPaths) && !$cert->isTrustedBy($this->trustedCACertPaths))
+        {
+            throw new Exception("Signing certificate is not issued by a trusted CA: its chain could not be verified up to the CA certificates of the option 'caCertPath', which must hold the issuing CA and the certificates up to its root!");
+        }
+
+        if (!is_null($this->expectedSubject))
+        {
+            $matches = is_string($this->expectedSubject)
+                ? $cert->getDN() === $this->expectedSubject
+                : self::_matchesName($cert->getSubject(), $this->expectedSubject);
+            if (!$matches)
+            {
+                throw new Exception("Subject of the signing certificate is not the expected one! Subject: " . $cert->getDN() . ".");
+            }
+        }
+
+        $this->isCertTrusted = true;
+    }
+
+
+    /**
+     * Indicates whether a name (the subject or the issuer of a certificate,
+     * as returned by `openssl_x509_parse()`) holds the expected fields.
+     *
+     * Each expected field must be present with the very same value: character
+     * case is significant, and a field repeated in the name (e.g. two "OU")
+     * is an array of its values.
+     *
+     * @param array $name The name to check.
+     *
+     * @param array $expected The expected fields.
+     *
+     * @return boolean TRUE if every expected field matches, FALSE otherwise.
+     */
+    static private function _matchesName($name, $expected)
+    {
+        foreach ($expected as $key => $value)
+        {
+            if (!isset($name[$key]) || $name[$key] !== $value)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
      * Throw an exception whose message lists the anomalies detected during
      * the analysis of the XML token.
      *
@@ -1999,15 +2265,40 @@ class XMLDSigToken
      *
      * - The token hash signature has been verified and is valid.
      *
-     * NOTE: This function only guarantee the integrity of the token regarding
-     * the X.509 certificate included in the XML token. It does not verify
-     * whether this certificate is valid or not.
+     * - The X.509 certificate included in the XML token is trusted: it is
+     *   valid at the current date, it is the pinned certificate and/or its
+     *   chain has been verified up to the trusted CA certificates, and its
+     *   subject is the expected one, if any (see `isCertTrusted()`).
+     *
+     * Without a trust anchor given to the analysis, it returns FALSE.
+     *
+     * The token timestamp is not checked: use `isOutOfDate()`.
      *
      * @return boolean TRUE if XML token is valid, FALSE otherwise.
      */
     public function isSignatureValid()
     {
-        return true === $this->isDigestValueOk && true === $this->isSignatureValueOk && is_null($this->error);
+        return true === $this->isDigestValueOk
+            && true === $this->isSignatureValueOk
+            && true === $this->isCertTrusted
+            && is_null($this->error);
+    }
+
+
+    /**
+     * Indicates whether the X.509 certificate included in the XML token is
+     * trusted or not, according to the trust anchor given to the analysis
+     * (options `caCertPath`, `signerCertPath` and `expectedSubject`).
+     *
+     * NOTE: If not evaluated (because an error occured before), this function
+     * return NULL. When it returns FALSE, `getError()` gives the reason.
+     *
+     * @return boolean|null TRUE if the certificate is trusted, FALSE
+     *     otherwise, NULL if cannot be evaluated.
+     */
+    public function isCertTrusted()
+    {
+        return $this->isCertTrusted;
     }
 
 
@@ -2304,11 +2595,15 @@ class XMLDSigToken
      *
      *  NOTE: Character case of data is significant.
      *
+     *  NOTE: This only compares names, which any certificate can copy: it
+     *  tells nothing about who issued the certificate. `isSignatureValid()`
+     *  verifies the certificate against the trust anchor of the analysis.
+     *
      * @param array $expectedIssuerInfo The issuer information that the X.509
      * certificate should match.
      *
-     * @return boolean TRUE if the X.509 certificate has been signed with the
-     * provided CA certificate, FALSE otherwise.
+     * @return boolean TRUE if the issuer of the X.509 certificate holds the
+     * expected information, FALSE otherwise.
      *
      * @throws Exception
      */
@@ -2327,18 +2622,8 @@ class XMLDSigToken
         {
             return false;
         }
-        foreach ($expectedIssuerInfo as $key => $value)
-        {
-            if (!isset($certIssuerInfo[$key]) || $certIssuerInfo[$key] !== $value)
-            {
-                // Issuer information of the X.509 certificate does not match
-                // the expected one.
-                return false;
-            }
-        }
 
-        // Issuer is the expected one.
-        return true;
+        return self::_matchesName($certIssuerInfo, $expectedIssuerInfo);
     }
 
 
@@ -2354,17 +2639,27 @@ class XMLDSigToken
      * passes the X.509 certificate that is supposed been included in the XML
      * token to the function.
      *
+     * Only the link between the certificate and the given CA certificate is
+     * checked (see `X509Cert::isValidCA()`). `isSignatureValid()` verifies the
+     * whole chain against the trust anchor of the analysis.
+     *
      * @param string $caCertPath The PEM certificate (public key) that is
      *     supposed been used by CA to sign the X.509 certificate included in
      *     the XML token.
      *
      * @return boolean TRUE if the X.509 certificate has been signed by the
-     *     expected CA, FALSE otherwise.
+     *     expected CA, FALSE otherwise (and when no certificate has been read
+     *     from the token).
      *
      * @throws Exception
      */
     public function isValidCertCA($caCertPath)
     {
+        if (is_null($this->x509Certificate))
+        {
+            return false;
+        }
+
         // Get the CA public key that is supposed be used to sign the X.509
         // certificate.
         $caCert = @file_get_contents($caCertPath);

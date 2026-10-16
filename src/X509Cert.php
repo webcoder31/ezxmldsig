@@ -47,12 +47,11 @@ use Exception;
 /**
  * Analyze an X.509 certificate.
  *
- * The `X509Cert` class provides a set of convenient methods for extracting 
- * essential information contained in an X.509 certificate and for performing 
- * some useful checkings. In particular, it can verify the origin of the X.509 
- * certificate by using the intermediate certificate used by the CA to perform 
- * its signature (CSR). This class is used internaly by the `XMLDSigToken` 
- * class.
+ * The `X509Cert` class provides a set of convenient methods for extracting
+ * essential information contained in an X.509 certificate and for performing
+ * some useful checkings. Every cryptographic check (signature of the
+ * certificate, chain of trust, validity dates) is performed by OpenSSL. This
+ * class is used internaly by the `XMLDSigToken` class.
  */
 class X509Cert
 {
@@ -60,13 +59,7 @@ class X509Cert
     private $cert;
 
      /** @var array The X.509 information of the certificatet. */
-    private $x509Info;   
-
-    /** @var string The signature that is encrypted in the certificate. */
-    private $encryptedSignature;
-
-    /** @var string The signature that is encrypted in the certificate. */
-    private $originallyHashedContent;
+    private $x509Info;
 
 
     /**
@@ -78,9 +71,8 @@ class X509Cert
      */
     public function __construct($cert)
     {
-        // DER encode the PEM certificate.
-        $derCert = self::pemToDer($cert);
-        if (!is_string($derCert))
+        // Check that OpenSSL can read the certificate.
+        if (!is_string($cert) || false === @openssl_x509_read($cert))
         {
             throw new Exception("Invalid certificate!");
         }
@@ -93,35 +85,11 @@ class X509Cert
             throw new Exception($msg);
         }
 
-        // Grab the encrypted signature from the DER encoded certificate.
-        $encryptedSignature = self::extractEncryptedSignature($derCert);
-        if (!is_string($encryptedSignature))
-        {
-            $msg = "Failed to extract encrypted signature from certificate!";
-            throw new Exception($msg);
-        }
-
-        // Get what was originally hashed by the issuer of the certiicate. 
-        // NOTE : This is the DER encoded certificate without the issuer 
-        //        information and the signature.
-        $originallyHashedContent = self::getHashedContent($derCert);
-        if ($originallyHashedContent === false)
-        {
-            $msg = "Failed to extract hashed content from certificate!";
-            throw new Exception($msg);
-        }
-
         // Store the PEM certificate.
         $this->cert = $cert;
 
         // Store X.509 information.
         $this->x509Info = $x509Info;
-
-        // Store the encrypted signature.
-        $this->encryptedSignature = $encryptedSignature;
-
-        // Store the content originally hashed by the issuer of the certiicate.
-        $this->originallyHashedContent = $originallyHashedContent;
     }
 
 
@@ -133,6 +101,30 @@ class X509Cert
     public function getPem()
     {
         return $this->cert;
+    }
+
+
+    /**
+     * Get the fingerprint of the certificate: the hash of its DER encoding.
+     *
+     * Two certificates are the same certificate if, and only if, their
+     * fingerprints are equal.
+     *
+     * @param string $algorithm The hash algorithm. Default: 'sha256'.
+     *
+     * @return string The fingerprint, as a lowercase hexadecimal string.
+     *
+     * @throws Exception
+     */
+    public function getFingerprint($algorithm = 'sha256')
+    {
+        $fingerprint = openssl_x509_fingerprint($this->cert, $algorithm);
+        if (false === $fingerprint)
+        {
+            throw new Exception("Failed to compute the fingerprint of the certificate!");
+        }
+
+        return $fingerprint;
     }
 
 
@@ -175,11 +167,11 @@ class X509Cert
      * @param string The format of the returned date.
      *        Default: 'ymdHise'
      *
-     * @return string|false The date from which the certificate is valid, 
+     * @return string|false The date from which the certificate is valid,
      *         FALSE if $dateFormat is invalid.
      */
     public function getValidFrom($dateFormat = 'ymdHise')
-    {      
+    {
         $tz = new DateTimeZone('UTC');
         $validFrom = $this->x509Info['validFrom'];
         $dt = DateTime::createFromFormat('ymdHise', $validFrom, $tz);
@@ -193,7 +185,7 @@ class X509Cert
      * @param string The format of the returned date.
      *        Default: 'ymdHise'
      *
-     * @return string|false The date to which the certificate is valid, 
+     * @return string|false The date to which the certificate is valid,
      *         FALSE if $dateFormat is invalid.
      */
     public function getValidTo($dateFormat = 'ymdHise')
@@ -208,7 +200,7 @@ class X509Cert
     /**
      * Indicates whether the certificate is out of date or not.
      *
-     * @return boolean TRUE if embedded certificate is out of date, 
+     * @return boolean TRUE if embedded certificate is out of date,
      *         FALSE otherwise.
      */
     public function isOutOfDate()
@@ -236,390 +228,181 @@ class X509Cert
 
 
     /**
+     * Indicates whether the key usage of the certificate allows it to sign
+     * data.
+     *
+     * The "keyUsage" extension, when the certificate has one, must allow
+     * "digitalSignature" or "nonRepudiation". A certificate without this
+     * extension is not restricted.
+     *
+     * @return boolean TRUE if the certificate may sign data, FALSE otherwise.
+     */
+    public function canSign()
+    {
+        if (!isset($this->x509Info['extensions']['keyUsage']))
+        {
+            return true;
+        }
+
+        $keyUsage = array_map('trim', explode(',', $this->x509Info['extensions']['keyUsage']));
+
+        return in_array('Digital Signature', $keyUsage, true)
+            || in_array('Non Repudiation', $keyUsage, true);
+    }
+
+
+    /**
+     * Check that the certificate is trusted: OpenSSL builds and verifies its
+     * chain up to a certificate of the given CA files.
+     *
+     * Every certificate of the given files is trusted, and the chain is built
+     * from these certificates only. OpenSSL verifies the signature of each
+     * link, the validity dates of every certificate of the chain at the
+     * current date, that each issuer is a CA (basic constraints, key usage,
+     * path length) and that the chain ends at a self-signed certificate of
+     * the given files. A chain that stops at an intermediate CA is rejected:
+     * to trust the certificates issued by an intermediate CA, give its
+     * certificate and the certificates up to its root (in one file or in
+     * several). A certificate issued by another intermediate CA of the same
+     * root is then rejected, since the chain cannot be built without that
+     * other intermediate certificate.
+     *
+     * @param string|array $caCertPaths The path, or the list of paths, of PEM
+     *        files that hold the trusted CA certificates.
+     *
+     * @return boolean TRUE if the chain of the certificate has been verified,
+     *         FALSE otherwise.
+     *
+     * @throws Exception
+     */
+    public function isTrustedBy($caCertPaths)
+    {
+        $caCertPaths = (array) $caCertPaths;
+        if (empty($caCertPaths))
+        {
+            throw new Exception("No CA certificate file to verify the certificate chain!");
+        }
+        foreach ($caCertPaths as $caCertPath)
+        {
+            if (!is_string($caCertPath) || !is_file($caCertPath) || !is_readable($caCertPath))
+            {
+                throw new Exception("Cannot read CA certificate file! File: " . (is_string($caCertPath) ? $caCertPath : gettype($caCertPath)));
+            }
+        }
+
+        // Only the given CA certificates may be trusted, not those of the
+        // system. When the list given to openssl_x509_checkpurpose() holds no
+        // directory, PHP adds the default CA directory of OpenSSL (that of
+        // the system, or the one named by the environment variable
+        // SSL_CERT_DIR) to the trusted certificates, and the default CA file
+        // when the list holds no file: any public CA would then be a trust
+        // anchor. An empty directory, created for this call, is therefore
+        // always added to the list. This guard must not be removed.
+        $emptyDir = self::createEmptyDirectory();
+        try
+        {
+            // X509_PURPOSE_ANY: the chain is verified, but no purpose is
+            // required from the certificate (see canSign() for its key
+            // usage). openssl_x509_checkpurpose() returns -1 on error: only
+            // TRUE is a success.
+            $caInfo = array_merge(array_values($caCertPaths), [$emptyDir]);
+            return true === openssl_x509_checkpurpose($this->cert, X509_PURPOSE_ANY, $caInfo);
+        }
+        finally
+        {
+            @rmdir($emptyDir);
+        }
+    }
+
+
+    /**
+     * Create an empty directory, readable by its owner only, in the
+     * temporary directory of the system.
+     *
+     * @return string The path of the directory.
+     *
+     * @throws Exception If the directory cannot be created.
+     */
+    static private function createEmptyDirectory()
+    {
+        // mkdir() fails if the path exists (even as a link): the directory is
+        // the one created here, hence empty.
+        $path = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ezxmldsig-ca-' . bin2hex(random_bytes(16));
+        if (!@mkdir($path, 0700))
+        {
+            throw new Exception("Cannot create an empty directory to verify the certificate chain in " . sys_get_temp_dir() . "!");
+        }
+
+        return $path;
+    }
+
+
+    /**
      * Check the origin of the certificate.
      *
-     * Verify that the X.509 certificate has been signed with the private key 
-     * correcsponding to the given CA certificate to validate its origin.
-     * NOTE : Note that more than one CA certificate can give a positive result, 
-     *        some certificates re-issue signing certificates after having only 
-     *        changed the expiration dates.
-     *        Note that it also works with self-signed certificates. In this 
-     *        case, passes the the X.509 certificate that is supposed been 
-     *        included in the XML digital signature to the function.
+     * Verify that the X.509 certificate has been issued by the given CA
+     * certificate: OpenSSL verifies the signature of the certificate with the
+     * public key of the CA certificate, the issuer name of the certificate
+     * must be the subject name of the CA certificate, and the CA certificate
+     * must be a CA ("CA:TRUE" basic constraint and, if it has a "keyUsage"
+     * extension, "keyCertSign").
      *
-     * @param string $caCert The certificate (in PEM format) corresponding to 
-     *        the private key that is supposed been used by CA to sign the X.509 
+     * Only this link is checked: neither the validity dates nor the chain of
+     * the CA certificate. Use `isTrustedBy()` to verify the whole chain.
+     *
+     * NOTE : Note that more than one CA certificate can give a positive result,
+     *        some certificates re-issue signing certificates after having only
+     *        changed the expiration dates.
+     *        Note that it also works with self-signed CA certificates. In this
+     *        case, passes the X.509 certificate itself to the function.
+     *
+     * @param string $caCert The certificate (in PEM format) corresponding to
+     *        the private key that is supposed been used by CA to sign the X.509
      *        certificate.
      *
-     * @return boolean TRUE if origin of the X.509 certificate has been 
+     * @return boolean TRUE if origin of the X.509 certificate has been
      *         validated, FALSE otherwise.
      *
      * @throws Exception
      */
     public function isValidCA($caCert)
     {
-        // Get the public key from the CA certificate, which is supposed been
-        // used to encrypt the signature in the X.509 embedded certificate.
-        $caPublicKey = openssl_pkey_get_public($caCert);
-        if (false === $caPublicKey)
+        if (!is_string($caCert) || false === @openssl_x509_read($caCert))
         {
-            $msg = "Failed to get the public key from the CA certificate!";
-            throw new Exception($msg);
+            throw new Exception("Invalid CA certificate!");
         }
 
-        // Try to decrypt the encrypted signature using the CA's public key.
-        // The decrypted signature is a DER encoded ASN1 structure containing
-        // the signature algorithm and the signature hash.
-        // NOTE : The decrypted signature will be stored in $decryptedSignature.
-        $result = openssl_public_decrypt(
-                        $this->encryptedSignature, 
-                        $decryptedSignature, 
-                        $caPublicKey
-                    );
-
-        if (false === $result)
+        $caInfo = openssl_x509_parse($caCert);
+        if ($caInfo === false)
         {
-            // Signature cannot be decrypted! This mean that the CA's public key
-            // was not used to sign the embedded X.509 certificate.
-            return false;
+            throw new Exception("Failed to extract X.509 information from CA certificate!");
         }
 
-        // Get the OID of the signature hash algorithm, which is required
-        // to generate our own hash of the originally hashed content.
-        // This hash will then be compared to the issuer's hash.
-        $oid = self::getSignatureAlgorithmOid($decryptedSignature);
-        if ($oid === false)
-        {
-            $msg = "Failed to determine algorithm used to sign certificate!";
-            throw new Exception($msg);
-        }
-        switch ($oid)
-        {
-            case '1.2.840.113549.2.2': $algorithm = 'md2';
-                break;
-            case '1.2.840.113549.2.4': $algorithm = 'md4';
-                break;
-            case '1.2.840.113549.2.5': $algorithm = 'md5';
-                break;
-            case '1.3.14.3.2.18': $algorithm = 'sha';
-                break;
-            case '1.3.14.3.2.26': $algorithm = 'sha1';
-                break;
-            case '2.16.840.1.101.3.4.2.1': $algorithm = 'sha256';
-                break;
-            case '2.16.840.1.101.3.4.2.2': $algorithm = 'sha384';
-                break;
-            case '2.16.840.1.101.3.4.2.3': $algorithm = 'sha512';
-                break;
-            default:
-                $msg = "Algorithm used to sign the certificate is unknown!";
-                throw new Exception($msg);
-                break;
-        }
-
-        // Get the hash generated by the issuer from the decrypted signature.
-        $signatureHash = self::getSignatureHash($decryptedSignature);
-
-        // Hash the originally hashed content with the same algorithm.
-        $computedHash = hash($algorithm, $this->originallyHashedContent);
-
-        // Compare hashes and returns the result.
-        return ($signatureHash === $computedHash);
-    }
-
-
-    /**
-     * Extract encrypted signature from a DER encoded certificate.
-     * Expects X.509 DER encoded certificate consisting of a section container
-     * containing 2 sequences and a bitstream. The bitstream contains the 
-     * original signature encrypted with the public key of the issuing signer.
-     * The DER encoded certificate has the following structure:
-     *     SEQUENCE
-     *         SEQUENCE  (Issuer and signature sections)
-     *             ...
-     *             ...
-     *         SEQUENCE  (Signature encryption algorithm OID)
-     *             ...
-     *             NULL
-     *         BITSTREAM (Encrypted signature)
-     *
-     * @param string $derCertificate DER encoded certificate.
-     *
-     * @return string|false The encrypted signature on success, 
-     *         FALSE on failure.
-     */
-    static private function extractEncryptedSignature($derCertificate)
-    {
-        if (strlen($derCertificate) < 5)
+        // The CA certificate must be allowed to issue certificates.
+        $basicConstraints = isset($caInfo['extensions']['basicConstraints']) ? $caInfo['extensions']['basicConstraints'] : '';
+        if (!in_array('CA:TRUE', array_map('trim', explode(',', $basicConstraints)), true))
         {
             return false;
         }
-
-        // Skip container sequence.
-        $derData = substr($derCertificate, 4);
-
-        // Now burns through two sequences and then return the final bitstream.
-        while (strlen($derData) > 1)
+        if (isset($caInfo['extensions']['keyUsage']))
         {
-            // Get the class of the following data.
-            $class = ord($derData[0]);
-
-            switch ($class)
+            $keyUsage = array_map('trim', explode(',', $caInfo['extensions']['keyUsage']));
+            if (!in_array('Certificate Sign', $keyUsage, true))
             {
-                // Sequence class case.
-                case 0x30:
-                    // Compute the length of the sequence.
-                    $length = ord($derData[1]);
-                    $bytes = 0;
-                    if ($length & 0x80)
-                    {
-                        $bytes = $length & 0x0f;
-                        $length = 0;
-                        for ($i = 0; $i < $bytes; $i++)
-                        {
-                            $length = ($length << 8) | ord($derData[$i + 2]);
-                        }
-                    }
-                    // Get the content of the sequence.
-                    $contents = substr($derData, 2 + $bytes, $length);
-
-                    // Burns the sequence.
-                    $derData = substr($derData, 2 + $bytes + $length);
-                    break;
-
-                // Bistream class case.
-                case 0x03:
-                    // Compute the length of the bitstream.
-                    $length = ord($derData[1]);
-                    $bytes = 0;
-                    if ($length & 0x80)
-                    {
-                        $bytes = $length & 0x0f;
-                        $length = 0;
-                        for ($i = 0; $i < $bytes; $i++)
-                        {
-                            $length = ($length << 8) | ord($derData[$i + 2]);
-                        }
-                    }
-
-                    // Returns the bitstream (the DER encoded signature).
-                    return substr($derData, 3 + $bytes, $length);
-                    break;
-
-                // Unknown class case.
-                default:
-                    // Extraction failed.
-                    return false;
-                    break;
+                return false;
             }
         }
 
-        // Extraction failed.
-        return false;
-    }
-
-
-    /**
-     * Get DER certificate with issuer and signature sections stripped.
-     * The DER encoded certificate has the following structure:
-     *     SEQUENCE
-     *         SEQUENCE  (Issuer and signature sections)
-     *             ...
-     *             ...
-     *         SEQUENCE  (Signature encryption algorithm OID)
-     *             ...
-     *             NULL
-     *         BITSTREAM (Encrypted signature)
-     *
-     * @param string $derCertificate DER encoded certificate.
-     *
-     * @return string|false DER certificate with issuer and signature sections 
-     *         stripped on success, FALSE on failure.
-     */
-    static private function getHashedContent($derCertificate)
-    {
-        if (!is_string($derCertificate) or strlen($derCertificate) < 8)
+        // The certificate must name the CA as its issuer.
+        if ($this->x509Info['issuer'] !== $caInfo['subject'])
         {
-            // Invalid DER certificate.
             return false;
         }
 
-        // Compute the length of data to strip.
-        $bit = 4;
-        $length = ord($derCertificate[($bit + 1)]);
-        $bytes = 0;
-        if ($length & 0x80)
-        {
-            $bytes = $length & 0x0f;
-            $length = 0;
-            for ($i = 0; $i < $bytes; $i++)
-            {
-                $length = ($length << 8) | ord($derCertificate[$bit + $i + 2]);
-            }
-        }
-
-        // Returns DER certificate with issuer and signature sections stripped.
-        return substr($derCertificate, 4, $length + 4);
-    }
-
-
-    /**
-     * Get signature algorithm OID from DER encoded signature data.
-     * This ASN1 data should contain the following structure:
-     *     SEQUENCE
-     *         SEQUENCE
-     *             OID  (Signature hash algorithm)
-     *             NULL
-     *     OCTET STRING (Signature hash)
-     *
-     * @param string $derSignatureData DER encoded signature data.
-     *
-     * @return string|false The signature algorithm OID, FALSE on failure.
-     */
-    static private function getSignatureAlgorithmOid($derSignatureData)
-    {
-        // Validate this is the DER encoded singature we need.
-        if (!is_string($derSignatureData) or strlen($derSignatureData) < 5)
-        {
-            // Invalid DER data.
-            return false;
-        }
-
-        $bit_seq1 = 0;
-        $bit_seq2 = 2;
-        $bit_oid  = 4;
-
-        if (ord($derSignatureData[$bit_seq1]) !== 0x30)
-        {
-            // Invalid DER certificate.
-            return false;
-        }
-
-        if (ord($derSignatureData[$bit_seq2]) !== 0x30)
-        {
-            // Invalid DER certificate.
-            return false;
-        }
-
-        if (ord($derSignatureData[$bit_oid]) !== 0x06)
-        {
-            // Invalid DER certificate.
-            return false;
-        }
-
-        // Strip out what we don't need.
-        $derData = substr($derSignatureData, $bit_oid);
-
-        // Get the algorithm OID.
-        $length = ord($derData[1]);
-        $bytes = 0;
-        if ($length & 0x80)
-        {
-            $bytes = $length & 0x0f;
-            $length = 0;
-            for ($i = 0; $i < $bytes; $i++)
-            {
-                $length = ($length << 8) | ord($derData[$i + 2]);
-            }
-        }
-        $oidData = substr($derData, 2 + $bytes, $length);
-
-        // Unpack the algorithm OID.
-        $oid = floor(ord($oidData[0])/40);
-        $oid .= '.' . ord($oidData[0]) % 40;
-        $value = 0;
-        $i = 1;
-        while ($i < strlen($oidData))
-        {
-            $value = $value << 7;
-            $value = $value | (ord($oidData[$i]) & 0x7f);
-            if (!(ord($oidData[$i]) & 0x80))
-            {
-                $oid .= '.' . $value;
-                $value = 0;
-            }
-            $i++;
-        }
-
-        // Returns the algorithm OID.
-        return $oid;
-    }
-
-
-    /**
-     * Get signature hash from a DER encoded signature data.
-     * This is ASN1 data that should contain the following structure:
-     *     SEQUENCE
-     *         SEQUENCE
-     *             OID  (Signature hash algorithm)
-     *             NULL
-     *     OCTET STRING (Signature hash)
-     *
-     * @param string $derSignatureData Decrypted DER encoded signature data.
-     *
-     * @return string|false The signature hash, FALSE on failure.
-     */
-    static private function getSignatureHash($derSignatureData)
-    {
-        // Validate this is the DER encoded singature we need.
-        if (!is_string($derSignatureData) or strlen($derSignatureData) < 5)
-        {
-            // Invalid DER data.
-            return false;
-        }
-
-        if (ord($derSignatureData[0]) !== 0x30)
-        {
-            // Invalid DER data.
-            return false;
-        }
-
-        // Strip out the container sequence.
-        $derData = substr($derSignatureData, 2);
-        if (ord($derData[0]) !== 0x30)
-        {
-            // Invalid DER certificate.
-            return false;
-        }
-
-        // Compute the length of the first sequence to strip out.
-        $length = ord($derData[1]);
-        $bytes = 0;
-        if ($length & 0x80)
-        {
-            $bytes = $length & 0x0f;
-            $length = 0;
-            for ($i = 0; $i < $bytes; $i++)
-            {
-                $length = ($length << 8) | ord($derData[$i + 2]);
-            }
-        }
-
-        // Strip out the first sequence.
-        $derData = substr($derData, 2 + $bytes + $length);
-
-        // Now we should have an octet string.
-        if (ord($derData[0]) !== 0x04)
-        {
-            // Invalid DER data.
-            return false;
-        }
-
-        // Compute the length of the octet string.
-        $length = ord($derData[1]);
-        $bytes = 0;
-        if ($length & 0x80)
-        {
-            $bytes = $length & 0x0f;
-            $length = 0;
-            for ($i = 0; $i < $bytes; $i++)
-            {
-                $length = ($length << 8) | ord($derData[$i + 2]);
-            }
-        }
-
-        // Returns the signature hash.
-        return bin2hex(substr($derData, 2 + $bytes, $length));
+        // The signature of the certificate must verify with the public key of
+        // the CA. openssl_x509_verify() returns 1 (valid), 0 (invalid) or -1
+        // (error): only 1 is a success.
+        return 1 === openssl_x509_verify($this->cert, $caCert);
     }
 
 

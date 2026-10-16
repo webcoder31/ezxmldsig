@@ -27,7 +27,7 @@ class XMLDSigTokenTest extends TestCase
         $data = self::sampleData();
         $xml = self::createToken($data)->getXML();
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $this->assertNull($token->getError());
         $this->assertSame([], $token->getAnomalies());
@@ -49,7 +49,7 @@ class XMLDSigTokenTest extends TestCase
         ];
         $xml = self::createToken($data)->getXML();
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $this->assertTrue($token->isSignatureValid());
         $this->assertSame($data, $token->getData());
@@ -61,7 +61,7 @@ class XMLDSigTokenTest extends TestCase
         $xml = self::createToken(self::sampleData())->getXML();
         $after = time();
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $timestamp = DateTime::createFromFormat(
             XMLDSigToken::TOKEN_TIMESTAMP_FORMAT,
@@ -78,7 +78,7 @@ class XMLDSigTokenTest extends TestCase
     {
         $xml = self::createToken(self::sampleData())->getXML();
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $this->assertFalse($token->isCertOutOfDate());
         $this->assertSame('Signature Dept', $token->getCertSubject()['OU']);
@@ -90,7 +90,7 @@ class XMLDSigTokenTest extends TestCase
     {
         $xml = self::createToken(self::sampleData())->getXML();
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $this->assertTrue($token->isValidCertCA(self::cert('intermediate.cert.pem')));
     }
@@ -99,7 +99,7 @@ class XMLDSigTokenTest extends TestCase
     {
         $xml = self::createToken(self::sampleData())->getXML();
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $this->assertFalse($token->isValidCertCA(self::cert('root.cert.pem')));
     }
@@ -120,7 +120,7 @@ class XMLDSigTokenTest extends TestCase
         $data = self::sampleData();
         $xml = $this->createSecureToken($data)->getXML();
 
-        $token = XMLDSigToken::analyzeSecureXMLToken($xml, self::cert('crypt.key.pem'));
+        $token = XMLDSigToken::analyzeSecureXMLToken($xml, self::cert('crypt.key.pem'), null, self::trustAnchor());
 
         $this->assertNull($token->getError());
         $this->assertSame([], $token->getAnomalies());
@@ -138,7 +138,7 @@ class XMLDSigTokenTest extends TestCase
         $data = self::sampleData();
         $xml = self::createToken($data)->getXML();
 
-        $token = XMLDSigToken::analyzeSecureXMLToken($xml, self::cert('crypt.key.pem'));
+        $token = XMLDSigToken::analyzeSecureXMLToken($xml, self::cert('crypt.key.pem'), null, self::trustAnchor());
 
         $this->assertNull($token->getError());
         $this->assertTrue($token->isSignatureValid());

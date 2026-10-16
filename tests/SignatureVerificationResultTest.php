@@ -138,7 +138,7 @@ class SignatureVerificationResultTest extends TestCase
         $doc = $forge();
         $this->assertSame($expectedResult, $this->verificationResult($doc));
 
-        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML());
+        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML(), self::trustAnchor());
 
         $this->assertTrue($token->isDigestValueOk());
         $this->assertFalse($token->isSignatureValueOk());

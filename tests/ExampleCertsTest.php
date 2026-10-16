@@ -25,6 +25,15 @@ class ExampleCertsTest extends TestCase
         return dirname(__DIR__) . '/examples/certs/' . $name;
     }
 
+    /** The trust anchor that examples/parse-xml-token.php passes. */
+    private static function exampleTrustAnchor()
+    {
+        return [
+            'caCertPath' => [self::exampleCert('intermediate.cert.pem'), self::exampleCert('root.cert.pem')],
+            'expectedSubject' => ['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept'],
+        ];
+    }
+
     public function testSignedTokenPassesTheChecksOfTheParsingExample()
     {
         $data = self::sampleData();
@@ -35,7 +44,7 @@ class ExampleCertsTest extends TestCase
             'signKeyPassword'
         )->getXML();
 
-        $token = XMLDSigToken::analyzeXMLToken($sig);
+        $token = XMLDSigToken::analyzeXMLToken($sig, self::exampleTrustAnchor());
 
         $this->assertNull($token->getError());
         $this->assertTrue($token->isSignatureValid());
@@ -64,7 +73,8 @@ class ExampleCertsTest extends TestCase
         $token = XMLDSigToken::analyzeSecureXMLToken(
             $sig,
             self::exampleCert('crypt.key.pem'),
-            'cryptKeyPassword'
+            'cryptKeyPassword',
+            self::exampleTrustAnchor()
         );
 
         $this->assertNull($token->getError());

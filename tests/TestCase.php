@@ -27,12 +27,145 @@ abstract class TestCase extends BaseTestCase
         'emailAddress' => 'ivar@lothbrok.dk',
     ];
 
+    /** @var string|null Temporary directory of the files written by
+    tempFile() and issueCertificate(), removed after each test. */
+    private $tempDirPath = null;
+
+    protected function tearDown(): void
+    {
+        if (!is_null($this->tempDirPath))
+        {
+            array_map('unlink', glob($this->tempDirPath . '/*'));
+            rmdir($this->tempDirPath);
+            $this->tempDirPath = null;
+        }
+        parent::tearDown();
+    }
+
     /**
      * Returns the path of a file of tests/fixtures/certs/.
      */
     protected static function cert($name)
     {
         return __DIR__ . '/fixtures/certs/' . $name;
+    }
+
+    /**
+     * Returns the trust anchor of the test certificates: the intermediate CA
+     * that issued the signing certificate, and the root up to which OpenSSL
+     * verifies the chain.
+     */
+    protected static function trustAnchor(array $options = [])
+    {
+        return $options + [
+            'caCertPath' => [self::cert('intermediate.cert.pem'), self::cert('root.cert.pem')],
+        ];
+    }
+
+    /**
+     * Returns a temporary directory removed after the test.
+     */
+    private function tempDir()
+    {
+        if (is_null($this->tempDirPath))
+        {
+            $this->tempDirPath = sys_get_temp_dir() . '/ezxmldsig-test-' . bin2hex(random_bytes(8));
+            mkdir($this->tempDirPath, 0700);
+        }
+
+        return $this->tempDirPath;
+    }
+
+    /**
+     * Writes a file in a temporary directory removed after the test, and
+     * returns its path.
+     */
+    protected function tempFile($name, $contents)
+    {
+        $path = $this->tempDir() . '/' . $name;
+        file_put_contents($path, $contents);
+
+        return $path;
+    }
+
+    /**
+     * Issues a certificate and its key (without password) in a temporary
+     * directory removed after the test, and returns their paths.
+     *
+     * @param string $name Base name of the files.
+     * @param string $profile 'root' (root CA), 'ca' (intermediate CA) or
+     *     'sign' (signing certificate).
+     * @param string|null $issuer Base name, in tests/fixtures/certs/, of the
+     *     issuer certificate and key (e.g. 'intermediate'), the 'prefix'
+     *     returned by this method for a certificate it issued, or NULL for a
+     *     self-signed certificate.
+     * @param int $days Validity, from now. 0 gives a certificate that expires
+     *     at the current second.
+     * @param string|null $issuerKeyPassword Password of the issuer key.
+     *
+     * @return array ['cert' => path, 'key' => path, 'prefix' => path prefix]
+     */
+    protected function issueCertificate($name, $profile, $issuer, $days = 30, $issuerKeyPassword = null)
+    {
+        if (!is_file($this->tempDir() . '/openssl.cnf'))
+        {
+            file_put_contents($this->tempDir() . '/openssl.cnf', implode("\n", [
+                '[req]',
+                'distinguished_name = dn',
+                '[dn]',
+                '[root_profile]',
+                'basicConstraints = critical, CA:TRUE',
+                'keyUsage = critical, keyCertSign, cRLSign',
+                '[ca_profile]',
+                'basicConstraints = critical, CA:TRUE, pathlen:0',
+                'keyUsage = critical, keyCertSign, cRLSign',
+                '[sign_profile]',
+                'basicConstraints = CA:FALSE',
+                'keyUsage = critical, digitalSignature, nonRepudiation',
+                '',
+            ]));
+        }
+        $config = [
+            'config' => $this->tempDirPath . '/openssl.cnf',
+            'digest_alg' => 'sha256',
+            'x509_extensions' => $profile . '_profile',
+        ];
+
+        $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA] + $config);
+        if (is_null($issuer))
+        {
+            $issuerCert = null;
+            $issuerKey = $key;
+        }
+        else
+        {
+            $issuerPrefix = strpos($issuer, '/') === false ? self::cert($issuer) : $issuer;
+            $issuerCert = file_get_contents($issuerPrefix . '.cert.pem');
+            $issuerKey = openssl_pkey_get_private(file_get_contents($issuerPrefix . '.key.pem'), (string) $issuerKeyPassword);
+        }
+
+        $csr = openssl_csr_new([
+            'C' => 'DK',
+            'O' => 'Lothbrok Ltd',
+            'OU' => ucfirst($name) . ' Dept',
+            'CN' => 'www.lothbrok.dk',
+        ], $key, $config);
+        $cert = openssl_csr_sign($csr, $issuerCert, $issuerKey, $days, $config, random_int(1, PHP_INT_MAX));
+        $this->assertNotFalse($cert, 'Failed to issue a test certificate: ' . openssl_error_string());
+
+        $prefix = $this->tempDirPath . '/' . $name;
+        openssl_x509_export_to_file($cert, $prefix . '.cert.pem');
+        openssl_pkey_export_to_file($key, $prefix . '.key.pem', null, $config);
+
+        return ['cert' => $prefix . '.cert.pem', 'key' => $prefix . '.key.pem', 'prefix' => $prefix];
+    }
+
+    /**
+     * Creates a signed token with a certificate issued by issueCertificate().
+     */
+    protected static function createTokenWith(array $issued, array $data)
+    {
+        return XMLDSigToken::createXMLToken($data, $issued['key'], $issued['cert']);
     }
 
     /**
