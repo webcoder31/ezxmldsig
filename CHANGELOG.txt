@@ -29,8 +29,23 @@ Backward-incompatible changes (major version):
   (were RSA-SHA1 and SHA-1), at creation and at analysis: a token signed
   with RSA-SHA1 or with an SHA-1 digest is rejected unless the analysis
   declares these algorithms with the options `signatureAlgorithm` and
-  `digestAlgorithm` (or sets `checkSigningAlgorithms` to FALSE). The default
-  encryption algorithms are unchanged.
+  `digestAlgorithm` (or sets `checkSigningAlgorithms` to FALSE).
+- The token data are encrypted with AES-256-GCM by default (was
+  AES-128-CBC); the session key is still encrypted with RSA-OAEP
+  (`RSA_OAEP_MGF1P`).
+- RSA 1.5 is refused as key transport algorithm, at creation and at
+  analysis, and no option allows it: the constant `XMLDSigToken::RSA_1_5` is
+  removed.
+- A token encrypted with a CBC algorithm (`TRIPLEDES_CBC`, `AES128_CBC`,
+  `AES192_CBC`, `AES256_CBC`) is only decrypted if the analysis names this
+  algorithm with the option `sessionKeyCipheringAlgorithm`, even when
+  `checkCryptingAlgorithms` is FALSE.
+- Every failure of the decryption that depends on the encrypted content
+  gives the error `Token decryption failed!`, which replaces
+  `Session key decryption failed! Reason: ...`,
+  `Token data decryption failed! Reason: ...`,
+  `Failed loading decrypted session key to decrypt token data!`, the
+  messages of xmlseclibs and, for an encrypted token, `Malformed token!`.
 - An unknown option, an option out of its context, or an option whose value
   is NULL or of the wrong type throws an exception instead of being ignored.
   Out of context are `checkSigningAlgorithms`, `checkCryptingAlgorithms`,
@@ -41,12 +56,14 @@ Backward-incompatible changes (major version):
   `checkCryptingAlgorithms` without a decryption key.
 - `signatureAlgorithm` only accepts signature algorithms (RSA-SHA1,
   RSA-SHA256, RSA-SHA384, RSA-SHA512) and `cryptAlgorithm` only key transport
-  algorithms (RSA 1.5, RSA-OAEP), at creation as in the algorithms read from
+  algorithms (RSA-OAEP), at creation as in the algorithms read from
   a token ("ds:SignatureMethod", "xenc:EncryptedKey/xenc:EncryptionMethod").
 - `createSecureXMLToken()` throws an exception when `$cryptCertPath` is NULL,
   instead of creating an unencrypted token.
 
 New:
+- Constants `XMLDSigToken::AES128_GCM`, `AES192_GCM` and `AES256_GCM`,
+  accepted by the option `sessionKeyCipheringAlgorithm`.
 - `XMLDSigToken::isCertTrusted()`, `X509Cert::isTrustedBy()`,
   `X509Cert::canSign()` and `X509Cert::getFingerprint()`.
 - Option `expectedSubject`: full Distinguished Name or subject fields the
@@ -97,6 +114,15 @@ Security:
   decrypted DigestInfo.
 - `isValidCertCA()` returns FALSE instead of failing when no certificate
   could be read from the token.
+- Close the decryption oracles. The errors of the decryption told apart an
+  invalid RSA 1.5 padding of the session key, a session key of the wrong
+  length (and its length), CBC data of the wrong length, and decrypted data
+  that are not well-formed XML (with PHP warnings): the steps padding oracle
+  attacks (Bleichenbacher, Jager-Somorovsky) rely on. They now give one
+  error with no detail, RSA 1.5 is refused, CBC is only accepted when
+  declared, and the default AES-GCM rejects altered data before any
+  parsing. A token whose encryption algorithms are not the expected ones was
+  decrypted before being rejected: it is now rejected without decryption.
 
 Requirements:
 - PHP 7.4 or greater (was PHP 5.6).

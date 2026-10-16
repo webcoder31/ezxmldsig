@@ -214,7 +214,8 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * decryption of data:
  *
  * - Algorithm used to encrypt / decrypt data is:
- *   http://www.w3.org/2001/04/xmlenc#aes128-cbc (symetric ciphering).
+ *   http://www.w3.org/2009/xmlenc11#aes256-gcm (authenticated symetric
+ *   ciphering).
  *
  * - Algorithm used to encrypt / decrypt the session key is:
  *   http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymetric ciphering).
@@ -243,7 +244,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   </ds:KeyInfo>
  *   <ds:Object Id="Token">
  *     <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Content">
- *       <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+ *       <xenc:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>
  *       <ds:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
  *         <xenc:EncryptedKey>
  *           <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
@@ -332,7 +333,9 @@ class XMLDSigToken
     const AES128_CBC = XMLSecurityKey::AES128_CBC;
     const AES192_CBC = XMLSecurityKey::AES192_CBC;
     const AES256_CBC = XMLSecurityKey::AES256_CBC;
-    const RSA_1_5 = XMLSecurityKey::RSA_1_5;
+    const AES128_GCM = XMLSecurityKey::AES128_GCM;
+    const AES192_GCM = XMLSecurityKey::AES192_GCM;
+    const AES256_GCM = XMLSecurityKey::AES256_GCM;
     const RSA_OAEP_MGF1P = XMLSecurityKey::RSA_OAEP_MGF1P;
     const DSA_SHA1 = XMLSecurityKey::DSA_SHA1;
     const RSA_SHA1 = XMLSecurityKey::RSA_SHA1;
@@ -357,6 +360,10 @@ class XMLDSigToken
         'cryptAlgorithm'               => 'encryption',
         'checkCryptingAlgorithms'      => 'decryption',
     ];
+
+    /** @const string The error of every failure that depends on the
+    decrypted content (see _decryptToken()). */
+    private const DECRYPTION_FAILED = 'Token decryption failed!';
 
 
     /* PROPERTIES */
@@ -390,7 +397,7 @@ class XMLDSigToken
 
     /** @var string The algorithm that should be used to generate the session
     key which will be used to encrypt the token. */
-    private $sessionKeyCipheringAlgorithm = self::AES128_CBC;
+    private $sessionKeyCipheringAlgorithm = self::AES256_GCM;
 
     /** @var string The algorithm that should be used to encrypt the token with
     the generated session key. */
@@ -727,10 +734,19 @@ class XMLDSigToken
      *   generated session key.
      *   <br/>Possible values:
      *
+     *   - `AES128_GCM`
+     *     <br/>cf. http://www.w3.org/2009/xmlenc11#aes128-gcm
+     *
+     *   - `AES192_GCM`
+     *     <br/>cf. http://www.w3.org/2009/xmlenc11#aes192-gcm
+     *
+     *   - **`AES256_GCM`** (Default value)
+     *     <br/>cf. http://www.w3.org/2009/xmlenc11#aes256-gcm
+     *
      *   - `TRIPLEDES_CBC`
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#tripledes-cbc
      *
-     *   - **`AES128_CBC`** (Default value)
+     *   - `AES128_CBC`
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#aes128-cbc
      *
      *   - `AES192_CBC`
@@ -739,15 +755,19 @@ class XMLDSigToken
      *   - `AES256_CBC`
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#aes256-cbc
      *
+     *   The CBC algorithms do not protect the integrity of the data: only
+     *   the signature does. An analysis only decrypts a token encrypted with
+     *   one of them if this option names it, even when
+     *   `checkCryptingAlgorithms` is FALSE.
+     *
      * - **`cryptAlgorithm`** [string] Encryption only (creation with an
      *   encryption certificate, analysis with a decryption key). The
      *   asymmetric algorithm used to encrypt the session key with the
      *   encryption certificate (key transport). Signature algorithms (see
-     *   `signatureAlgorithm`) are rejected.
+     *   `signatureAlgorithm`) are rejected, and so is RSA 1.5
+     *   (http://www.w3.org/2001/04/xmlenc#rsa-1_5), at creation as at
+     *   analysis.
      *   <br/>Possible values:
-     *
-     *   - `RSA_1_5`
-     *     <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-1_5
      *
      *   - **`RSA_OAEP_MGF1P`** (Default value)
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p
@@ -1572,7 +1592,7 @@ class XMLDSigToken
         // provided to perform encryption).
         if (!is_null($this->cryptCert))
         {
-            // Randomly generate a session key using AES-128 algorithm.
+            // Randomly generate a session key for the symmetric algorithm.
             // This key will be used to cipher our node "Token" (the content of
             // the node "ds:Object").
             $sessionKey = new XMLSecurityKey($this->sessionKeyCipheringAlgorithm);
@@ -1906,6 +1926,18 @@ class XMLDSigToken
                     $this->anomalies[] = "Unauthorized " . $algorithm['name'] . " algorithm! Expected: " . $algorithm['expectedValue'] . ", Used: " . $usedAlgorithm . ".";
                 }
             }
+
+            // An algorithm without integrity (CBC) is only accepted when it
+            // is the declared one, even if the check of the algorithms is
+            // turned off (see _isAuthenticatedCipheringAlgorithm()).
+            $usedAlgorithm = $this->xpath->evaluate("string(//ds:Signature/ds:Object/xenc:EncryptedData/xenc:EncryptionMethod/@Algorithm)");
+            if (!self::_isAuthenticatedCipheringAlgorithm($usedAlgorithm)
+                && $usedAlgorithm !== $this->sessionKeyCipheringAlgorithm
+                && !$this->checkCryptingAlgorithms)
+            {
+                // ANOMALY: Undeclared unauthenticated algorithm!
+                $this->anomalies[] = "Unauthorized Session Key Ciphering algorithm! " . $usedAlgorithm . " has no integrity: declare it with the option 'sessionKeyCipheringAlgorithm' to accept it.";
+            }
         }
 
         // Create an XMLSecurityDSig object that rejects empty or failed
@@ -2020,9 +2052,6 @@ class XMLDSigToken
         // whose certificate is not trusted.
         $this->_verifyCertTrust();
 
-        // Create an XMLSecEnc object.
-        $objXMLSecEnc = new XMLSecEnc();
-
         // Check if the content of the node "ds:Object" is ciphered.
         $encryptedDataNode = $this->xpath->query("xenc:EncryptedData", $nodeObject)->item(0);
 
@@ -2034,105 +2063,22 @@ class XMLDSigToken
         }
         else
         {
-            // The node "ds:Object" is ciphered. We will decrypt it now.
+            // The node "ds:Object" is ciphered.
             // Set encryption flag to TRUE.
             $this->isDataEncrypted = true;
 
-            // Check that we have a private key to perform decryption.
-            if (is_null($this->cryptKey))
+            // Do not decrypt a token encrypted with other algorithms than
+            // the expected ones: the decryption itself is what an attacker
+            // submitting altered tokens probes (see
+            // _isValidKeyTransportAlgorithm() and
+            // _isAuthenticatedCipheringAlgorithm()).
+            if (!empty($this->anomalies))
             {
-                // ERROR: No private key provided for decryption.
-                throw new Exception("Token is encrypted but no private key is provided for decryption!");
+                $this->_throwAnomalies();
             }
 
-            // Passes the node containing the ciphered token to the XMLSecEnc
-            // object.
-            $objXMLSecEnc->setNode($encryptedDataNode);
-
-            // Indicates to the XMLSecEnc object what is encrypted (the node
-            // element or only its content) by reading the attribute "Type" of
-            // the node containing the ciphered data (the child node of the
-            // node "ds:Object").
-            $objXMLSecEnc->type = $encryptedDataNode->getAttribute("Type");
-
-            // Get an XMLSecurityKey object already configured with the
-            // algorithm which was used to encrypt the session key.
-            $objKeyCrypt = $objXMLSecEnc->locateKey();
-            if (is_null($objKeyCrypt))
-            {
-                // ERROR: The encrypted session key has been found but not the
-                // algorithm.
-                throw new Exception("Cannot locate session key ciphering algorithm!");
-            }
-
-            // Retrieve encrypted session key and decipher it using the private
-            // key. We will use it later to decrypt the token data.
-            $objKeyInfoCrypt = $objXMLSecEnc->locateKeyInfo($objKeyCrypt);
-            if (is_null($objKeyInfoCrypt))
-            {
-                // ERROR: Session key cannot be found.
-                throw new Exception("Cannot locate session key!");
-            }
-            else
-            {
-                if (!$objKeyInfoCrypt->isEncrypted)
-                {
-                    // ERROR: Session key found but it is not encrypted.
-                    throw new Exception("Session key is not encrypted!");
-                }
-                else
-                {
-                    // Loads the private key to be be used for deciphering the
-                    // crypted session key. If a password is provided, use it to
-                    // access the private key.
-                    if (!is_null($this->cryptKeyPassword))
-                    {
-                        $objKeyInfoCrypt->passphrase = $this->cryptKeyPassword;
-                    }
-                    $objKeyInfoCrypt->loadKey($this->cryptKey, false);
-
-                    if (empty($objKeyInfoCrypt->key))
-                    {
-                        // ERROR: Failed loading private key to decrypt session
-                        // key!
-                        throw new Exception("Failed loading private key to decrypt session key!");
-                    }
-
-                    // Prepare the decryption key object that will be used to
-                    // decipher the token data by passing the deciphered session
-                    // key to it.
-                    $objXMLSecCrypt = $objKeyInfoCrypt->encryptedCtx;
-                    try
-                    {
-                        $decrypedtKey = $objXMLSecCrypt->decryptKey($objKeyInfoCrypt);
-                    }
-                    catch (Exception $e)
-                    {
-                        // ERROR: Session key decryption failed.
-                        throw new Exception("Session key decryption failed! Reason: " . $e->getMessage() . ".");
-                    }
-
-                    $objKeyCrypt->loadKey($decrypedtKey);
-                    if (empty($objKeyCrypt->key))
-                    {
-                        // ERROR: Failed loading decrypted session key to
-                        // decrypt token data!
-                        throw new Exception("Failed loading decrypted session key to decrypt token data!");
-                    }
-                }
-            }
-
-            // Decrypt the ciphered token data using the decryption key we've
-            // just prepared.
-            try
-            {
-                $decryptedDataNode = $objXMLSecEnc->decryptNode($objKeyCrypt, true);
-            }
-            catch (Exception $e)
-            {
-                // ERROR: Token data decryption failed.
-                throw new Exception("Token data decryption failed! Reason: " . $e->getMessage() . ".");
-            }
+            // Decrypt it now.
+            $this->_decryptToken($encryptedDataNode);
         }
 
         // Verify that the token data is well formed. The token is read from the
@@ -2147,8 +2093,10 @@ class XMLDSigToken
         {
             if ($this->xpath->query($query, $nodeObject)->length !== 1)
             {
-                // ERROR: Malformed token!
-                throw new Exception("Malformed token!");
+                // ERROR: Malformed token! The structure of an encrypted
+                // token is that of its decrypted content: it fails as the
+                // decryption does (see _decryptToken()).
+                throw new Exception($this->isDataEncrypted ? self::DECRYPTION_FAILED : "Malformed token!");
             }
         }
 
@@ -2246,6 +2194,118 @@ class XMLDSigToken
         if (!empty($this->anomalies))
         {
             $this->_throwAnomalies();
+        }
+    }
+
+
+    /**
+     * Decrypt the content of the node "ds:Object" in place.
+     *
+     * The failures that do not depend on the token content (no decryption
+     * key, a key that cannot be loaded) or only on its structure have their
+     * own message. Every failure that depends on the decrypted content
+     * (session key, token data, parsing of the decrypted XML) gives the same
+     * error, `DECRYPTION_FAILED`, without its reason, and raises no PHP
+     * warning: a message or a warning per failure would tell an attacker who
+     * can submit altered tokens which step failed, which is how padding
+     * oracles (Bleichenbacher on RSA 1.5, Jager-Somorovsky on CBC) decrypt a
+     * token step by step. `_readXML()` only calls this function once the
+     * digest, the signature, the certificate and the algorithms of the token
+     * have been verified.
+     *
+     * @param DOMElement $encryptedDataNode The node "xenc:EncryptedData",
+     *     child of the digested node "ds:Signature/ds:Object".
+     *
+     * @throws Exception
+     */
+    private function _decryptToken($encryptedDataNode)
+    {
+        // Check that we have a private key to perform decryption.
+        if (is_null($this->cryptKey))
+        {
+            // ERROR: No private key provided for decryption.
+            throw new Exception("Token is encrypted but no private key is provided for decryption!");
+        }
+
+        // Passes the node containing the ciphered token to an XMLSecEnc
+        // object, and indicates to it what is encrypted (the node element or
+        // only its content) by reading the attribute "Type" of this node.
+        $objXMLSecEnc = new XMLSecEnc();
+        $objXMLSecEnc->setNode($encryptedDataNode);
+        $objXMLSecEnc->type = $encryptedDataNode->getAttribute("Type");
+
+        // Get an XMLSecurityKey object already configured with the algorithm
+        // which was used to encrypt the token data with the session key.
+        $objKeyCrypt = $objXMLSecEnc->locateKey();
+        if (is_null($objKeyCrypt))
+        {
+            // ERROR: The algorithm cannot be found.
+            throw new Exception("Cannot locate session key ciphering algorithm!");
+        }
+
+        // Retrieve the encrypted session key.
+        $objKeyInfoCrypt = $objXMLSecEnc->locateKeyInfo($objKeyCrypt);
+        if (is_null($objKeyInfoCrypt))
+        {
+            // ERROR: Session key cannot be found.
+            throw new Exception("Cannot locate session key!");
+        }
+        if (!$objKeyInfoCrypt->isEncrypted)
+        {
+            // ERROR: Session key found but it is not encrypted.
+            throw new Exception("Session key is not encrypted!");
+        }
+
+        // Loads the private key to be used for deciphering the crypted
+        // session key. If a password is provided, use it to access the
+        // private key.
+        if (!is_null($this->cryptKeyPassword))
+        {
+            $objKeyInfoCrypt->passphrase = $this->cryptKeyPassword;
+        }
+        $objKeyInfoCrypt->loadKey($this->cryptKey, false);
+        if (empty($objKeyInfoCrypt->key))
+        {
+            // ERROR: Failed loading private key to decrypt session key!
+            throw new Exception("Failed loading private key to decrypt session key!");
+        }
+
+        // Decipher the session key, then the token data with it, in place.
+        // From here on, every failure gives the same error: exceptions are
+        // caught, libxml errors are kept internal and PHP warnings are
+        // intercepted (see above).
+        $failed = false;
+        $prevState = libxml_use_internal_errors(true);
+        libxml_clear_errors();
+        set_error_handler(function () use (&$failed) {
+            $failed = true;
+            return true;
+        }, E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+        try
+        {
+            $sessionKey = $objKeyInfoCrypt->encryptedCtx->decryptKey($objKeyInfoCrypt);
+            $objKeyCrypt->loadKey($sessionKey);
+            $objXMLSecEnc->decryptNode($objKeyCrypt, true);
+            if (count(libxml_get_errors()) > 0)
+            {
+                $failed = true;
+            }
+        }
+        catch (\Throwable $e)
+        {
+            $failed = true;
+        }
+        finally
+        {
+            restore_error_handler();
+            libxml_clear_errors();
+            libxml_use_internal_errors($prevState);
+        }
+
+        if ($failed)
+        {
+            // ERROR: Token decryption failed.
+            throw new Exception(self::DECRYPTION_FAILED);
         }
     }
 
@@ -2945,6 +3005,11 @@ class XMLDSigToken
      * Check if an algorithm is valid to encrypt the session key that encrypts
      * the token (key transport).
      *
+     * RSA 1.5 (PKCS #1 v1.5 padding) is not valid, neither to create nor to
+     * analyze a token: whether the padding of a submitted session key is
+     * valid can be told from the decryption (Bleichenbacher), which lets an
+     * attacker who can submit altered tokens decrypt a session key.
+     *
      * @param string $algorithm The algorithm reference (URL).
      *
      * @return boolean TRUE if valid, FALSE otherwise.
@@ -2961,7 +3026,6 @@ class XMLDSigToken
 
         switch ($algorithm)
         {
-            case (self::RSA_1_5):
             case (self::RSA_OAEP_MGF1P):
                 return(true);
             default:
@@ -2991,10 +3055,35 @@ class XMLDSigToken
             case (self::AES128_CBC):
             case (self::AES192_CBC):
             case (self::AES256_CBC):
+            case (self::AES128_GCM):
+            case (self::AES192_GCM):
+            case (self::AES256_GCM):
                 return(true);
             default:
                 return(false);
         }
+    }
+
+
+    /**
+     * Check if a symmetric algorithm authenticates the data it decrypts.
+     *
+     * AES-GCM checks an authentication tag before returning any decrypted
+     * data: altered data fails as a whole. CBC has no integrity: altered
+     * data is decrypted all the same, and how the decrypted content then
+     * fails (padding, XML parsing) can tell an attacker who can submit
+     * altered tokens what it holds (Jager-Somorovsky). A token encrypted
+     * with CBC is therefore only decrypted if the analysis declares this
+     * algorithm (option `sessionKeyCipheringAlgorithm`), whatever
+     * `checkCryptingAlgorithms`.
+     *
+     * @param string $algorithm The algorithm reference (URL).
+     *
+     * @return boolean TRUE if the algorithm is authenticated, FALSE otherwise.
+     */
+    static private function _isAuthenticatedCipheringAlgorithm($algorithm)
+    {
+        return in_array($algorithm, [self::AES128_GCM, self::AES192_GCM, self::AES256_GCM], true);
     }
 
 

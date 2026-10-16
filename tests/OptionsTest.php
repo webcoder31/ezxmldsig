@@ -5,6 +5,7 @@ namespace webcoder31\ezxmldsig\Tests;
 use DOMDocument;
 use DOMXPath;
 use Exception;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 use webcoder31\ezxmldsig\XMLDSigToken;
 
 /**
@@ -138,12 +139,12 @@ class OptionsTest extends TestCase
         $this->assertSame('http://www.w3.org/2001/04/xmlenc#sha256', $algorithms['digest']);
     }
 
-    public function testTheDefaultEncryptionAlgorithmsAreUnchanged()
+    public function testTheDefaultEncryptionAlgorithmsAreAes256GcmAndRsaOaep()
     {
         $algorithms = self::algorithmsOf($this->createSecureToken(self::sampleData())->getXML());
 
         $this->assertSame('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', $algorithms['signature']);
-        $this->assertSame('http://www.w3.org/2001/04/xmlenc#aes128-cbc', $algorithms['sessionKey']);
+        $this->assertSame('http://www.w3.org/2009/xmlenc11#aes256-gcm', $algorithms['sessionKey']);
         $this->assertSame('http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p', $algorithms['keyTransport']);
     }
 
@@ -325,7 +326,7 @@ class OptionsTest extends TestCase
     public function keyTransportAlgorithms()
     {
         return [
-            'RSA_1_5' => [XMLDSigToken::RSA_1_5],
+            'RSA_1_5' => [XMLSecurityKey::RSA_1_5],
             'RSA_OAEP_MGF1P' => [XMLDSigToken::RSA_OAEP_MGF1P],
         ];
     }
