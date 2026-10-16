@@ -1445,6 +1445,27 @@ class XMLDSigToken
         $this->xpath->registerNamespace('ds', XMLSecurityDSig::XMLDSIGNS);
         $this->xpath->registerNamespace('xenc', XMLSecEnc::XMLENCNS);
 
+        // xmlseclibs computes the digest over the first element of the
+        // document whose attribute "Id" is "Token" and, when "ds:Signature" is
+        // not the document element, it first detaches "ds:Signature" from the
+        // document. A second element "Id=Token", or a "ds:Signature" wrapped
+        // in another element, thus lets a copy of the signed "ds:Object",
+        // placed where the signature does not cover it, be digested instead of
+        // the "ds:Object" the token is read from (signature wrapping). Such
+        // documents are rejected. The token is also read only from the node
+        // xmlseclibs digested (see below).
+        $root = $xmlDoc->documentElement;
+        if (XMLSecurityDSig::XMLDSIGNS !== $root->namespaceURI || 'Signature' !== $root->localName)
+        {
+            // ERROR: XML Digital Signature is malformed!
+            throw new Exception("XML digital signature is malformed! The document element must be ds:Signature.");
+        }
+        if ($this->xpath->query('//@*[local-name()="Id" and .="' . self::TOKEN_NAME . '"]')->length !== 1)
+        {
+            // ERROR: XML Digital Signature is malformed!
+            throw new Exception("XML digital signature is malformed! Exactly one element must have the attribute Id=\"" . self::TOKEN_NAME . "\".");
+        }
+
         // Verify that the XML Digital Signature is well formed.
         $queries = array(
             "//ds:Signature",
@@ -1651,15 +1672,31 @@ class XMLDSigToken
 
         // Verify that the hash computed from the node "ds:Signature/ds:Object"
         // is the same as the one stored in the node
-        // "ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue".
+        // "ds:Signature/ds:SignedInfo/ds:Reference/ds:DigestValue", and get
+        // the node the hash was computed over. The token is read from this
+        // node only, never by searching the document: data, timestamp and
+        // encrypted content are then those the digest covers.
+        $nodeObject = null;
         try
         {
             $XMLDSig->validateReference();
+
+            $validatedNodes = $XMLDSig->getValidatedNodes();
+            if (isset($validatedNodes[self::TOKEN_NAME]))
+            {
+                $nodeObject = $validatedNodes[self::TOKEN_NAME];
+            }
+            if (is_null($nodeObject) || !$nodeObject->isSameNode($this->xpath->query("/ds:Signature/ds:Object")->item(0)))
+            {
+                throw new Exception("The digested node is not the node ds:Signature/ds:Object!");
+            }
+
             $this->isDigestValueOk = true;
         }
         catch (Exception $e)
         {
             // ANOMALY: Token hash verification failed!
+            $nodeObject = null;
             $this->isDigestValueOk = false;
             $this->anomalies[] = "Token hash verification failed!";
         }
@@ -1673,9 +1710,23 @@ class XMLDSigToken
         // "ds:Signature/ds:SignatureValue" is correct for the node
         // "ds:Signature/ds:SignedInfo" using the key we've just built from the
         // X.509 certificate found in the XML Digital Signature.
-        if ($XMLDSig->verify($objKeyX509))
+        // The verification returns the value of openssl_verify(): 1 (valid),
+        // 0 (invalid) or -1 (error). -1 is returned, whatever the signature
+        // value, when the key of the certificate does not suit the signature
+        // algorithm (e.g. an EC or DSA key with an RSA algorithm), and it is
+        // TRUE in a boolean context: only a strict 1 makes the signature valid.
+        try
         {
-            // Token signature is not valid!
+            $signatureVerification = $XMLDSig->verify($objKeyX509);
+        }
+        catch (\Throwable $e)
+        {
+            $signatureVerification = false;
+        }
+
+        if (1 === $signatureVerification)
+        {
+            // Token signature is valid.
             $this->isSignatureValueOk = true;
         }
         else
@@ -1685,11 +1736,18 @@ class XMLDSigToken
             $this->anomalies[] = "Token hash signature verification failed!";
         }
 
+        // Neither decrypt nor read a token whose hash or hash signature is not
+        // valid: its content is not the signed one.
+        if (!$this->isDigestValueOk || !$this->isSignatureValueOk)
+        {
+            $this->_throwAnomalies();
+        }
+
         // Create an XMLSecEnc object.
         $objXMLSecEnc = new XMLSecEnc();
 
         // Check if the content of the node "ds:Object" is ciphered.
-        $encryptedDataNode = $objXMLSecEnc->locateEncryptedData($xmlDoc);
+        $encryptedDataNode = $this->xpath->query("xenc:EncryptedData", $nodeObject)->item(0);
 
         if (is_null($encryptedDataNode))
         {
@@ -1800,16 +1858,17 @@ class XMLDSigToken
             }
         }
 
-        // Verify that the token data is well formed.
+        // Verify that the token data is well formed. The token is read from the
+        // digested node "ds:Signature/ds:Object" (see above).
         $queries = array(
-            "//ds:Signature/ds:Object/" . self::TOKEN_NAME,
-            "//ds:Signature/ds:Object/" . self::TOKEN_NAME . "/" . self::TOKEN_TIMESTAMP_NAME,
-            "//ds:Signature/ds:Object/" . self::TOKEN_NAME . "/" . self::TOKEN_DATA_NAME,
+            self::TOKEN_NAME,
+            self::TOKEN_NAME . "/" . self::TOKEN_TIMESTAMP_NAME,
+            self::TOKEN_NAME . "/" . self::TOKEN_DATA_NAME,
         );
 
         foreach ($queries as $query)
         {
-            if ($this->xpath->query($query)->length !== 1)
+            if ($this->xpath->query($query, $nodeObject)->length !== 1)
             {
                 // ERROR: Malformed token!
                 throw new Exception("Malformed token!");
@@ -1817,8 +1876,8 @@ class XMLDSigToken
         }
 
         // Get the node "ds:Signature/ds:Object/Token/TokenTimestamp".
-        $query = "//ds:Signature/ds:Object/" . self::TOKEN_NAME . "/" . self::TOKEN_TIMESTAMP_NAME;
-        $nodeTokenTimestamp = $this->xpath->query($query)->item(0);
+        $query = self::TOKEN_NAME . "/" . self::TOKEN_TIMESTAMP_NAME;
+        $nodeTokenTimestamp = $this->xpath->query($query, $nodeObject)->item(0);
 
         // Check that token timestamp node is a DOM element that contains solely
         // a text node.
@@ -1848,8 +1907,8 @@ class XMLDSigToken
         }
 
         // Get the node "ds:Signature/ds:Object/Token/TokenData".
-        $query = "//ds:Signature/ds:Object/" . self::TOKEN_NAME . "/" . self::TOKEN_DATA_NAME;
-        $nodeTokenData = $this->xpath->query($query)->item(0);
+        $query = self::TOKEN_NAME . "/" . self::TOKEN_DATA_NAME;
+        $nodeTokenData = $this->xpath->query($query, $nodeObject)->item(0);
 
         /**
          * Inline function to build a flat or multi-dimensional associative
@@ -1909,9 +1968,21 @@ class XMLDSigToken
         // message.
         if (!empty($this->anomalies))
         {
-            $nb = count($this->anomalies);
-            throw new Exception($nb . ($nb === 1 ? " anomaly" : " anomalies") . " detected: " . implode(" ; ", $this->anomalies));
+            $this->_throwAnomalies();
         }
+    }
+
+
+    /**
+     * Throw an exception whose message lists the anomalies detected during
+     * the analysis of the XML token.
+     *
+     * @throws Exception
+     */
+    private function _throwAnomalies()
+    {
+        $nb = count($this->anomalies);
+        throw new Exception($nb . ($nb === 1 ? " anomaly" : " anomalies") . " detected: " . implode(" ; ", $this->anomalies));
     }
 
 

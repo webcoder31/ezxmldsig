@@ -15,6 +15,21 @@ Security:
 - Token analysis fails when the canonicalization of the node "ds:SignedInfo"
   or of a referenced node fails or yields an empty string, whatever the
   xmlseclibs version.
+- Fix signature wrapping: a copy of the signed "ds:Object" placed in
+  "ds:KeyInfo" (or outside "ds:Signature") was digested instead of the
+  "ds:Object" the token was read from, so that forged data and a forged
+  timestamp passed for signed ones, encrypted tokens included. Data,
+  timestamp and encrypted content are now read only from the node whose
+  digest was verified, and a document whose element is not "ds:Signature" or
+  that holds more than one attribute Id="Token" is rejected.
+- Fix the verification of "ds:SignatureValue": openssl_verify() returns -1,
+  which was taken for a valid signature, when the key of the certificate does
+  not suit the signature algorithm (an EC or DSA certificate with an RSA
+  algorithm), whatever the signature value. Only a result of 1 now makes the
+  signature valid.
+- Token data and timestamp are neither decrypted nor read when the digest or
+  the signature is not valid: `getData()` and `getTimestamp()` then return
+  NULL.
 
 Requirements:
 - PHP 7.4 or greater (was PHP 5.6).
