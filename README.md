@@ -38,10 +38,10 @@ The ``XMLDSigToken`` class allows creating and analyzing enveloping XML Digital 
 
 1) It build an XML token from a flat or multidimensional associative array representing the user data and retrieve it in the same way.
 
-2) It allows chossing the various algorithms that should be used to build the XML Digital Signature. The ones used by default are the following:
+2) It allows chossing the various algorithms that should be used to build the XML Digital Signature (see [Options](#options)). The ones used by default are the following:
     * Algorithm used to canonalize data before signing is: http://www.w3.org/TR/2001/REC-xml-c14n-20010315.
-    * Algorithm used to generate the signature is: http://www.w3.org/2000/09/xmldsig#rsa-sha1.
-    * Algorithm used to compute the hash of contained data is: http://www.w3.org/2000/09/xmldsig#sha1.
+    * Algorithm used to generate the signature is: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256.
+    * Algorithm used to compute the hash of contained data is: http://www.w3.org/2001/04/xmlenc#sha256.
     * Algorithm used to encode user data values is: Base64.
 
 3) It is also capable of encrypting / decrypting token data for safe use with an unsecured HTTP connection, providing the same level of security as an SSL connection. 
@@ -130,13 +130,13 @@ echo htmlentities($sig);
 <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
   <ds:SignedInfo>
     <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-    <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+    <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
     <ds:Reference URI="#Token">
       <ds:Transforms>
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
-      <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-      <ds:DigestValue>Fg9V0dPJcVniGRZEWLefxuAqU7Y=</ds:DigestValue>
+      <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+      <ds:DigestValue>K3f2nX9a ... 1hQ6sE0=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
   <ds:SignatureValue>rmSevcH4 ... WsEX9A==</ds:SignatureValue>
@@ -216,13 +216,13 @@ echo htmlentities($sig);
 <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
   <ds:SignedInfo>
     <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-    <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+    <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
     <ds:Reference URI="#Token">
       <ds:Transforms>
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
-      <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-      <ds:DigestValue>ownzH5dZ9pjaekEoo/RxiUOLc3w=</ds:DigestValue>
+      <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+      <ds:DigestValue>p0Rw7mVd ... cT4yLk8=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
   <ds:SignatureValue>oJsmcOx6 ... 1whi1w==</ds:SignatureValue>
@@ -369,7 +369,71 @@ Only the signing certificate is taken from the token, never intermediate certifi
 
 When a token is created, it is analyzed right away to check it, with the certificate of its own signing key as trust anchor.
 
-**Upgrading from 0.x.** ``analyzeXMLToken($xml)`` and ``analyzeSecureXMLToken($xml, $cryptKeyPath, $cryptKeyPassword)`` without a trust anchor now reject every token: pass ``caCertPath`` (and/or ``signerCertPath``) in their ``$options``. A call to ``isValidCertCA()`` with the intermediate CA, which used to be the way to check the origin of the certificate, becomes ``'caCertPath' => [intermediate, root]``.
+
+### Options
+
+Each factory takes an associative array ``$options`` as its last parameter. Each option applies to a context: token creation (``createXMLToken()``, ``createSecureXMLToken()``), token analysis (``analyzeXMLToken()``, ``analyzeSecureXMLToken()``) or both. The encryption options only apply when an encryption certificate (``createSecureXMLToken()``) or a decryption key (``analyzeSecureXMLToken()``) is given. An unknown option (a misspelt name, for instance), an option given out of its context, or an option whose value is ``NULL`` or invalid throws an exception: none is ignored.
+
+| Option | Context | Type | Default |
+|---|---|---|---|
+| ``base64Encode`` | creation | boolean | ``TRUE`` |
+| ``xmldsigNsPrefix`` | creation | string (``''``: no prefix) | ``'ds'`` |
+| ``canonicalizationAlgorithm`` | creation and analysis | string | ``C14N`` |
+| ``signatureAlgorithm`` | creation and analysis | string | ``RSA_SHA256`` |
+| ``digestAlgorithm`` | creation and analysis | string | ``SHA256`` |
+| ``checkSigningAlgorithms`` | analysis | boolean | ``TRUE`` |
+| ``caCertPath``, ``signerCertPath``, ``expectedSubject`` | analysis | see [Trust anchor](#trust-anchor) | none |
+| ``sessionKeyCipheringAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``AES128_CBC`` |
+| ``cryptAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``RSA_OAEP_MGF1P`` |
+| ``checkCryptingAlgorithms`` | analysis with a decryption key | boolean | ``TRUE`` |
+
+The algorithms are given with the constants of the ``XMLDSigToken`` class (e.g. ``XMLDSigToken::RSA_SHA512``), whose values are the URIs of the XMLDSIG and XML Encryption specifications. Each algorithm option only accepts the algorithms of its own list:
+
+* ``canonicalizationAlgorithm``: ``C14N``, ``C14N_COMMENTS``, ``EXC_C14N``, ``EXC_C14N_COMMENTS``.
+* ``signatureAlgorithm``: ``RSA_SHA1``, ``RSA_SHA256``, ``RSA_SHA384``, ``RSA_SHA512``.
+* ``digestAlgorithm``: ``SHA1``, ``SHA256``, ``SHA384``, ``SHA512``, ``RIPEMD160``.
+* ``sessionKeyCipheringAlgorithm`` (symmetric encryption of the token data): ``TRIPLEDES_CBC``, ``AES128_CBC``, ``AES192_CBC``, ``AES256_CBC``.
+* ``cryptAlgorithm`` (encryption of the session key with the encryption certificate, or key transport): ``RSA_1_5``, ``RSA_OAEP_MGF1P``.
+
+Signature and key transport algorithms are both asymmetric, but a key transport algorithm is refused as a signature algorithm, and the reverse, whether given as an option or read from a token.
+
+At creation, the algorithm options are the algorithms the token is built with. At analysis, they are the algorithms the token must have been built with: a token built with other algorithms is rejected, and ``getError()`` names them (``Unauthorized Signature algorithm! Expected: ..., Used: ...``). ``checkSigningAlgorithms`` (signature, digest, canonicalization) and ``checkCryptingAlgorithms`` (session key, key transport) set to ``FALSE`` turn this check off; an algorithm out of the lists above is rejected all the same.
+
+```php
+// Create a token signed with RSA-SHA512 and an SHA-512 digest...
+$token = XMLDSigToken::createXMLToken($data, $signKey, $signCert, $signKeyPassword, [
+    'signatureAlgorithm' => XMLDSigToken::RSA_SHA512,
+    'digestAlgorithm' => XMLDSigToken::SHA512,
+]);
+
+// ...and analyze it, expecting these algorithms.
+$token = XMLDSigToken::analyzeXMLToken($sig, [
+    'caCertPath' => ['path/to/ca/intermediate/certificate', 'path/to/ca/root/certificate'],
+    'signatureAlgorithm' => XMLDSigToken::RSA_SHA512,
+    'digestAlgorithm' => XMLDSigToken::SHA512,
+]);
+```
+
+
+### Upgrading from 0.x
+
+* **Trust anchor.** ``analyzeXMLToken($xml)`` and ``analyzeSecureXMLToken($xml, $cryptKeyPath, $cryptKeyPassword)`` without a trust anchor now reject every token: pass ``caCertPath`` (and/or ``signerCertPath``) in their ``$options``. A call to ``isValidCertCA()`` with the intermediate CA, which used to be the way to check the origin of the certificate, becomes ``'caCertPath' => [intermediate, root]``.
+* **Default algorithms.** Tokens are signed with RSA-SHA256 and an SHA-256 digest (RSA-SHA1 and SHA-1 before), and the analysis expects these algorithms by default. A token created with the 0.x defaults is rejected (``Unauthorized Signature algorithm! ...``) unless the analysis declares them:
+
+  ```php
+  $options = [
+      'caCertPath' => ['path/to/ca/intermediate/certificate', 'path/to/ca/root/certificate'],
+      'signatureAlgorithm' => XMLDSigToken::RSA_SHA1,
+      'digestAlgorithm' => XMLDSigToken::SHA1,
+  ];
+  ```
+
+  Conversely, a 0.x analysis that expects the 0.x defaults rejects the tokens of this version: upgrade the receiver first, or pass ``'signatureAlgorithm' => XMLDSigToken::RSA_SHA1`` and ``'digestAlgorithm' => XMLDSigToken::SHA1`` to the creation until it is upgraded. The default encryption algorithms (AES-128-CBC, RSA-OAEP) are unchanged.
+* **Options of ``createXMLToken()``.** Its ``$options`` were ignored: they now apply. Check that the options you pass to it are the ones you want.
+* **Option checks.** An unknown option, an option out of its context (``checkSigningAlgorithms``, ``checkCryptingAlgorithms`` or a trust option at creation, ``base64Encode`` or ``xmldsigNsPrefix`` at analysis, an encryption option without an encryption certificate or a decryption key), or an option whose value is ``NULL`` or of the wrong type now throws an exception instead of being ignored. Remove such options.
+* **Algorithm lists.** ``signatureAlgorithm`` no longer accepts ``RSA_1_5`` and ``RSA_OAEP_MGF1P``, ``cryptAlgorithm`` no longer accepts the ``RSA_SHA*`` algorithms, and ``sessionKeyCipheringAlgorithm``, which used to refuse every encryption algorithm, now accepts them.
+* **``createSecureXMLToken()``** throws an exception when ``$cryptCertPath`` is ``NULL``, instead of creating an unencrypted token.
+
 
 ## Examples
 

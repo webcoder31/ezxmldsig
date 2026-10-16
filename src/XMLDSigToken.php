@@ -341,6 +341,23 @@ class XMLDSigToken
     const RSA_SHA512 = XMLSecurityKey::RSA_SHA512;
     const HMAC_SHA1 = XMLSecurityKey::HMAC_SHA1;
 
+    /** @const array The context each option applies to (see
+    _checkOptions()). */
+    private const OPTION_CONTEXTS = [
+        'base64Encode'                 => 'creation',
+        'xmldsigNsPrefix'              => 'creation',
+        'canonicalizationAlgorithm'    => 'any',
+        'signatureAlgorithm'           => 'any',
+        'digestAlgorithm'              => 'any',
+        'checkSigningAlgorithms'       => 'analysis',
+        'caCertPath'                   => 'analysis',
+        'signerCertPath'               => 'analysis',
+        'expectedSubject'              => 'analysis',
+        'sessionKeyCipheringAlgorithm' => 'encryption',
+        'cryptAlgorithm'               => 'encryption',
+        'checkCryptingAlgorithms'      => 'decryption',
+    ];
+
 
     /* PROPERTIES */
 
@@ -355,11 +372,11 @@ class XMLDSigToken
 
     /** @var string The algorithm that should be used to sign the computed hash
     of the token. */
-    private $signatureAlgorithm = self::RSA_SHA1;
+    private $signatureAlgorithm = self::RSA_SHA256;
 
     /** @var string The algorithm that should be used to compute the hash of the
     token. */
-    private $digestAlgorithm = self::SHA1;
+    private $digestAlgorithm = self::SHA256;
 
     /** @var string The algorithm that should be used to canonicalize the token
     before computing its hash. NOTE: In our case, it is the same algorithm as
@@ -543,7 +560,7 @@ class XMLDSigToken
      *
      * When the object creates a token, it analyzes it right away to check it,
      * and trusts the certificate of its own signing key (`$signCertPath`) for
-     * that: the trust options are ignored.
+     * that: the trust options do not apply to token creation.
      *
      * **Configuring the object:**
      *
@@ -556,8 +573,30 @@ class XMLDSigToken
      * <code>
      * $options = [
      *   'base64Encode' => false,
-     *   'xmldsigNsPrefix' => '',
-     *   'checkSigningAlgorithms' => false
+     *   'xmldsigNsPrefix' => ''
+     * ];
+     * </code>
+     *
+     * Each option applies to a context: token creation (`createXMLToken()`,
+     * `createSecureXMLToken()`), token analysis (`analyzeXMLToken()`,
+     * `analyzeSecureXMLToken()`), or both. The encryption options only apply
+     * when an encryption certificate (creation) or a decryption key
+     * (analysis) is given. An unknown option, an option given out of its
+     * context, or an option whose value is NULL or invalid throws an
+     * exception.
+     *
+     * The algorithm options apply to both contexts: at creation, they are the
+     * algorithms the token is built with; at analysis, the algorithms the
+     * token must have been built with. A token built with other algorithms is
+     * rejected (`getError()` lists them), unless `checkSigningAlgorithms` or
+     * `checkCryptingAlgorithms` is FALSE. To analyze a token built with
+     * RSA-SHA1 and SHA-1 (the defaults of the 0.x versions):
+     *
+     * <code>
+     * $options = [
+     *   'caCertPath' => ['intermediate.cert.pem', 'root.cert.pem'],
+     *   'signatureAlgorithm' => XMLDSigToken::RSA_SHA1,
+     *   'digestAlgorithm' => XMLDSigToken::SHA1
      * ];
      * </code>
      *
@@ -608,26 +647,30 @@ class XMLDSigToken
      *   Character case is significant. It does not replace a trust anchor.
      *   <br/>Default value: none.
      *
-     * - **`base64Encode`** [boolean] Whether to base64 encode token data or
-     *   not.
+     * - **`base64Encode`** [boolean] Creation only. Whether to base64 encode
+     *   token data or not.
      *   <br/>Default value: **`TRUE`**.
      *
-     * - **`xmldsigNsPrefix`** [string] The XML namespace (xmlns) prefix to use
-     *   in the XML digital signature tags. Set it to empty string to avoid
-     *   prefix usage.
+     * - **`xmldsigNsPrefix`** [string] Creation only. The XML namespace
+     *   (xmlns) prefix to use in the XML digital signature tags. Set it to
+     *   empty string to avoid prefix usage.
      *   <br/>Default value: **`'ds'`**.
      *
-     * - **`checkSigningAlgorithms`** [boolean] Whether to check that the
-     *   algorithms used to sign the token are the expected ones or not.
+     * - **`checkSigningAlgorithms`** [boolean] Analysis only. Whether to
+     *   check that the algorithms used to sign the token are the expected
+     *   ones or not. Even when FALSE, an algorithm that is not in the lists
+     *   below is rejected.
      *   <br/>Default value: **`TRUE`**.
      *
-     * - **`checkCryptingAlgorithms`** [boolean] Whether to check that the
-     *   algorithms used to crypt the token are the expected ones or not.
+     * - **`checkCryptingAlgorithms`** [boolean] Analysis with a decryption
+     *   key only. Whether to check that the algorithms used to crypt the
+     *   token are the expected ones or not. Even when FALSE, an algorithm
+     *   that is not in the lists below is rejected.
      *   <br/>Default value: **`TRUE`**.
      *
-     * - **`canonicalizationAlgorithm`** [string] The algorithm used to
-     *   canonicalize the XMLdigital signature and to canonicalize token data
-     *   before computing its hash.
+     * - **`canonicalizationAlgorithm`** [string] Creation and analysis. The
+     *   algorithm used to canonicalize the XMLdigital signature and to
+     *   canonicalize token data before computing its hash.
      *   <br/>Possible values:
      *
      *   - **`C14N`** (Default value)
@@ -642,23 +685,15 @@ class XMLDSigToken
      *   - `EXC_C14N_COMMENTS`
      *     <br/>cf. http://www.w3.org/2001/10/xml-exc-c14n#WithComments
      *
-     * - **`signatureAlgorithm`** [string] The asymmetric algorithm used to sign
-     *   the hash of token data.
+     * - **`signatureAlgorithm`** [string] Creation and analysis. The
+     *   asymmetric algorithm used to sign the hash of token data. Key
+     *   transport algorithms (see `cryptAlgorithm`) are rejected.
      *   <br/>Possible values:
      *
-     *   - `RSA_1_5`
-     *     <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-1_5
-     *
-     *   - `RSA_OAEP_MGF1P`
-     *     <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p
-     *
-     *   - `DSA_SHA1` (Does not work)
-     *     <br/>cf. http://www.w3.org/2000/09/xmldsig#dsa-sha1)
-     *
-     *   - **`RSA_SHA1`** (Default value)
+     *   - `RSA_SHA1`
      *     <br/>cf. http://www.w3.org/2000/09/xmldsig#rsa-sha1
      *
-     *   - `RSA_SHA256`
+     *   - **`RSA_SHA256`** (Default value)
      *     <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
      *
      *   - `RSA_SHA384`
@@ -667,17 +702,14 @@ class XMLDSigToken
      *   - `RSA_SHA512`
      *     <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
      *
-     *   - `HMAC_SHA1` (Does not work)
-     *     <br/>cf. http://www.w3.org/2000/09/xmldsig#hmac-sha1
-     *
-     * - **`digestAlgorithm`** [string] The algorithm used to compute the hash
-     *   of token data.
+     * - **`digestAlgorithm`** [string] Creation and analysis. The algorithm
+     *   used to compute the hash of token data.
      *   <br/>Possible values:
      *
-     *   - **`SHA1`** (Default value)
+     *   - `SHA1`
      *     <br/>cf. http://www.w3.org/2000/09/xmldsig#sha1
      *
-     *   - `SHA256`
+     *   - **`SHA256`** (Default value)
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#sha256
      *
      *   - `SHA384`
@@ -689,9 +721,10 @@ class XMLDSigToken
      *   - `RIPEMD160`
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#ripemd160
      *
-     * - **`sessionKeyCipheringAlgorithm`** [string] The symmetric algorithm
-     *   used to cipher the session key which will be used to encrypt token
-     *   date.
+     * - **`sessionKeyCipheringAlgorithm`** [string] Encryption only
+     *   (creation with an encryption certificate, analysis with a decryption
+     *   key). The symmetric algorithm used to encrypt token data with a
+     *   generated session key.
      *   <br/>Possible values:
      *
      *   - `TRIPLEDES_CBC`
@@ -706,8 +739,11 @@ class XMLDSigToken
      *   - `AES256_CBC`
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#aes256-cbc
      *
-     * - **`cryptAlgorithm`** [string] The asymmetric algorithm used to encrypt
-     *   token data with the ciphered session key.
+     * - **`cryptAlgorithm`** [string] Encryption only (creation with an
+     *   encryption certificate, analysis with a decryption key). The
+     *   asymmetric algorithm used to encrypt the session key with the
+     *   encryption certificate (key transport). Signature algorithms (see
+     *   `signatureAlgorithm`) are rejected.
      *   <br/>Possible values:
      *
      *   - `RSA_1_5`
@@ -715,24 +751,6 @@ class XMLDSigToken
      *
      *   - **`RSA_OAEP_MGF1P`** (Default value)
      *     <br/>cf. http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p
-     *
-     *   - `DSA_SHA1` (Does not work)
-     *     <br/>cf. http://www.w3.org/2000/09/xmldsig#dsa-sha1
-     *
-     *   - `RSA_SHA1` (Does not work)
-     *     <br/>cf. http://www.w3.org/2000/09/xmldsig#rsa-sha1
-     *
-     *   - `RSA_SHA256`
-     *     <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
-     *
-     *   - `RSA_SHA384`
-     *     <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha384
-     *
-     *   - `RSA_SHA512`
-     *     <br/>cf. http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
-     *
-     *   - `HMAC_SHA1` (Does not work)
-     *     <br/>cf. http://www.w3.org/2000/09/xmldsig#hmac-sha1
      *
      * @param mixed $xmlOrData An XML token (string) or token data (associative
      *     array).
@@ -778,13 +796,24 @@ class XMLDSigToken
             $options = []
         )
     {
+        if (!is_array($xmlOrData) && !is_string($xmlOrData))
+        {
+            throw new Exception("Invalid parameter 'xmlOrData'! Parameter must be either an array or a string!");
+        }
+
+        // Check the options against what the object is created for: an
+        // unknown option, or an option that does not apply here, throws
+        // (see _checkOptions()).
+        $isCreation = is_array($xmlOrData);
+        self::_checkOptions($options, $isCreation, !is_null($isCreation ? $cryptCertPath : $cryptKeyPath));
+
         // Load configuration options.
-        $base64Encode = (isset($options['base64Encode']) && is_bool($options['base64Encode'])) ? $options['base64Encode'] : true;
+        $base64Encode = isset($options['base64Encode']) ? $options['base64Encode'] : true;
 
-        $xmldsigNsPrefix = (isset($options['xmldsigNsPrefix']) && is_string($options['xmldsigNsPrefix'])) ? $options['xmldsigNsPrefix'] : null;
+        $xmldsigNsPrefix = isset($options['xmldsigNsPrefix']) ? $options['xmldsigNsPrefix'] : null;
 
-        $checkSigningAlgorithms = (isset($options['checkSigningAlgorithms']) && is_bool($options['checkSigningAlgorithms'])) ? $options['checkSigningAlgorithms'] : true;
-        $checkCryptingAlgorithms = (isset($options['checkCryptingAlgorithms']) && is_bool($options['checkCryptingAlgorithms'])) ? $options['checkCryptingAlgorithms'] : true;
+        $checkSigningAlgorithms = isset($options['checkSigningAlgorithms']) ? $options['checkSigningAlgorithms'] : true;
+        $checkCryptingAlgorithms = isset($options['checkCryptingAlgorithms']) ? $options['checkCryptingAlgorithms'] : true;
 
         $canonicalizationAlgorithm = isset($options['canonicalizationAlgorithm']) ? $options['canonicalizationAlgorithm'] : null;
         $signatureAlgorithm = isset($options['signatureAlgorithm']) ? $options['signatureAlgorithm'] : null;
@@ -809,7 +838,7 @@ class XMLDSigToken
         // If provided, set and store the signature algorithm.
         if (!is_null($signatureAlgorithm))
         {
-            if (self::_isValidAsymmetricCipheringAlgorithm($signatureAlgorithm))
+            if (self::_isValidSignatureAlgorithm($signatureAlgorithm))
             {
                 $this->signatureAlgorithm = $signatureAlgorithm;
             }
@@ -840,7 +869,7 @@ class XMLDSigToken
 
         // Check what have to be done according to the type of $xmlOrData
         // parameter.
-        if (is_array($xmlOrData))
+        if ($isCreation)
         {
             // $xmlOrData is an array, so we have to create an XML token.
 
@@ -964,7 +993,7 @@ class XMLDSigToken
                 // If provided, set and store the session key algorithm.
                 if (!is_null($sessionKeyCipheringAlgorithm))
                 {
-                    if (self::_isValidHashAlgorithm($sessionKeyCipheringAlgorithm))
+                    if (self::_isValidSymmetricCipheringAlgorithm($sessionKeyCipheringAlgorithm))
                     {
                         $this->sessionKeyCipheringAlgorithm = $sessionKeyCipheringAlgorithm;
                     }
@@ -977,7 +1006,7 @@ class XMLDSigToken
                 // If provided, set and store the crypt algorithm.
                 if (!is_null($cryptAlgorithm))
                 {
-                    if (self::_isValidAsymmetricCipheringAlgorithm($cryptAlgorithm))
+                    if (self::_isValidKeyTransportAlgorithm($cryptAlgorithm))
                     {
                         $this->cryptAlgorithm = $cryptAlgorithm;
                     }
@@ -1008,7 +1037,7 @@ class XMLDSigToken
                 $this->error = $e->getMessage();
             }
         }
-        elseif (is_string($xmlOrData))
+        else
         {
             // $xmlOrData is a string, so we have to analyze the XML token.
 
@@ -1042,7 +1071,7 @@ class XMLDSigToken
                 // If provided, set and store the session key algorithm.
                 if (!is_null($sessionKeyCipheringAlgorithm))
                 {
-                    if (self::_isValidHashAlgorithm($sessionKeyCipheringAlgorithm))
+                    if (self::_isValidSymmetricCipheringAlgorithm($sessionKeyCipheringAlgorithm))
                     {
                         $this->sessionKeyCipheringAlgorithm = $sessionKeyCipheringAlgorithm;
                     }
@@ -1055,7 +1084,7 @@ class XMLDSigToken
                 // If provided, set and store the crypt algorithm.
                 if (!is_null($cryptAlgorithm))
                 {
-                    if (self::_isValidAsymmetricCipheringAlgorithm($cryptAlgorithm))
+                    if (self::_isValidKeyTransportAlgorithm($cryptAlgorithm))
                     {
                         $this->cryptAlgorithm = $cryptAlgorithm;
                     }
@@ -1084,9 +1113,88 @@ class XMLDSigToken
                 $this->error = $e->getMessage();
             }
         }
-        else
+    }
+
+
+    /**
+     * Check the options given to the object against what it is created for.
+     *
+     * Each option is only read in its context (see `OPTION_CONTEXTS`): token
+     * creation, token analysis, both ("any"), encryption (creation with an
+     * encryption certificate, or analysis with a decryption key) or
+     * decryption (analysis with a decryption key). A misspelt option, or an
+     * option given out of its context, would be ignored without notice and
+     * leave the token without the configuration the caller asked for: it
+     * throws an exception instead, as does an option whose value is NULL or
+     * of the wrong type. The values of the algorithm and trust options are
+     * checked where they are loaded.
+     *
+     * @param array $options Configuration options.
+     *
+     * @param boolean $isCreation TRUE if the object creates a token, FALSE if
+     *     it analyzes one.
+     *
+     * @param boolean $isEncryption TRUE if an encryption certificate (token
+     *     creation) or a decryption key (token analysis) is given.
+     *
+     * @throws Exception
+     */
+    static private function _checkOptions($options, $isCreation, $isEncryption)
+    {
+        if (!is_array($options))
         {
-            throw new Exception("Invalid parameter 'xmlOrData'! Parameter must be either an array or a string!");
+            throw new Exception("Invalid parameter 'options'! Parameter must be an array.");
+        }
+
+        foreach ($options as $name => $value)
+        {
+            if (!isset(self::OPTION_CONTEXTS[$name]))
+            {
+                throw new Exception("Unknown option '" . $name . "'!");
+            }
+
+            switch (self::OPTION_CONTEXTS[$name])
+            {
+                case 'creation':
+                    if (!$isCreation)
+                    {
+                        throw new Exception("Option '" . $name . "' only applies to token creation!");
+                    }
+                    break;
+                case 'analysis':
+                    if ($isCreation)
+                    {
+                        throw new Exception("Option '" . $name . "' only applies to token analysis! A created token is checked with the certificate of its own signing key.");
+                    }
+                    break;
+                case 'encryption':
+                    if (!$isEncryption)
+                    {
+                        throw new Exception("Option '" . $name . "' only applies to an encrypted token! Give the encryption certificate (createSecureXMLToken()) or the decryption key (analyzeSecureXMLToken()).");
+                    }
+                    break;
+                case 'decryption':
+                    if ($isCreation || !$isEncryption)
+                    {
+                        throw new Exception("Option '" . $name . "' only applies to the analysis of an encrypted token! Give the decryption key (analyzeSecureXMLToken()).");
+                    }
+                    break;
+            }
+
+            if (is_null($value))
+            {
+                throw new Exception("Invalid option '" . $name . "'! Its value must not be NULL.");
+            }
+
+            if (in_array($name, ['base64Encode', 'checkSigningAlgorithms', 'checkCryptingAlgorithms'], true) && !is_bool($value))
+            {
+                throw new Exception("Invalid option '" . $name . "'! It must be a boolean.");
+            }
+
+            if ('xmldsigNsPrefix' === $name && !is_string($value))
+            {
+                throw new Exception("Invalid option '" . $name . "'! It must be a string.");
+            }
         }
     }
 
@@ -1189,6 +1297,9 @@ class XMLDSigToken
             $signKeyPath,
             $signKeyPassword,
             $signCertPath,
+            $cryptKeyPath = null,
+            $cryptKeyPassword = null,
+            $cryptCertPath = null,
             $options
         );
     }
@@ -1245,6 +1356,13 @@ class XMLDSigToken
             $options = []
         )
     {
+        // Without an encryption certificate, the constructor would create an
+        // unencrypted token.
+        if (is_null($cryptCertPath))
+        {
+            throw new Exception("Missing parameter 'cryptCertPath'! An X.509 certificate is required to encrypt token.");
+        }
+
         return new XMLDSigToken(
             $data,
             $signKeyPath,
@@ -1673,7 +1791,7 @@ class XMLDSigToken
             "//ds:Signature/ds:SignedInfo/ds:SignatureMethod/@Algorithm"
             => array(
                 'name'             => 'Signature',
-                'validateFunction' => '_isValidAsymmetricCipheringAlgorithm',
+                'validateFunction' => '_isValidSignatureAlgorithm',
                 'expectedValue'    => $this->signatureAlgorithm
             ),
             "//ds:Signature/ds:SignedInfo/ds:Reference/ds:Transforms/ds:Transform/@Algorithm"
@@ -1761,7 +1879,7 @@ class XMLDSigToken
                 "//ds:Signature/ds:Object/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:EncryptionMethod/@Algorithm"
                 => array(
                     'name'             => 'Crypt',
-                    'validateFunction' => '_isValidAsymmetricCipheringAlgorithm',
+                    'validateFunction' => '_isValidKeyTransportAlgorithm',
                     'expectedValue'    => $this->cryptAlgorithm
                 )
             );
@@ -2740,6 +2858,12 @@ class XMLDSigToken
      */
     static private function _isValidCanonicalizationAlgorithm($algorithm)
     {
+        // switch compares loosely: TRUE would match any algorithm.
+        if (!is_string($algorithm))
+        {
+            return(false);
+        }
+
         switch ($algorithm)
         {
             case (self::C14N):
@@ -2762,6 +2886,12 @@ class XMLDSigToken
      */
     static private function _isValidHashAlgorithm($algorithm)
     {
+        // switch compares loosely: TRUE would match any algorithm.
+        if (!is_string($algorithm))
+        {
+            return(false);
+        }
+
         switch ($algorithm)
         {
             case (self::SHA1):
@@ -2777,25 +2907,62 @@ class XMLDSigToken
 
 
     /**
-     * Check if an algorithm is valid to perform asymmetric ciphering
-     * operations.
+     * Check if an algorithm is valid to sign the node "ds:SignedInfo".
+     *
+     * Signature and key transport algorithms (see
+     * `_isValidKeyTransportAlgorithm()`) are both asymmetric, but each list
+     * only holds its own: a key transport algorithm is not a signature
+     * algorithm, and the reverse.
      *
      * @param string $algorithm The algorithm reference (URL).
      *
      * @return boolean TRUE if valid, FALSE otherwise.
      */
-    static private function _isValidAsymmetricCipheringAlgorithm($algorithm)
+    static private function _isValidSignatureAlgorithm($algorithm)
     {
+        // switch compares loosely: TRUE would match any algorithm.
+        if (!is_string($algorithm))
+        {
+            return(false);
+        }
+
         switch ($algorithm)
         {
-            case (self::RSA_1_5):
-            case (self::RSA_OAEP_MGF1P):
             // case (self::DSA_SHA1): // Does not work.
-            case (self::RSA_SHA1): // Does not work as signature algorithm.
+            case (self::RSA_SHA1):
             case (self::RSA_SHA256):
             case (self::RSA_SHA384):
             case (self::RSA_SHA512):
             // case (self::HMAC_SHA1): // Does not work.
+                return(true);
+            default:
+                return(false);
+        }
+    }
+
+
+    /**
+     * Check if an algorithm is valid to encrypt the session key that encrypts
+     * the token (key transport).
+     *
+     * @param string $algorithm The algorithm reference (URL).
+     *
+     * @return boolean TRUE if valid, FALSE otherwise.
+     *
+     * @see _isValidSignatureAlgorithm()
+     */
+    static private function _isValidKeyTransportAlgorithm($algorithm)
+    {
+        // switch compares loosely: TRUE would match any algorithm.
+        if (!is_string($algorithm))
+        {
+            return(false);
+        }
+
+        switch ($algorithm)
+        {
+            case (self::RSA_1_5):
+            case (self::RSA_OAEP_MGF1P):
                 return(true);
             default:
                 return(false);
@@ -2812,6 +2979,12 @@ class XMLDSigToken
      */
     static private function _isValidSymmetricCipheringAlgorithm($algorithm)
     {
+        // switch compares loosely: TRUE would match any algorithm.
+        if (!is_string($algorithm))
+        {
+            return(false);
+        }
+
         switch ($algorithm)
         {
             case (self::TRIPLEDES_CBC):

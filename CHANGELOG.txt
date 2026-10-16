@@ -25,12 +25,39 @@ Backward-incompatible changes (major version):
   CA certificate, and the CA certificate to be a CA (basic constraints, key
   usage). The constructor no longer extracts the signature of the
   certificate.
+- The default signature and digest algorithms are RSA-SHA256 and SHA-256
+  (were RSA-SHA1 and SHA-1), at creation and at analysis: a token signed
+  with RSA-SHA1 or with an SHA-1 digest is rejected unless the analysis
+  declares these algorithms with the options `signatureAlgorithm` and
+  `digestAlgorithm` (or sets `checkSigningAlgorithms` to FALSE). The default
+  encryption algorithms are unchanged.
+- An unknown option, an option out of its context, or an option whose value
+  is NULL or of the wrong type throws an exception instead of being ignored.
+  Out of context are `checkSigningAlgorithms`, `checkCryptingAlgorithms`,
+  `caCertPath`, `signerCertPath` and `expectedSubject` at creation,
+  `base64Encode` and `xmldsigNsPrefix` at analysis,
+  `sessionKeyCipheringAlgorithm` and `cryptAlgorithm` without an encryption
+  certificate (creation) or a decryption key (analysis), and
+  `checkCryptingAlgorithms` without a decryption key.
+- `signatureAlgorithm` only accepts signature algorithms (RSA-SHA1,
+  RSA-SHA256, RSA-SHA384, RSA-SHA512) and `cryptAlgorithm` only key transport
+  algorithms (RSA 1.5, RSA-OAEP), at creation as in the algorithms read from
+  a token ("ds:SignatureMethod", "xenc:EncryptedKey/xenc:EncryptionMethod").
+- `createSecureXMLToken()` throws an exception when `$cryptCertPath` is NULL,
+  instead of creating an unencrypted token.
 
 New:
 - `XMLDSigToken::isCertTrusted()`, `X509Cert::isTrustedBy()`,
   `X509Cert::canSign()` and `X509Cert::getFingerprint()`.
 - Option `expectedSubject`: full Distinguished Name or subject fields the
   signing certificate must have.
+
+Fixed:
+- `createXMLToken()` ignored its `$options`, passed in place of
+  `$cryptKeyPath`: they now apply.
+- `sessionKeyCipheringAlgorithm` was checked against the digest algorithms,
+  so that no encryption algorithm was accepted: it now accepts the symmetric
+  encryption algorithms.
 
 Security:
 - Require robrichards/xmlseclibs ^3.1.5 instead of 2.0.1, which is affected by
