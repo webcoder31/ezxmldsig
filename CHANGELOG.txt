@@ -5,6 +5,32 @@ Unreleased
 - Add `bin/gen-test-certs`, which generates the test certificate chain in
   `tests/fixtures/certs/` and the example certificates in `examples/certs/`.
 - Regenerate the example certificates: the signing certificate had expired.
+  examples/certs/ now also holds the root CA certificate.
+- `bin/gen-test-certs` always runs OpenSSL in the alpine:3.22 Docker image.
+
+Backward-incompatible changes (major version):
+- Token analysis requires a trust anchor, given in `$options`: `caCertPath`
+  (PEM files of the trusted CA certificates) and/or `signerCertPath` (the
+  pinned signing certificate). Without it, `isSignatureValid()` returns FALSE
+  and `getError()` says that no trust anchor was given. Calls such as
+  `analyzeXMLToken($xml)` must add the option.
+- `isSignatureValid()` also requires the signing certificate to be trusted:
+  valid at the current date, key usage allowing signing, chain verified by
+  OpenSSL up to a self-signed certificate of `caCertPath`, same fingerprint
+  as `signerCertPath`, and subject matching the new option `expectedSubject`
+  when given. To trust an intermediate CA, `caCertPath` must hold it and the
+  certificates up to its root.
+- `X509Cert::isValidCA()` relies on OpenSSL (`openssl_x509_verify()`) and
+  also requires the issuer name of the certificate to be the subject of the
+  CA certificate, and the CA certificate to be a CA (basic constraints, key
+  usage). The constructor no longer extracts the signature of the
+  certificate.
+
+New:
+- `XMLDSigToken::isCertTrusted()`, `X509Cert::isTrustedBy()`,
+  `X509Cert::canSign()` and `X509Cert::getFingerprint()`.
+- Option `expectedSubject`: full Distinguished Name or subject fields the
+  signing certificate must have.
 
 Security:
 - Require robrichards/xmlseclibs ^3.1.5 instead of 2.0.1, which is affected by
@@ -30,6 +56,20 @@ Security:
 - Token data and timestamp are neither decrypted nor read when the digest or
   the signature is not valid: `getData()` and `getTimestamp()` then return
   NULL.
+- The signing certificate is verified against a trust anchor: a token
+  signed with any key pair and a certificate copying the names of a
+  legitimate one was valid, `isValidCertIssuer()` passing too, unless the
+  caller also called `isValidCertCA()`. Token data and timestamp are neither
+  decrypted nor read when the certificate is not trusted. Only the CA
+  certificates of `caCertPath` are trusted, never those of the system store
+  (which PHP otherwise adds to the files given to
+  `openssl_x509_checkpurpose()`).
+- `X509Cert::isValidCA()` no longer parses ASN.1 by hand: the signature of
+  the certificate is verified by OpenSSL. The hand-made parser accepted
+  MD2, MD4, MD5 and SHA-1 and ignored the bytes following the hash in the
+  decrypted DigestInfo.
+- `isValidCertCA()` returns FALSE instead of failing when no certificate
+  could be read from the token.
 
 Requirements:
 - PHP 7.4 or greater (was PHP 5.6).

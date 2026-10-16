@@ -103,7 +103,7 @@ class SignatureWrappingTest extends TestCase
         $timestamp = self::forgedTimestamp();
         $xml = self::wrapIntoKeyInfo(self::createToken(self::sampleData())->getXML(), $timestamp);
 
-        $token = XMLDSigToken::analyzeXMLToken($xml);
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
 
         $this->assertNotForged($token, $timestamp);
         $this->assertNull($token->getData());
@@ -114,7 +114,7 @@ class SignatureWrappingTest extends TestCase
         $timestamp = self::forgedTimestamp();
         $xml = self::wrapIntoKeyInfo($this->createSecureToken(self::sampleData())->getXML(), $timestamp);
 
-        $token = XMLDSigToken::analyzeSecureXMLToken($xml, self::cert('crypt.key.pem'));
+        $token = XMLDSigToken::analyzeSecureXMLToken($xml, self::cert('crypt.key.pem'), null, self::trustAnchor());
 
         $this->assertNotForged($token, $timestamp);
         $this->assertNull($token->getData());
@@ -138,7 +138,7 @@ class SignatureWrappingTest extends TestCase
         $envelope->appendChild($signature);
         self::forgeObjectContent($object, $timestamp);
 
-        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML());
+        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML(), self::trustAnchor());
 
         $this->assertNotForged($token, $timestamp);
         $this->assertNull($token->getData());
@@ -155,7 +155,7 @@ class SignatureWrappingTest extends TestCase
         $doc->replaceChild($envelope, $signature);
         $envelope->appendChild($signature);
 
-        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML());
+        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML(), self::trustAnchor());
 
         $this->assertFalse($token->isSignatureValid());
         $this->assertNull($token->getData());
@@ -173,7 +173,7 @@ class SignatureWrappingTest extends TestCase
         $extra->setAttribute('Id', 'Token');
         $xpath->query('/ds:Signature')->item(0)->appendChild($extra);
 
-        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML());
+        $token = XMLDSigToken::analyzeXMLToken($doc->saveXML(), self::trustAnchor());
 
         $this->assertFalse($token->isSignatureValid());
         $this->assertNull($token->getData());

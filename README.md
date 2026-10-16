@@ -7,7 +7,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
 
 ## Requirements
 
-The library **ezxmldsig** requires PHP version 5.6 or greater and the version 2.0.1 of the library **xmlseclibs** developed by Rob Richards.
+The library **ezxmldsig** requires PHP version 7.4 or greater, with the OpenSSL extension, and the library **xmlseclibs** developed by Rob Richards, version ^3.1.5 (3.1.5 or a later 3.x version).
 
 
 ## How to Install?
@@ -49,22 +49,23 @@ The class allows chosing the algorithms that should be used to perform data encr
     * Algorithm used to encrypt data is: http://www.w3.org/2001/04/xmlenc#aes128-cbc (symmetric ciphering).
     * Algorithm used to encrypt the session key that will be used to cypher data is: http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymmetric ciphering).
 
-4) It guarantees the integrity of the user data stored in the XMLDSig token by verifying that:
+4) It guarantees the integrity and the origin of the user data stored in the XMLDSig token by verifying that:
     * The XML digital signature meets the XMLDSIG specifications.
     * The algorithms used to construct the XML digital signature are those expected.
     * The token contained in the XML digital signature has not been altered.
+    * The X.509 certificate included in the XML digital signature is trusted: it is valid at the current date, OpenSSL verifies its chain up to the CA certificates you trust and/or it is the very certificate you pinned, and its subject is the one you expect, if you ask for it (see [Trust anchor](#trust-anchor)).
 
 5) It is also able to verify with confidence that the token is not out of date because the token timestamp is signed too.
 
-6) It may perform variuous checkings on the X.509 certificate included the XML Digital Signature:
+6) It gives access to the information of the X.509 certificate included in the XML Digital Signature (subject, issuer, validity dates), and keeps individual checks on it:
     * Ensure that the certificate is not out of date.
-    * Check the issuer of the certificate.
-    * Verify the origin of the certificate. 
+    * Check the issuer names of the certificate.
+    * Verify that the certificate was issued by a given CA certificate.
 
 
 ### X509Cert class
 
-The ``X509Cert`` class provides a set of convenient methods for extracting essential information contained in an X.509 certificate and for performing some useful checkings. In particular, it can verify the origin of the X.509 certificate by using the intermediate certificate used by the CA to perform its signature (CSR). This class is used internaly by the ``XMLDSigToken`` class.
+The ``X509Cert`` class provides a set of convenient methods for extracting essential information contained in an X.509 certificate and for performing some useful checkings, all of them with OpenSSL: whether the certificate was issued by a given CA certificate (``isValidCA()``), whether OpenSSL verifies its chain up to trusted CA certificates (``isTrustedBy()``), whether its key usage allows signing (``canSign()``). This class is used internaly by the ``XMLDSigToken`` class.
 
 
 ### Other classes coming soon...
@@ -254,6 +255,8 @@ echo htmlentities($sig);
 
 In the following example, we will assume that we will receive the XML digital signature (in a Base64 coded field of an HTTP POST request) from an approved source that we want to ensure is the issuer. We will extract the signature from the POST request and we will perform all checkings to make sure we can trust the received user data.
 
+The analysis requires a trust anchor, described below: without it, no token is valid.
+
 
 #### Source code
 
@@ -281,63 +284,37 @@ $sig = base64_decode($_POST['xmltoken']);
 $cryptKey = 'path/to/crypting/private/key';
 $cryptKeyPassword = 'crypting-key-password'; // Use null if it is not needed.
 
-// The issuer information of the sender to which the certificate transmitted
-// in the XML digital signature should correspond to be declared valid.
-$expectedIssuer = [
-    'C'  => 'DK',
-    'ST' => 'Jylland',
-    'O'  => 'Lothbrok Ltd',
-    'OU' => 'Shield Wall Dept',
-    'CN' => 'www.lothbrok.dk',
-    'emailAddress' => 'ivar@lothbrok.dk'
+// Trust anchor (required): the CA that issued the signing certificate of the
+// sender, and the certificates up to its root. Optionally, the subject the
+// signing certificate must have.
+$options = [
+    'caCertPath' => [
+        'path/to/ca/intermediate/certificate',
+        'path/to/ca/root/certificate',
+    ],
+    'expectedSubject' => ['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept'],
 ];
 
-// CA intermediate certificate against which to verify origin of 
-// the signing certificate transmitted in the XML Digital Signature.
-$caCertPath = 'path/to/ca/intermediate/certificate';
-
 // Create token object from the XML Digital Signature 
-$token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword);
+$token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword, $options);
 
 // NOTE: The above instruction works even if user data is not encrypted.
 // However, if user data is not encrypted and you don't own a private key 
 // then use the following method:
-// $token = XMLDSigToken::analyzeXMLToken($sig);
+// $token = XMLDSigToken::analyzeXMLToken($sig, $options);
 
 // Verify that:
 // - the XML digital signature meets the XMLDSIG specifications.
 // - the algorithms used to construct the XML digital signature are those 
 //   expected (here, the default ones).
 // - the token contained in the XML digital signature has not been altered.
+// - the signing certificate is valid at the current date, has been issued
+//   by a trusted CA and has the expected subject.
 // - the token contained in the XML digital signature is correctly timestamped
 //   and contains user data.
-if (!$token->isValid()) 
+if (!$token->isSignatureValid())
 {
-    echo "ERROR: Invalid XML Digital Signature!";
-    exit();
-}
-
-// Verify that the X.509 certificate included in 
-// the XML digital signature is not out of date.
-if ($token->isCertOutOfDate()) 
-{
-    echo "ERROR: Signing certificate is out of date!";
-    exit();
-}
-
-// Verify that the issuer of the X.509 certificate included 
-// in the XML digital signature is indeed the one we expect.
-if (!$token->checkCertIssuer($expectedIssuer)) 
-{
-    echo "ERROR: Issuer of signing certificate is not valid!";
-    exit();
-}
-
-// Verify that the X.509 certificate included in the XML
-// digital signature actualy comes from the CA we expect.
-if (!$token->checkCertCA($caCertPath)) 
-{
-    echo "ERROR: Signing certificate not issued by the expected CA!";
+    echo "ERROR: Invalid XML Digital Signature! " . $token->getError();
     exit();
 }
 
@@ -353,6 +330,47 @@ echo "Token data:";
 var_dump($token->getData());
 ```
 
+
+### Trust anchor
+
+The signature of a token is verified with the X.509 certificate the token carries. Anyone can sign a token with a key pair of their own and a certificate that copies the names (subject, issuer) of a legitimate one: the signature alone proves nothing. The analysis therefore requires a trust anchor, given in its ``$options``, and ``isSignatureValid()`` only returns ``TRUE`` if the certificate of the token is trusted:
+
+* **``caCertPath``** (string or array of strings): PEM files holding the CA certificates you trust. OpenSSL must build and verify the chain of the signing certificate up to a self-signed certificate of these files: signature of each link, validity dates, CA constraints and key usage of each issuer.
+* **``signerCertPath``** (string): a PEM certificate the token must be signed with (pinning). Given alone, it is the trust anchor; given with ``caCertPath``, both are required.
+* **``expectedSubject``** (array or string, optional): the subject the signing certificate must have. Character case is significant. It does not replace ``caCertPath`` or ``signerCertPath``.
+    * As an array, the fields to check, as returned by ``getCertSubject()``: ``['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']``. Fields that are not given are not checked.
+    * As a string, the full Distinguished Name, compared as is with the one ``getCertDN()`` returns. This is the OpenSSL "oneline" format: every field of the subject, in the order of the certificate, each written ``/<short name>=<value>`` with no space and no escaping:
+
+      ```
+      /C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk
+      ```
+
+      It is neither the RFC 2253 form (``CN=...,O=...``) nor the form printed by the ``openssl`` command line (``C=DK, ST=...``): copy it from ``getCertDN()``.
+
+In every case, the signing certificate must be valid at the current date and, if it has a ``keyUsage`` extension, allow ``digitalSignature`` or ``nonRepudiation``.
+
+**Trusting an intermediate CA.** OpenSSL only accepts a chain that ends at a self-signed root. To trust the certificates issued by an intermediate CA, give its certificate **and** the certificates up to its root, as several files or as one file holding them all:
+
+```php
+$options = ['caCertPath' => ['path/to/intermediate.cert.pem', 'path/to/root.cert.pem']];
+```
+
+With the intermediate certificate alone, every token is rejected and ``getError()`` returns:
+
+```
+Signing certificate is not issued by a trusted CA: its chain could not be verified up to the CA certificates of the option 'caCertPath', which must hold the issuing CA and the certificates up to its root!
+```
+
+Only the signing certificate is taken from the token, never intermediate certificates: a certificate issued by another intermediate CA of the same root is rejected, since its issuer is not in your files. A certificate issued directly by one of the CA certificates you give (the root included) is accepted: add ``expectedSubject`` to narrow it down.
+
+**Without a trust anchor**, ``isSignatureValid()`` returns ``FALSE`` and ``getError()`` returns ``No trust anchor! Pass the option 'caCertPath' (trusted CA certificates) and/or 'signerCertPath' (pinned signing certificate) to analyze a token: without them, no signing certificate can be trusted.``. An option of the wrong type, or naming a file that cannot be read, throws an exception.
+
+``isCertTrusted()`` tells whether the certificate passed these checks. The individual checks ``isCertOutOfDate()``, ``isValidCertIssuer()`` and ``isValidCertCA()`` remain available, but ``isSignatureValid()`` does not need them. ``isValidCertIssuer()`` only compares names, which any certificate can copy.
+
+When a token is created, it is analyzed right away to check it, with the certificate of its own signing key as trust anchor.
+
+**Upgrading from 0.x.** ``analyzeXMLToken($xml)`` and ``analyzeSecureXMLToken($xml, $cryptKeyPath, $cryptKeyPassword)`` without a trust anchor now reject every token: pass ``caCertPath`` (and/or ``signerCertPath``) in their ``$options``. A call to ``isValidCertCA()`` with the intermediate CA, which used to be the way to check the origin of the certificate, becomes ``'caCertPath' => [intermediate, root]``.
+
 ## Examples
 
 Similar examples are provided in the `examples` directory along with cryptographic material.
@@ -360,7 +378,7 @@ Simply visit the file `index.html` to see them in action (need to be hosted on a
 
 **NOTE:** To work out of the box, theses examples require that you've installed the library **ezxmldsig** using **composer**.
 
-The certificates of the examples are valid for 10 years from their generation. To issue new ones, run `bin/gen-test-certs --examples`.
+The certificates of the examples (`examples/certs/`: a root CA, the intermediate CA that issued the signing and encryption certificates, and these certificates with their keys) are valid for 10 years from their generation. `examples/parse-xml-token.php` trusts the intermediate CA and its root. To issue new ones, run `bin/gen-test-certs --examples`.
 
 
 ## Tests
@@ -377,7 +395,7 @@ The script uses the official `php:<version>-cli` images. On first run, it downlo
 
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
 
-The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, an intermediate CA, signing and encryption certificates issued by the intermediate, and a certificate signed by its own key that copies the subject and issuer names of the signing certificate. Run `bin/gen-test-certs` to generate them again (it uses the local OpenSSL, or Docker when OpenSSL is not available).
+The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, an intermediate CA, signing and encryption certificates issued by the intermediate, and a certificate signed by its own key that copies the subject and issuer names of the signing certificate. Run `bin/gen-test-certs` to generate them again (it runs OpenSSL in the `alpine:3.22` Docker image, whatever OpenSSL the host has). The tests of the trust anchor also issue certificates on the fly (expired, issued by another intermediate CA, issued by a certificate that is not a CA) in a temporary directory removed after each test.
 
 
 ## Documentation

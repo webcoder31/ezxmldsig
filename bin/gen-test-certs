@@ -19,14 +19,18 @@
 #                                                whose subject and issuer DN copy
 #                                                those of sign.cert.pem
 #
-# examples/certs/ receives the files the examples use: intermediate.cert.pem,
+# examples/certs/ receives the files the examples use: root.cert.pem and
+# intermediate.cert.pem (the trust anchor of examples/parse-xml-token.php),
 # sign.cert.pem, sign.key.pem (password "signKeyPassword"), crypt.cert.pem and
 # crypt.key.pem (password "cryptKeyPassword").
 #
 # Every certificate is valid for 10 years from the time of generation.
 #
-# The local openssl binary is used when it is OpenSSL; otherwise (missing, or
-# LibreSSL) the script runs itself again inside an Alpine Docker container.
+# The script always runs itself again inside an Alpine Docker container
+# (alpine:3.22), whatever openssl the host has: the certificates then come
+# from the same OpenSSL version on every machine (the host may have LibreSSL,
+# or an OpenSSL whose behavior differs). The container runs as root, to
+# install openssl, and gives the written files back to the calling user.
 
 set -eu
 
@@ -39,18 +43,23 @@ case "${1:-}" in
     *) echo "Usage: $0 [--examples]" >&2; exit 2 ;;
 esac
 
-if ! openssl version 2>/dev/null | grep -q '^OpenSSL'; then
-    if [ "${GEN_CERTS_IN_DOCKER:-}" = 1 ]; then
-        echo "OpenSSL is not available in the container." >&2
+if [ "${GEN_CERTS_IN_DOCKER:-}" != 1 ]; then
+    if ! docker info >/dev/null 2>&1; then
+        echo "Docker is not reachable (with Colima: colima start)." >&2
         exit 1
     fi
-    echo "No local OpenSSL binary: running in Docker (alpine:3.22)." >&2
+    echo "Running in Docker (alpine:3.22)." >&2
     exec docker run --rm -e GEN_CERTS_IN_DOCKER=1 \
-        -u "$(id -u):$(id -g)" \
+        -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
         -v "$ROOT_DIR:/work" -w /work \
         --entrypoint sh alpine:3.22 -c \
-        'apk add --no-cache -q openssl >/dev/null 2>&1 || true; sh bin/gen-test-certs "$@"' \
+        'apk add --no-cache -q openssl >/dev/null && sh bin/gen-test-certs "$@"' \
         sh "$@"
+fi
+
+if ! openssl version 2>/dev/null | grep -q '^OpenSSL'; then
+    echo "OpenSSL is not available in the container." >&2
+    exit 1
 fi
 
 if [ "$MODE" = examples ]; then
@@ -165,7 +174,8 @@ for name in sign crypt; do
 done
 
 if [ "$MODE" = examples ]; then
-    FILES="intermediate.cert.pem sign.cert.pem sign.key.pem crypt.cert.pem crypt.key.pem"
+    FILES="root.cert.pem intermediate.cert.pem sign.cert.pem sign.key.pem
+           crypt.cert.pem crypt.key.pem"
 else
     FILES="root.cert.pem root.key.pem intermediate.cert.pem intermediate.key.pem
            sign.cert.pem sign.key.pem crypt.cert.pem crypt.key.pem
@@ -175,6 +185,7 @@ fi
 mkdir -p "$OUT_DIR"
 for f in $FILES; do
     cp "$WORK_DIR/$f" "$OUT_DIR/$f"
+    chown "$HOST_UID:$HOST_GID" "$OUT_DIR/$f"
 done
 echo "Certificates written to ${OUT_DIR#$ROOT_DIR/}:"
 for f in $FILES; do
