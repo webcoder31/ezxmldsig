@@ -164,7 +164,7 @@ class X509Cert
     /**
      * Get the UTC date from which the certificate is valid.
      *
-     * @param string The format of the returned date.
+     * @param string $dateFormat The format of the returned date.
      *        Default: 'ymdHise'
      *
      * @return string|false The date from which the certificate is valid,
@@ -182,7 +182,7 @@ class X509Cert
     /**
      * Get the UTC date to which the certificate is valid.
      *
-     * @param string The format of the returned date.
+     * @param string $dateFormat The format of the returned date.
      *        Default: 'ymdHise'
      *
      * @return string|false The date to which the certificate is valid,

@@ -295,16 +295,9 @@ class EncryptionTest extends TestCase
         $this->assertSame(self::DECRYPTION_FAILED, $token->getError());
         $this->assertSame([], $token->getAnomalies());
         $this->assertNull($token->getData());
-        // No detail in what the object shows either. getHTMLDump() shows
-        // getError() and getAnomalies(); under PHP 8 it fails beforehand, in
-        // getPrettyXML(), which passes its arguments to implode() in an order
-        // PHP 8 no longer accepts.
-        $outputs = [print_r($token, true)];
-        if (PHP_MAJOR_VERSION < 8)
-        {
-            $outputs[] = $token->getHTMLDump();
-        }
-        foreach ($outputs as $output)
+        // No detail in what the object shows either: getHTMLDump() shows
+        // getError() and getAnomalies().
+        foreach ([print_r($token, true), $token->getHTMLDump()] as $output)
         {
             foreach (['Reason', 'openssl', 'Key must', 'appendXML', 'parser error', 'Session key', 'Token data'] as $detail)
             {

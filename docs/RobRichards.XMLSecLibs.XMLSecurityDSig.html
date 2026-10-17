@@ -1,0 +1,1457 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class RobRichards\XMLSecLibs\XMLSecurityDSig | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-RobRichards.html">RobRichards</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-RobRichards.XMLSecLibs.html">XMLSecLibs</a>
+			</li>
+	</ul>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="RobRichards.XMLSecLibs.XMLSecEnc.html">
+							XMLSecEnc
+						</a>
+					</li>
+					<li class="active">
+						<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html">
+							XMLSecurityDSig
+						</a>
+					</li>
+					<li>
+						<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html">
+							XMLSecurityKey
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-RobRichards.XMLSecLibs.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-RobRichards.html">RobRichards</a>\<a href="namespace-RobRichards.XMLSecLibs.html">XMLSecLibs</a>\<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html">XMLSecurityDSig</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>xmlseclibs.php Copyright (c) 2007-2024, Robert Richards <a href="mailto:rrichards@cdatazone.org">rrichards@cdatazone.org</a>.
+All rights reserved. Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met: * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution. * Neither the name of Robert Richards nor the names of his
+contributors may be used to endorse or promote products derived
+from this software without specific prior written permission. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+&quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="__construct" id="___construct">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>__construct(<span>string <var>$prefix</var> = <span class="php-str">'ds'</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#___construct">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="generateGUID" id="_generateGUID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>generateGUID(<span>string <var>$prefix</var> = <span class="php-str">'pfx'</span></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Generate guid</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Generate guid</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$prefix</var>&nbsp;&nbsp;</td>
+										<td><p>Prefix to use for guid. defaults to pfx</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The generated guid</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_generateGUID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="generate_GUID" id="_generate_GUID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><span class="deprecated">generate_GUID</span>(<span>string <var>$prefix</var> = <span class="php-str">'pfx'</span></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Generate guid</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Generate guid</p>
+</div>
+							<h4>Deprecated</h4>
+							<div>
+									<p>Method deprecated in Release 1.4.1</p>
+
+							</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$prefix</var>&nbsp;&nbsp;</td>
+										<td><p>Prefix to use for guid. defaults to pfx</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The generated guid</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_generate_GUID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="locateSignature" id="_locateSignature">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>locateSignature(<span><a href="DOMDocument.html"><span title="DOMDocument">DOMDocument</span></a> <var>$objDoc</var></span>, <span>int <var>$pos</var> = <span class="php-num">0</span></span>): <a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a>|null</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_locateSignature">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="createNewSignNode" id="_createNewSignNode">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>createNewSignNode(<span>string <var>$name</var></span>, <span>null|string <var>$value</var> = <span class="php-kw">null</span></span>): <a href="DOMElement.html"><span title="DOMElement">DOMElement</span></a></code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_createNewSignNode">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="setCanonicalMethod" id="_setCanonicalMethod">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>setCanonicalMethod(<span>string <var>$method</var></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_setCanonicalMethod">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="canonicalizeSignedInfo" id="_canonicalizeSignedInfo">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>canonicalizeSignedInfo(): null|string</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_canonicalizeSignedInfo">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="calculateDigest" id="_calculateDigest">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>calculateDigest(<span>string <var>$digestAlgorithm</var></span>, <span>string <var>$data</var></span>, <span>bool <var>$encode</var> = <span class="php-kw">true</span></span>): string</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_calculateDigest">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="validateDigest" id="_validateDigest">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>validateDigest(<span><var>$refNode</var></span>, <span>string <var>$data</var></span>): bool</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_validateDigest">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="processTransforms" id="_processTransforms">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>processTransforms(<span><var>$refNode</var></span>, <span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$objData</var></span>, <span>bool <var>$includeCommentNodes</var> = <span class="php-kw">true</span></span>): string</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_processTransforms">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="processRefNode" id="_processRefNode">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>processRefNode(<span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$refNode</var></span>): bool</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_processRefNode">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getRefNodeID" id="_getRefNodeID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getRefNodeID(<span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$refNode</var></span>): null</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getRefNodeID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getRefIDs" id="_getRefIDs">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getRefIDs(): array</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getRefIDs">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="validateReference" id="_validateReference">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>validateReference(): bool</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_validateReference">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="addReference" id="_addReference">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>addReference(<span><a href="DOMDocument.html"><span title="DOMDocument">DOMDocument</span></a> <var>$node</var></span>, <span>string <var>$algorithm</var></span>, <span>null|array <var>$arTransforms</var> = <span class="php-kw">null</span></span>, <span>null|array <var>$options</var> = <span class="php-kw">null</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_addReference">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="addReferenceList" id="_addReferenceList">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>addReferenceList(<span>array <var>$arNodes</var></span>, <span>string <var>$algorithm</var></span>, <span>null|array <var>$arTransforms</var> = <span class="php-kw">null</span></span>, <span>null|array <var>$options</var> = <span class="php-kw">null</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_addReferenceList">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="addObject" id="_addObject">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>addObject(<span><a href="DOMElement.html"><span title="DOMElement">DOMElement</span></a>|string <var>$data</var></span>, <span>null|string <var>$mimetype</var> = <span class="php-kw">null</span></span>, <span>null|string <var>$encoding</var> = <span class="php-kw">null</span></span>): <a href="DOMElement.html"><span title="DOMElement">DOMElement</span></a></code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_addObject">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="locateKey" id="_locateKey">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>locateKey(<span>null|<a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$node</var> = <span class="php-kw">null</span></span>): null|<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a></code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_locateKey">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="verify" id="_verify">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>verify(<span><a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a> <var>$objKey</var></span>): bool|int</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Returns:
+Bool when verifying HMAC_SHA1;
+Int otherwise, with following meanings:
+1 on succesful signature verification,
+0 when signature verification failed,
+-1 if an error occurred during processing. NOTE: be very careful when checking the int return value, because in
+PHP, -1 will be cast to True when in boolean context. Always check the
+return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Returns:
+Bool when verifying HMAC_SHA1;
+Int otherwise, with following meanings:
+1 on succesful signature verification,
+0 when signature verification failed,
+-1 if an error occurred during processing. NOTE: be very careful when checking the int return value, because in
+PHP, -1 will be cast to True when in boolean context. Always check the
+return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
+</div>
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_verify">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="signData" id="_signData">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>signData(<span><a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a> <var>$objKey</var></span>, <span>string <var>$data</var></span>): mixed|string</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_signData">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="sign" id="_sign">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>sign(<span><a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a> <var>$objKey</var></span>, <span>null|<a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$appendToNode</var> = <span class="php-kw">null</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_sign">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="appendCert" id="_appendCert">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>appendCert()</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_appendCert">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="appendKey" id="_appendKey">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>appendKey(<span><a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a> <var>$objKey</var></span>, <span>null|<a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$parent</var> = <span class="php-kw">null</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_appendKey">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="insertSignature" id="_insertSignature">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>insertSignature(<span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$node</var></span>, <span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$beforeNode</var> = <span class="php-kw">null</span></span>): <a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a></code>
+
+
+	<div class="expandable-collapsedView">
+		<p>This function inserts the signature element. The signature element will be appended to the element, unless $beforeNode is specified. If $beforeNode
+is specified, the signature element will be inserted as the last element before $beforeNode.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>This function inserts the signature element. The signature element will be appended to the element, unless $beforeNode is specified. If $beforeNode
+is specified, the signature element will be inserted as the last element before $beforeNode.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$node</var>&nbsp;&nbsp;</td>
+										<td><p>The node the signature element should be inserted into.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$beforeNode</var>&nbsp;&nbsp;</td>
+										<td><p>The node the signature element should be located before.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The signature element node</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_insertSignature">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="appendSignature" id="_appendSignature">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>appendSignature(<span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$parentNode</var></span>, <span>bool <var>$insertBefore</var> = <span class="php-kw">false</span></span>): <a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a></code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_appendSignature">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="get509XCert" id="_get509XCert">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>get509XCert(<span>string <var>$cert</var></span>, <span>bool <var>$isPEMFormat</var> = <span class="php-kw">true</span></span>): string</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_get509XCert">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="staticGet509XCerts" id="_staticGet509XCerts">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>staticGet509XCerts(<span>string <var>$certs</var></span>, <span>bool <var>$isPEMFormat</var> = <span class="php-kw">true</span></span>): array</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_staticGet509XCerts">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="staticAdd509Cert" id="_staticAdd509Cert">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>staticAdd509Cert(
+	<span><a href="DOMElement.html"><span title="DOMElement">DOMElement</span></a> <var>$parentRef</var></span>,
+	<span>string <var>$cert</var></span>,
+	<span>bool <var>$isPEMFormat</var> = <span class="php-kw">true</span></span>,
+	<span>bool <var>$isURL</var> = <span class="php-kw">false</span></span>,
+	<span>null|<a href="DOMXPath.html"><span title="DOMXPath">DOMXPath</span></a> <var>$xpath</var> = <span class="php-kw">null</span></span>,
+	<span>null|array <var>$options</var> = <span class="php-kw">null</span></span>,
+)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_staticAdd509Cert">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="add509Cert" id="_add509Cert">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>add509Cert(<span>string <var>$cert</var></span>, <span>bool <var>$isPEMFormat</var> = <span class="php-kw">true</span></span>, <span>bool <var>$isURL</var> = <span class="php-kw">false</span></span>, <span>null|array <var>$options</var> = <span class="php-kw">null</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_add509Cert">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="appendToKeyInfo" id="_appendToKeyInfo">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>appendToKeyInfo(<span><a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a> <var>$node</var></span>): <a href="DOMNode.html"><span title="DOMNode">DOMNode</span></a></code>
+
+
+	<div class="expandable-collapsedView">
+		<p>This function appends a node to the KeyInfo. The KeyInfo element will be created if one does not exist in the document.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>This function appends a node to the KeyInfo. The KeyInfo element will be created if one does not exist in the document.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$node</var>&nbsp;&nbsp;</td>
+										<td><p>The node to append to the KeyInfo.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The KeyInfo element node</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_appendToKeyInfo">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getValidatedNodes" id="_getValidatedNodes">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getValidatedNodes(): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>This function retrieves an associative array of the validated nodes. The array will contain the id of the referenced node as the key and the node itself
+as the value. Returns:
+An associative array of validated nodes or null if no nodes have been validated.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>This function retrieves an associative array of the validated nodes. The array will contain the id of the referenced node as the key and the node itself
+as the value. Returns:
+An associative array of validated nodes or null if no nodes have been validated.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>Associative array of validated nodes</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getValidatedNodes">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="XMLDSIGNS" id="XMLDSIGNS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>XMLDSIGNS = <span class="php-str">'http://www.w3.org/2000/09/xmldsig#'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#XMLDSIGNS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SHA1" id="SHA1">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SHA1 = <span class="php-str">'http://www.w3.org/2000/09/xmldsig#sha1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SHA1">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SHA256" id="SHA256">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SHA256 = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#sha256'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SHA256">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SHA384" id="SHA384">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SHA384 = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#sha384'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SHA384">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SHA512" id="SHA512">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SHA512 = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#sha512'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SHA512">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RIPEMD160" id="RIPEMD160">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RIPEMD160 = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#ripemd160'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RIPEMD160">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="C14N" id="C14N">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>C14N = <span class="php-str">'http://www.w3.org/TR/2001/REC-xml-c14n-20010315'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#C14N">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="C14N_COMMENTS" id="C14N_COMMENTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>C14N_COMMENTS = <span class="php-str">'http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#C14N_COMMENTS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="EXC_C14N" id="EXC_C14N">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>EXC_C14N = <span class="php-str">'http://www.w3.org/2001/10/xml-exc-c14n#'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#EXC_C14N">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="EXC_C14N_COMMENTS" id="EXC_C14N_COMMENTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>EXC_C14N_COMMENTS = <span class="php-str">'http://www.w3.org/2001/10/xml-exc-c14n#WithComments'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#EXC_C14N_COMMENTS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="template" id="template">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>template = <span class="php-str">'&lt;ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:SignatureMethod /&gt;
+  &lt;/ds:SignedInfo&gt;
+&lt;/ds:Signature&gt;'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#template">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="BASE_TEMPLATE" id="BASE_TEMPLATE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>BASE_TEMPLATE = <span class="php-str">'&lt;Signature xmlns="http://www.w3.org/2000/09/xmldsig#"&gt;
+  &lt;SignedInfo&gt;
+    &lt;SignatureMethod /&gt;
+  &lt;/SignedInfo&gt;
+&lt;/Signature&gt;'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#BASE_TEMPLATE">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="properties">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Properties</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="sigNode" id="$sigNode">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap"><a href="DOMElement.html"><span title="DOMElement">DOMElement</span></a>|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$sigNode</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$sigNode">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="idKeys" id="$idKeys">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">array</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$idKeys</var> = []</code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$idKeys">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="idNS" id="$idNS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">array</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$idNS</var> = []</code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$idNS">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

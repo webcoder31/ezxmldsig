@@ -1,6 +1,11 @@
 <?php 
 /**
  * File: parse-xml-token.php
+ *
+ * WARNING: The private keys of examples/certs/ are public: they are
+ * published with the source code of this library. Anyone can sign tokens
+ * that these examples trust, and decrypt the tokens they encrypt. Use them
+ * for this demonstration only, never in an application.
  */
 
 // Autoload required classes.
@@ -57,7 +62,7 @@ echo '<h1>XMLDSig Token Analysis</h1>';
 if (!$token->isSignatureValid())
 {
     echo "<h2>ERROR: Invalid XML Digital Signature!</h2>";
-    echo "<p>" . htmlspecialchars((string) $token->getError()) . "</p>";
+    echo "<p>" . htmlspecialchars((string) $token->getError(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</p>";
 }
 
 // Verify that the XML token was issued less than 2 minutes ago.
@@ -67,16 +72,22 @@ else if ($token->isOutOfDate(120))
 }
 
 // All is fine ! We can trust user data.
+// NOTE: A valid token can be posted again for as long as it is not out of
+// date. An application must also refuse a token whose identifier
+// ($token->getTokenId()) it has already accepted: the library keeps no list
+// of the tokens it has seen (see the README, section "Replay").
 else
 {
     echo "<h2>Token successfully verified!</h2>";
+    echo "<p>Token identifier: " . htmlspecialchars($token->getTokenId()) . "</p>";
 
-    // Dump token data.
+    // Dump token data. Like anything that comes from the token, they are
+    // escaped before being written in the page.
     echo "<h3>Token data:</h3>";
-    var_dump($token->getData());
+    echo "<pre>" . htmlspecialchars(print_r($token->getData(), true), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</pre>";
 }
 
-// Dump token object.
+// Dump token object. getHTMLDump() escapes every value it shows.
 echo "<h3>Token details:</h3>";
 echo $token->getHTMLDump();
 

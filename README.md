@@ -55,12 +55,14 @@ The class allows chosing the algorithms that should be used to perform data encr
     * The token contained in the XML digital signature has not been altered.
     * The X.509 certificate included in the XML digital signature is trusted: it is valid at the current date, OpenSSL verifies its chain up to the CA certificates you trust and/or it is the very certificate you pinned, and its subject is the one you expect, if you ask for it (see [Trust anchor](#trust-anchor)).
 
-5) It is also able to verify with confidence that the token is not out of date because the token timestamp is signed too.
+5) It is also able to verify with confidence that the token is not out of date because the token timestamp is signed too. Each token also holds a signed random identifier, which lets the receiver refuse a token it has already accepted (see [Replay](#replay)).
 
 6) It gives access to the information of the X.509 certificate included in the XML Digital Signature (subject, issuer, validity dates), and keeps individual checks on it:
     * Ensure that the certificate is not out of date.
     * Check the issuer names of the certificate.
     * Verify that the certificate was issued by a given CA certificate.
+
+7) It refuses, before parsing them, the XML documents that have a document type declaration (see [XML parsing](#xml-parsing)), and its HTML output (``getHTMLDump()``) escapes every value it shows and loads no external resource.
 
 
 ### X509Cert class
@@ -148,6 +150,7 @@ echo htmlentities($sig);
   <ds:Object Id="Token">
     <Token>
       <TokenTimestamp>2017-05-20T07:20:49Z</TokenTimestamp>
+      <TokenId>3f9c2a7e0b1d4c58a6e2f7091b3d5c4e</TokenId>
       <TokenData>
         <name Algorithm="base64">UmFnbmFyIExvdGhicm9jaw==</name>
         <role Algorithm="base64">S2luZyBvZiBWaWNraW5ncw==</role>
@@ -314,7 +317,8 @@ $token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword,
 //   and contains user data.
 if (!$token->isSignatureValid())
 {
-    echo "ERROR: Invalid XML Digital Signature! " . $token->getError();
+    // The error may quote what the token holds: escape it.
+    echo "ERROR: Invalid XML Digital Signature! " . htmlspecialchars($token->getError(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     exit();
 }
 
@@ -325,10 +329,39 @@ if ($token->isOutOfDate(120))
     exit();
 }
 
+// Refuse a token already accepted (see Replay below). apcu_add() only adds
+// the identifier if it is not stored yet, and keeps it for as long as the
+// token could be accepted: 120 seconds of validity plus the clock tolerance.
+if (!apcu_add('xmltoken-' . $token->getTokenId(), true, 120 + XMLDSigToken::DESYNC_TOLERANCE))
+{
+    echo "ERROR: Token already used!";
+    exit();
+}
+
 // All is fine ! We can trust user data.
 echo "Token data:";
-var_dump($token->getData());
+echo '<pre>' . htmlspecialchars(print_r($token->getData(), true), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
 ```
+
+
+### Replay
+
+A valid token can be submitted again, by whoever intercepted it, for as long as ``isOutOfDate()`` accepts it. **The library keeps no list of the tokens it has analyzed**: refusing a token already accepted is up to the receiver.
+
+Each token holds an identifier of 128 random bits (``random_bytes()``), written in hexadecimal in the node ``Token/TokenId`` and covered by the signature: altering it invalidates the token. ``getTokenId()`` returns it (32 hexadecimal characters) for a valid token only, and ``NULL`` otherwise. The receiver must:
+
+* store the identifier of each token it accepts, atomically with the check that it is not stored yet (``apcu_add()``, a unique key in a database, ``SET NX`` in Redis...), in a store shared by all the servers that receive the tokens;
+* refuse a token whose identifier is already stored;
+* keep each identifier at least as long as the token can be accepted. ``isOutOfDate($ttl)`` accepts a token from ``XMLDSigToken::DESYNC_TOLERANCE`` seconds (30) before its timestamp to ``$ttl`` seconds after it: keep the identifier ``$ttl + XMLDSigToken::DESYNC_TOLERANCE`` seconds after accepting the token.
+
+A token without identifier, as created by the 0.x versions, is rejected (``Token identifier is missing!``): the receiver could not tell it from a replayed one. So is a token whose identifier is not 32 lowercase hexadecimal characters (``Token identifier is malformed!``).
+
+
+### XML parsing
+
+A document type declaration (``<!DOCTYPE ...>``) declares entities, which the XML parser expands where the document references them: nested entities make a small document grow to gigabytes, and external entities read local files or URLs. A token never has one: the analysis, like ``XMLDSigToken::alterXML()``, refuses any document holding ``<!DOCTYPE`` before parsing it (``XML Digital Signature must not have a document type declaration (DOCTYPE)!``).
+
+This check reads the bytes of the document, which only show ``<!DOCTYPE`` as is in UTF-8, the encoding of the tokens. A document in another encoding is therefore refused too (``XML Digital Signature must be encoded in UTF-8!``): one that holds a NUL byte (UTF-16, UTF-32) or declares another encoding. The documents are parsed with ``LIBXML_NONET`` (no network access), and any XML error rejects them, without PHP warning.
 
 
 ### Trust anchor
@@ -452,6 +485,9 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 * **Option checks.** An unknown option, an option out of its context (``checkSigningAlgorithms``, ``checkCryptingAlgorithms`` or a trust option at creation, ``base64Encode`` or ``xmldsigNsPrefix`` at analysis, an encryption option without an encryption certificate or a decryption key), or an option whose value is ``NULL`` or of the wrong type now throws an exception instead of being ignored. Remove such options.
 * **Algorithm lists.** ``signatureAlgorithm`` no longer accepts ``RSA_1_5`` and ``RSA_OAEP_MGF1P``, ``cryptAlgorithm`` no longer accepts the ``RSA_SHA*`` algorithms, and ``sessionKeyCipheringAlgorithm``, which used to refuse every encryption algorithm, now accepts them.
 * **``createSecureXMLToken()``** throws an exception when ``$cryptCertPath`` is ``NULL``, instead of creating an unencrypted token.
+* **Token identifier.** Each token holds a signed random identifier (``Token/TokenId``, see [Replay](#replay)). A token without identifier, as created by a 0.x version, is rejected (``Token identifier is missing!``), whatever the options: upgrade the senders together with the receivers. A token is valid for a few seconds or minutes (``isOutOfDate()``): no token created before the upgrade needs to be read after it. Receivers should refuse the identifiers they have already accepted.
+* **XML parsing.** A document with a document type declaration (``<!DOCTYPE``), or not encoded in UTF-8, is rejected before it is parsed, and ``alterXML()`` returns ``FALSE`` for it without changing it (see [XML parsing](#xml-parsing)). The tokens created by the library are in UTF-8 and have none.
+* **``getHTMLDump()``** escapes every value it shows and no longer loads the ``run_prettify.js`` script of Google Code Prettify from a CDN: the XML token is shown without syntax highlighting.
 * **Encryption.** The data are encrypted with AES-256-GCM (AES-128-CBC before), and the analysis rejects a token encrypted with CBC unless it declares the algorithm (see [Encryption](#encryption)). A 0.x analysis rejects AES-GCM (``Session Key Ciphering algorithm is invalid!``): upgrade the receivers first, declaring ``'sessionKeyCipheringAlgorithm' => XMLDSigToken::AES128_CBC`` while the senders create tokens with the 0.x defaults, then upgrade the senders and remove the option. With ``'checkCryptingAlgorithms' => false`` too, a receiver accepts both the declared CBC algorithm and AES-GCM during the transition. A sender upgraded first can pass the same option to ``createSecureXMLToken()`` until its receivers are upgraded. RSA 1.5 is refused and the constant ``XMLDSigToken::RSA_1_5`` is removed: use ``RSA_OAEP_MGF1P``, the default. A decryption failure gives ``Token decryption failed!`` instead of ``Session key decryption failed! Reason: ...`` or ``Token data decryption failed! Reason: ...``.
 
 
@@ -459,6 +495,8 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 
 Similar examples are provided in the `examples` directory along with cryptographic material.
 Simply visit the file `index.html` to see them in action (need to be hosted on an HTTP / PHP server).
+
+> **WARNING: the private keys of `examples/certs/` are public.** They are published with the source code of this library, with their passwords: anyone can sign tokens that the examples trust, and decrypt the tokens they encrypt. Use them for the examples only, never in an application or on a server reachable by others, and never trust their CA certificates: generate your own keys and certificates (see `examples/certs/README.md`). The same goes for the keys of `tests/fixtures/certs/`, which only serve the tests.
 
 **NOTE:** To work out of the box, theses examples require that you've installed the library **ezxmldsig** using **composer**.
 
@@ -485,6 +523,14 @@ The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, a
 ## Documentation
 
 Online documentation is available here : [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig/).
+
+This site is published by GitHub Pages from the `docs/` directory of the branch `master` (home page: `docs/index.html`). Its pages are generated from the docblocks of `src/` by [ApiGen](https://github.com/ApiGen/ApiGen), in Docker: run `bin/gen-docs` after changing a docblock, and commit `docs/` with the code.
+
+```
+bin/gen-docs
+```
+
+The script runs the official `apigen/apigen` image, pinned by digest since ApiGen publishes no versioned image, and installs the dependencies with `composer install` when `vendor/` is missing (ApiGen also documents the classes of PHP and xmlseclibs the code refers to). It replaces `docs/` as a whole, so that the pages of removed classes or methods do not remain, and refuses to do so if a generated file holds an absolute path. The pages load their style sheet and scripts from `docs/assets/` only: the site loads nothing from other servers.
 
 
 ## How to Contribute?
