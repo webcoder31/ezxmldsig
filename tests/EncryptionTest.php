@@ -350,4 +350,91 @@ class EncryptionTest extends TestCase
         self::assertNotDecrypted($token, $reason);
         $this->assertNull($token->isDataEncrypted());
     }
+
+    /**
+     * Creates an encrypted token for crypt.cert.pem with the test signing
+     * key, with or without the private key of the recipient.
+     */
+    private function createSecureTokenFor($cryptKeyPath, $signCert = 'sign.cert.pem', $cryptKeyPassword = null)
+    {
+        $this->requireSymmetricEncryption();
+
+        return XMLDSigToken::createSecureXMLToken(
+            self::sampleData(),
+            self::cert('sign.key.pem'),
+            self::cert($signCert),
+            $cryptKeyPath,
+            self::cert('crypt.cert.pem'),
+            self::SIGN_KEY_PASSWORD,
+            $cryptKeyPassword
+        );
+    }
+
+    public function testATokenCreatedWithoutTheRecipientKeyIsCheckedAndDecryptedByTheRecipient()
+    {
+        $created = $this->createSecureTokenFor(null);
+
+        // Checked up to its decryption, its content left unread.
+        $this->assertNull($created->getError());
+        $this->assertSame([], $created->getAnomalies());
+        $this->assertTrue($created->isDigestValueOk());
+        $this->assertTrue($created->isSignatureValueOk());
+        $this->assertTrue($created->isCertTrusted());
+        $this->assertTrue($created->isSignatureValid());
+        $this->assertTrue($created->isDataEncrypted());
+        $this->assertNull($created->getData());
+        $this->assertNull($created->getTimestamp());
+        $this->assertNull($created->getTokenId());
+
+        $doc = new DOMDocument();
+        $doc->loadXML($created->getXML());
+        $this->assertSame(1, self::xpath($doc)->query('/ds:Signature/ds:Object/xenc:EncryptedData')->length);
+        $this->assertSame(0, self::xpath($doc)->query('//TokenData')->length);
+
+        // The recipient decrypts it with its private key.
+        $token = self::analyze($created->getXML(), self::cert('crypt.key.pem'));
+
+        $this->assertNull($token->getError());
+        $this->assertTrue($token->isSignatureValid());
+        $this->assertTrue($token->isDataEncrypted());
+        $this->assertSame(self::sampleData(), $token->getData());
+        $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $token->getTokenId());
+        $this->assertFalse($token->isOutOfDate());
+    }
+
+    public function testATokenCreatedWithTheRecipientKeyIsDecryptedAtCreation()
+    {
+        $created = $this->createSecureTokenFor(self::cert('crypt.key.pem'));
+
+        $this->assertNull($created->getError());
+        $this->assertTrue($created->isSignatureValid());
+        $this->assertTrue($created->isDataEncrypted());
+        $this->assertSame(self::sampleData(), $created->getData());
+        $this->assertNotNull($created->getTimestamp());
+        $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $created->getTokenId());
+
+        $token = self::analyze($created->getXML(), self::cert('crypt.key.pem'));
+
+        $this->assertTrue($token->isSignatureValid());
+        $this->assertSame($created->getTokenId(), $token->getTokenId());
+    }
+
+    public function testATokenCreatedWithoutTheRecipientKeyIsStillChecked()
+    {
+        // The signing key does not match the certificate included in the
+        // token: the check made without decrypting the token sees it.
+        $created = $this->createSecureTokenFor(null, 'attacker.cert.pem');
+
+        $this->assertFalse($created->isSignatureValid());
+        $this->assertStringContainsString('Token hash signature verification failed!', (string) $created->getError());
+        $this->assertNull($created->getData());
+    }
+
+    public function testADecryptionKeyPasswordWithoutDecryptionKeyIsRefusedAtCreation()
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Invalid parameter 'cryptKeyPassword'!");
+
+        $this->createSecureTokenFor(null, 'sign.cert.pem', 'cryptKeyPassword');
+    }
 }

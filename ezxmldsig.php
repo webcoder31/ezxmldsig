@@ -2,7 +2,7 @@
 /**
  * ezxmldsig.php
  *
- * Copyright © 2017 - Thierry Thiers <webcoder31@gmail.com>
+ * Copyright © 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * 
  * This  software  is governed  by  the CeCILL-C  license under French  law  and
  * abiding  by the rules of distribution of free  software. You can  use, modify
@@ -30,7 +30,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  *
  * @author    Thierry Thiers <webcoder31@gmail.com>
- * @copyright 2017 - Thierry Thiers <webcoder31@gmail.com>
+ * @copyright 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
  * @version   1.0.0
  */

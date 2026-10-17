@@ -2,7 +2,7 @@
 /**
  * X509Cert.php
  *
- * Copyright © 2017 - Thierry Thiers <webcoder31@gmail.com>
+ * Copyright © 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * 
  * This  software  is governed  by  the CeCILL-C  license under French  law  and
  * abiding  by the rules of distribution of free  software. You can  use, modify
@@ -30,7 +30,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  *
  * @author    Thierry Thiers <webcoder31@gmail.com>
- * @copyright 2017 - Thierry Thiers <webcoder31@gmail.com>
+ * @copyright 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
  * @version   1.0.0
  */
@@ -49,16 +49,16 @@ use Exception;
  *
  * The `X509Cert` class provides a set of convenient methods for extracting
  * essential information contained in an X.509 certificate and for performing
- * some useful checkings. Every cryptographic check (signature of the
+ * some useful checks. Every cryptographic check (signature of the
  * certificate, chain of trust, validity dates) is performed by OpenSSL. This
- * class is used internaly by the `XMLDSigToken` class.
+ * class is used internally by the `XMLDSigToken` class.
  */
 class X509Cert
 {
     /** @var string The X.509 certificate in PEM format. */
     private $cert;
 
-     /** @var array The X.509 information of the certificatet. */
+    /** @var array The X.509 information of the certificate. */
     private $x509Info;
 
 
@@ -350,14 +350,14 @@ class X509Cert
      * Only this link is checked: neither the validity dates nor the chain of
      * the CA certificate. Use `isTrustedBy()` to verify the whole chain.
      *
-     * NOTE : Note that more than one CA certificate can give a positive result,
-     *        some certificates re-issue signing certificates after having only
+     * NOTE: More than one CA certificate can give a positive result,
+     *        some CAs re-issue signing certificates after having only
      *        changed the expiration dates.
      *        Note that it also works with self-signed CA certificates. In this
-     *        case, passes the X.509 certificate itself to the function.
+     *        case, pass the X.509 certificate itself to the function.
      *
      * @param string $caCert The certificate (in PEM format) corresponding to
-     *        the private key that is supposed been used by CA to sign the X.509
+     *        the private key that is supposed to be used by the CA to sign the X.509
      *        certificate.
      *
      * @return boolean TRUE if origin of the X.509 certificate has been

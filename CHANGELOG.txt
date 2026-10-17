@@ -28,6 +28,17 @@ details follow.
 - Add `examples/certs/README.md`, and warnings in the README and the
   examples: the private keys of `examples/certs/` are public and must only
   serve the examples.
+- Add `SECURITY.md`: how to report a vulnerability privately, and the
+  supported versions (1.x; the 0.x versions must no longer be used).
+- README and docblocks: the encryption protects the content of the token,
+  not the request that carries it, and the library checks the fixed
+  structure of an XML token, not the whole XMLDSIG specification;
+  `isSignatureValid()` checks neither freshness (`isOutOfDate()`) nor replay
+  (`getTokenId()`), which the receiver must check; `expectedSubject` or
+  `signerCertPath` should restrict a trust anchor whose CA also issues
+  certificates to others. The examples of results are produced by the
+  current code, and typing errors are fixed, in the error messages too
+  ("Unknwon" becomes "Unknown").
 
 Backward-incompatible changes (major version):
 - Token analysis requires a trust anchor, given in `$options`: `caCertPath`
@@ -104,6 +115,14 @@ New:
   otherwise. Constants `XMLDSigToken::TOKEN_ID_NAME` and `TOKEN_ID_BYTES`.
 - Option `expectedSubject`: full Distinguished Name or subject fields the
   signing certificate must have.
+- `createSecureXMLToken()` accepts NULL as `$cryptKeyPath`: the sender no
+  longer needs the private key of the recipient. The created token is then
+  checked up to its decryption (structure, algorithms, digest, signature,
+  trust in the signing certificate), and `getData()`, `getTimestamp()` and
+  `getTokenId()` return NULL, its content being encrypted and left unread.
+  Given, the private key is used as before to decrypt the created token and
+  check its content. A `$cryptKeyPassword` given without `$cryptKeyPath`
+  throws an exception.
 
 Fixed:
 - `createXMLToken()` ignored its `$options`, passed in place of

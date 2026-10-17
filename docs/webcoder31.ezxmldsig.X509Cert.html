@@ -88,9 +88,9 @@
 	<div class="description"><p>Analyze an X.509 certificate.</p>
 <p>The <code>X509Cert</code> class provides a set of convenient methods for extracting
 essential information contained in an X.509 certificate and for performing
-some useful checkings. Every cryptographic check (signature of the
+some useful checks. Every cryptographic check (signature of the
 certificate, chain of trust, validity dates) is performed by OpenSSL. This
-class is used internaly by the <code>XMLDSigToken</code> class.</p>
+class is used internally by the <code>XMLDSigToken</code> class.</p>
 </div>
 		</div>
 
@@ -605,11 +605,11 @@ must be a CA (&quot;CA:TRUE&quot; basic constraint and, if it has a &quot;keyUsa
 extension, &quot;keyCertSign&quot;).</p>
 <p>Only this link is checked: neither the validity dates nor the chain of
 the CA certificate. Use <code>isTrustedBy()</code> to verify the whole chain.</p>
-<p>NOTE : Note that more than one CA certificate can give a positive result,
-some certificates re-issue signing certificates after having only
+<p>NOTE: More than one CA certificate can give a positive result,
+some CAs re-issue signing certificates after having only
 changed the expiration dates.
 Note that it also works with self-signed CA certificates. In this
-case, passes the X.509 certificate itself to the function.</p>
+case, pass the X.509 certificate itself to the function.</p>
 </div>
 
 							<h4>Parameters</h4>
@@ -617,7 +617,7 @@ case, passes the X.509 certificate itself to the function.</p>
 									<tr>
 										<td><var>$caCert</var>&nbsp;&nbsp;</td>
 										<td><p>The certificate (in PEM format) corresponding to
-the private key that is supposed been used by CA to sign the X.509
+the private key that is supposed to be used by the CA to sign the X.509
 certificate.</p>
 </td>
 									</tr>
