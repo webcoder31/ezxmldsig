@@ -1,5 +1,5 @@
-Unreleased
-----------
+1.0.0 (2026-10-17)
+-------------------
 Next major version. In short: a token is only valid if its signing
 certificate is trusted (a trust anchor is required), the default algorithms
 are RSA-SHA256, SHA-256 and AES-256-GCM, RSA 1.5 is refused and CBC only
