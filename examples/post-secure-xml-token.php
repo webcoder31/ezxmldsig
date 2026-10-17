@@ -1,6 +1,11 @@
 <?php 
 /**
  * File: post-secure-xml-token.php
+ *
+ * WARNING: The private keys of examples/certs/ are public: they are
+ * published with the source code of this library. Anyone can sign tokens
+ * that these examples trust, and decrypt the tokens they encrypt. Use them
+ * for this demonstration only, never in an application.
  */
 
 // Autoload required classes.

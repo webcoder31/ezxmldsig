@@ -1,0 +1,1307 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class RobRichards\XMLSecLibs\XMLSecurityKey | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-RobRichards.html">RobRichards</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-RobRichards.XMLSecLibs.html">XMLSecLibs</a>
+			</li>
+	</ul>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="RobRichards.XMLSecLibs.XMLSecEnc.html">
+							XMLSecEnc
+						</a>
+					</li>
+					<li>
+						<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html">
+							XMLSecurityDSig
+						</a>
+					</li>
+					<li class="active">
+						<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html">
+							XMLSecurityKey
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-RobRichards.XMLSecLibs.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="RobRichards.XMLSecLibs.XMLSecurityKey.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-RobRichards.html">RobRichards</a>\<a href="namespace-RobRichards.XMLSecLibs.html">XMLSecLibs</a>\<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html">XMLSecurityKey</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>xmlseclibs.php Copyright (c) 2007-2024, Robert Richards <a href="mailto:rrichards@cdatazone.org">rrichards@cdatazone.org</a>.
+All rights reserved. Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met: * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution. * Neither the name of Robert Richards nor the names of his
+contributors may be used to endorse or promote products derived
+from this software without specific prior written permission. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+&quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="__construct" id="___construct">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>__construct(<span>string <var>$type</var></span>, <span>null|array <var>$params</var> = <span class="php-kw">null</span></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#___construct">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getSymmetricKeySize" id="_getSymmetricKeySize">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getSymmetricKeySize(): int|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Retrieve the key size for the symmetric encryption algorithm.. If the key size is unknown, or this isn't a symmetric encryption algorithm,
+null is returned.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Retrieve the key size for the symmetric encryption algorithm.. If the key size is unknown, or this isn't a symmetric encryption algorithm,
+null is returned.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The number of bytes in the key.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getSymmetricKeySize">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="generateSessionKey" id="_generateSessionKey">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>generateSessionKey(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Generates a session key using the openssl-extension.
+In case of using DES3-CBC the key is checked for a proper parity bits set.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Generates a session key using the openssl-extension.
+In case of using DES3-CBC the key is checked for a proper parity bits set.</p>
+</div>
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_generateSessionKey">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getRawThumbprint" id="_getRawThumbprint">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getRawThumbprint(<span>string <var>$cert</var></span>): null|string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Get the raw thumbprint of a certificate</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Get the raw thumbprint of a certificate</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getRawThumbprint">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="loadKey" id="_loadKey">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>loadKey(<span>string <var>$key</var></span>, <span>bool <var>$isFile</var> = <span class="php-kw">false</span></span>, <span>bool <var>$isCert</var> = <span class="php-kw">false</span></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Loads the given key, or - with isFile set true - the key from the keyfile.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Loads the given key, or - with isFile set true - the key from the keyfile.</p>
+</div>
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_loadKey">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="encryptData" id="_encryptData">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>encryptData(<span>string <var>$data</var></span>): mixed|string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Encrypts the given data (string) using the regarding php-extension, depending on the library assigned to algorithm in the contructor.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Encrypts the given data (string) using the regarding php-extension, depending on the library assigned to algorithm in the contructor.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_encryptData">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decryptData" id="_decryptData">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decryptData(<span>string <var>$data</var></span>): mixed|string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decrypts the given data (string) using the regarding php-extension, depending on the library assigned to algorithm in the contructor.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decrypts the given data (string) using the regarding php-extension, depending on the library assigned to algorithm in the contructor.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decryptData">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="signData" id="_signData">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>signData(<span>string <var>$data</var></span>): mixed|string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Signs the data (string) using the extension assigned to the type in the constructor.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Signs the data (string) using the extension assigned to the type in the constructor.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_signData">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="verifySignature" id="_verifySignature">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>verifySignature(<span>string <var>$data</var></span>, <span>string <var>$signature</var></span>): bool|int</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Verifies the data (string) against the given signature using the extension assigned to the type in the constructor. Returns in case of openSSL:
+1 on succesful signature verification,
+0 when signature verification failed,
+-1 if an error occurred during processing. NOTE: be very careful when checking the return value, because in PHP,
+-1 will be cast to True when in boolean context. So always check the
+return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Verifies the data (string) against the given signature using the extension assigned to the type in the constructor. Returns in case of openSSL:
+1 on succesful signature verification,
+0 when signature verification failed,
+-1 if an error occurred during processing. NOTE: be very careful when checking the return value, because in PHP,
+-1 will be cast to True when in boolean context. So always check the
+return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_verifySignature">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getAlgorith" id="_getAlgorith">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><span class="deprecated">getAlgorith</span>(): mixed</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getAlgorith">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getAlgorithm" id="_getAlgorithm">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getAlgorithm(): mixed</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getAlgorithm">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="makeAsnSegment" id="_makeAsnSegment">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>makeAsnSegment(<span>int <var>$type</var></span>, <span>string <var>$string</var></span>): null|string</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_makeAsnSegment">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="convertRSA" id="_convertRSA">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>convertRSA(<span>string <var>$modulus</var></span>, <span>string <var>$exponent</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Hint: Modulus and Exponent must already be base64 decoded</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Hint: Modulus and Exponent must already be base64 decoded</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_convertRSA">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="serializeKey" id="_serializeKey">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>serializeKey(<span>mixed <var>$parent</var></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_serializeKey">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getX509Certificate" id="_getX509Certificate">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getX509Certificate(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Retrieve the X509 certificate this key represents. Will return the X509 certificate in PEM-format if this key represents
+an X509 certificate.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Retrieve the X509 certificate this key represents. Will return the X509 certificate in PEM-format if this key represents
+an X509 certificate.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The X509 certificate or null if this key doesn't represent an X509-certificate.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getX509Certificate">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getX509Thumbprint" id="_getX509Thumbprint">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>getX509Thumbprint(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Get the thumbprint of this X509 certificate. Returns:
+The thumbprint as a lowercase 40-character hexadecimal number, or null
+if this isn't a X509 certificate.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Get the thumbprint of this X509 certificate. Returns:
+The thumbprint as a lowercase 40-character hexadecimal number, or null
+if this isn't a X509 certificate.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>Lowercase 40-character hexadecimal number of thumbprint</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getX509Thumbprint">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="fromEncryptedKeyElement" id="_fromEncryptedKeyElement">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>fromEncryptedKeyElement(<span><a href="DOMElement.html"><span title="DOMElement">DOMElement</span></a> <var>$element</var></span>): <b><span class="active" title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></b></code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Create key from an EncryptedKey-element.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Create key from an EncryptedKey-element.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The EncryptedKey-element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The new key.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td></td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_fromEncryptedKeyElement">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="TRIPLEDES_CBC" id="TRIPLEDES_CBC">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>TRIPLEDES_CBC = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#tripledes-cbc'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#TRIPLEDES_CBC">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AES128_CBC" id="AES128_CBC">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AES128_CBC = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#aes128-cbc'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AES128_CBC">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AES192_CBC" id="AES192_CBC">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AES192_CBC = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#aes192-cbc'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AES192_CBC">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AES256_CBC" id="AES256_CBC">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AES256_CBC = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#aes256-cbc'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AES256_CBC">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AES128_GCM" id="AES128_GCM">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AES128_GCM = <span class="php-str">'http://www.w3.org/2009/xmlenc11#aes128-gcm'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AES128_GCM">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AES192_GCM" id="AES192_GCM">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AES192_GCM = <span class="php-str">'http://www.w3.org/2009/xmlenc11#aes192-gcm'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AES192_GCM">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AES256_GCM" id="AES256_GCM">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AES256_GCM = <span class="php-str">'http://www.w3.org/2009/xmlenc11#aes256-gcm'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AES256_GCM">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_1_5" id="RSA_1_5">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_1_5 = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#rsa-1_5'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_1_5">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_OAEP_MGF1P" id="RSA_OAEP_MGF1P">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_OAEP_MGF1P = <span class="php-str">'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_OAEP_MGF1P">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_OAEP" id="RSA_OAEP">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_OAEP = <span class="php-str">'http://www.w3.org/2009/xmlenc11#rsa-oaep'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_OAEP">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="DSA_SHA1" id="DSA_SHA1">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>DSA_SHA1 = <span class="php-str">'http://www.w3.org/2000/09/xmldsig#dsa-sha1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#DSA_SHA1">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_SHA1" id="RSA_SHA1">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_SHA1 = <span class="php-str">'http://www.w3.org/2000/09/xmldsig#rsa-sha1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_SHA1">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_SHA256" id="RSA_SHA256">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_SHA256 = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_SHA256">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_SHA384" id="RSA_SHA384">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_SHA384 = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_SHA384">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_SHA512" id="RSA_SHA512">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>RSA_SHA512 = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_SHA512">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="HMAC_SHA1" id="HMAC_SHA1">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>HMAC_SHA1 = <span class="php-str">'http://www.w3.org/2000/09/xmldsig#hmac-sha1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#HMAC_SHA1">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AUTHTAG_LENGTH" id="AUTHTAG_LENGTH">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AUTHTAG_LENGTH = <span class="php-num">16</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AUTHTAG_LENGTH">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="properties">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Properties</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="type" id="$type">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">int|string</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$type</var> = <span class="php-num">0</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$type">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="key" id="$key">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">mixed|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$key</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$key">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="passphrase" id="$passphrase">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">string</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$passphrase</var> = <span class="php-str">""</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$passphrase">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="iv" id="$iv">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">string|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$iv</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$iv">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="name" id="$name">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">string|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$name</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$name">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="keyChain" id="$keyChain">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">mixed|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$keyChain</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$keyChain">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="isEncrypted" id="$isEncrypted">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">bool</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$isEncrypted</var> = <span class="php-kw">false</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$isEncrypted">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="encryptedCtx" id="$encryptedCtx">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap"><a href="RobRichards.XMLSecLibs.XMLSecEnc.html"><span title="RobRichards\XMLSecLibs\XMLSecEnc">XMLSecEnc</span></a>|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$encryptedCtx</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$encryptedCtx">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="guid" id="$guid">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">mixed|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$guid</var> = <span class="php-kw">null</span></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$guid">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

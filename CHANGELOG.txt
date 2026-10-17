@@ -1,5 +1,14 @@
 Unreleased
 ----------
+Next major version. In short: a token is only valid if its signing
+certificate is trusted (a trust anchor is required), the default algorithms
+are RSA-SHA256, SHA-256 and AES-256-GCM, RSA 1.5 is refused and CBC only
+accepted when declared, every option is checked against its context, each
+token carries a signed random identifier that lets the receiver refuse a
+replayed token, XML documents with a document type declaration are refused,
+the HTML output is escaped, and the library runs under PHP 7.4 to 8.3. The
+details follow.
+
 - Add a PHPUnit test suite covering the creation and analysis of signed and
   encrypted tokens, run in Docker under PHP 7.4 and PHP 8.3 with `bin/test`.
 - Add `bin/gen-test-certs`, which generates the test certificate chain in
@@ -7,6 +16,13 @@ Unreleased
 - Regenerate the example certificates: the signing certificate had expired.
   examples/certs/ now also holds the root CA certificate.
 - `bin/gen-test-certs` always runs OpenSSL in the alpine:3.22 Docker image.
+- Add `bin/gen-docs`, which generates the API documentation of `docs/` with
+  ApiGen in Docker. `docs/` is regenerated from the current code: its pages
+  have new names (e.g. `webcoder31.ezxmldsig.XMLDSigToken.html` instead of
+  `class-webcoder31.ezxmldsig.XMLDSigToken.html`).
+- Add `examples/certs/README.md`, and warnings in the README and the
+  examples: the private keys of `examples/certs/` are public and must only
+  serve the examples.
 
 Backward-incompatible changes (major version):
 - Token analysis requires a trust anchor, given in `$options`: `caCertPath`
@@ -60,12 +76,27 @@ Backward-incompatible changes (major version):
   a token ("ds:SignatureMethod", "xenc:EncryptedKey/xenc:EncryptionMethod").
 - `createSecureXMLToken()` throws an exception when `$cryptCertPath` is NULL,
   instead of creating an unencrypted token.
+- Each token holds a random identifier in a node "Token/TokenId", between
+  "TokenTimestamp" and "TokenData". A token without it, as created by the
+  0.x versions, is rejected ("Token identifier is missing!"), whatever the
+  options, and so is a token whose identifier is not 32 lowercase
+  hexadecimal characters ("Token identifier is malformed!").
+- A document with a document type declaration (DOCTYPE) is rejected before
+  it is parsed, at analysis ("XML Digital Signature must not have a
+  document type declaration (DOCTYPE)!") and by `alterXML()`, which returns
+  FALSE for it. So is a document that is not in UTF-8 ("XML Digital
+  Signature must be encoded in UTF-8!"): one that holds a NUL byte (UTF-16,
+  UTF-32) or declares another encoding.
+- `getHTMLDump()` no longer loads the script `run_prettify.js` of Google Code
+  Prettify: the XML token is shown without syntax highlighting.
 
 New:
 - Constants `XMLDSigToken::AES128_GCM`, `AES192_GCM` and `AES256_GCM`,
   accepted by the option `sessionKeyCipheringAlgorithm`.
 - `XMLDSigToken::isCertTrusted()`, `X509Cert::isTrustedBy()`,
   `X509Cert::canSign()` and `X509Cert::getFingerprint()`.
+- `XMLDSigToken::getTokenId()`: the identifier of a valid token, NULL
+  otherwise. Constants `XMLDSigToken::TOKEN_ID_NAME` and `TOKEN_ID_BYTES`.
 - Option `expectedSubject`: full Distinguished Name or subject fields the
   signing certificate must have.
 
@@ -75,6 +106,13 @@ Fixed:
 - `sessionKeyCipheringAlgorithm` was checked against the digest algorithms,
   so that no encryption algorithm was accepted: it now accepts the symmetric
   encryption algorithms.
+- `getPrettyXML()`, and thus `getHTMLDump()`, failed under PHP 8 (arguments
+  of `implode()` in the wrong order, deprecated under PHP 7.4).
+- The analysis set `DOMDocument::$preserveWhiteSpaces`, which does not exist
+  (deprecation warning under PHP 8.2 and later), instead of
+  `preserveWhiteSpace`. Whitespace was and remains preserved.
+- `getPrettyXML()`, `getHTMLDump()` and `alterXML()` raised PHP warnings for
+  a document that is not valid XML.
 
 Security:
 - Require robrichards/xmlseclibs ^3.1.5 instead of 2.0.1, which is affected by
@@ -123,6 +161,23 @@ Security:
   declared, and the default AES-GCM rejects altered data before any
   parsing. A token whose encryption algorithms are not the expected ones was
   decrypted before being rejected: it is now rejected without decryption.
+- Fix cross-site scripting in `getHTMLDump()`: token data, error,
+  anomalies, Distinguished Name and certificate fields were written without
+  escaping, for valid and rejected tokens alike, and
+  `examples/parse-xml-token.php` shows it for any posted token. Every value
+  is now escaped with `htmlspecialchars()` (`ENT_QUOTES | ENT_SUBSTITUTE`,
+  UTF-8), the outputs of `var_dump()` included, and the example escapes the
+  data it dumps.
+- `getHTMLDump()` loaded a script from cdn.rawgit.com, branch "master",
+  without integrity check: it loads no external resource any more.
+- The XML parser no longer expands the entities of a document type
+  declaration nor accesses the network (`LIBXML_NONET`): documents with a
+  DOCTYPE are refused before parsing (entity expansion, external entities).
+- Replay: a valid token could be submitted again for as long as it was not
+  out of date, with nothing to tell it from the original. The signed
+  identifier of each token (`getTokenId()`) lets the receiver refuse a token
+  it has already accepted; the library keeps no list of the tokens it has
+  seen (see the README, section "Replay").
 
 Requirements:
 - PHP 7.4 or greater (was PHP 5.6).

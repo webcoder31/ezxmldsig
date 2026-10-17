@@ -102,10 +102,12 @@ abstract class TestCase extends BaseTestCase
      * @param int $days Validity, from now. 0 gives a certificate that expires
      *     at the current second.
      * @param string|null $issuerKeyPassword Password of the issuer key.
+     * @param array $subject Subject fields that replace or complete the
+     *     default ones.
      *
      * @return array ['cert' => path, 'key' => path, 'prefix' => path prefix]
      */
-    protected function issueCertificate($name, $profile, $issuer, $days = 30, $issuerKeyPassword = null)
+    protected function issueCertificate($name, $profile, $issuer, $days = 30, $issuerKeyPassword = null, array $subject = [])
     {
         if (!is_file($this->tempDir() . '/openssl.cnf'))
         {
@@ -144,7 +146,7 @@ abstract class TestCase extends BaseTestCase
             $issuerKey = openssl_pkey_get_private(file_get_contents($issuerPrefix . '.key.pem'), (string) $issuerKeyPassword);
         }
 
-        $csr = openssl_csr_new([
+        $csr = openssl_csr_new($subject + [
             'C' => 'DK',
             'O' => 'Lothbrok Ltd',
             'OU' => ucfirst($name) . ' Dept',

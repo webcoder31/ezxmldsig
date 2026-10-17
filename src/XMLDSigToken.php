@@ -46,7 +46,6 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
-use SimpleXMLElement;
 use Exception;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecEnc;
@@ -65,12 +64,17 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   http://www.w3.org/TR/2001/REC-xml-c14n-20010315.
  *
  * - Algorithm used to generate the signature is:
- *   http://www.w3.org/2000/09/xmldsig#rsa-sha1.
+ *   http://www.w3.org/2001/04/xmldsig-more#rsa-sha256.
  *
  * - Algorithm used to compute the hash of token data is:
- *   http://www.w3.org/2000/09/xmldsig#sha1.
+ *   http://www.w3.org/2001/04/xmlenc#sha256.
  *
  * - Algorithm used to encode data's values is: Base64.
+ *
+ * The analysis expects these algorithms unless its options name others (see
+ * `__construct()`), and it requires a trust anchor: the CA certificates
+ * and/or the pinned certificate the signing certificate is verified against.
+ * Without it, no token is valid.
  *
  * **An XML token looks like this:**
  *
@@ -79,12 +83,12 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
  *   <ds:SignedInfo>
  *     <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
- *     <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+ *     <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
  *     <ds:Reference URI="#Token">
  *       <ds:Transforms>
  *         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
  *       </ds:Transforms>
- *       <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+ *       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
  *       <ds:DigestValue>---- TOKEN HASH ----</ds:DigestValue>
  *     </ds:Reference>
  *   </ds:SignedInfo>
@@ -97,6 +101,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   <ds:Object Id="Token">
  *     <Token>
  *       <TokenTimestamp>2016-10-24T08:33:14Z</TokenTimestamp>
+ *       <TokenId>---- 128-BIT RANDOM IDENTIFIER (HEXADECIMAL) ----</TokenId>
  *       <TokenData>
  *         <data1 Algorithm="base64">---- BASE64 ENCODED DATA ----</data1>
  *         <data2 Algorithm="base64">---- BASE64 ENCODED DATA ----</data2>
@@ -121,8 +126,13 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Compute an UTC timestamp and store it in a node `<TokenTimestamp />`.
  *
- * - Aggregate the nodes `<TokenTimestamp />` and `<TokenData />` inside a node
- *   `<Token />`.
+ * - Generate a random identifier of 128 bits (`random_bytes()`) and store
+ *   it, in hexadecimal, in a node `<TokenId />`. Signed with the rest of the
+ *   token, it lets the receiver refuse a token it has already accepted (see
+ *   `getTokenId()`).
+ *
+ * - Aggregate the nodes `<TokenTimestamp />`, `<TokenId />` and
+ *   `<TokenData />` inside a node `<Token />`.
  *
  * - Load the base DOM document representing an XML digital signature:
  *
@@ -147,8 +157,8 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  *   - Canonicalizing the content of the node `<ds:Object Id="Token" />`.
  *
- *   - Computing the SHA1 hash of the canonicalized node and storing it in the
- *     node `<ds:DigestValue />`.
+ *   - Computing the hash (SHA-256 by default) of the canonicalized node and
+ *     storing it in the node `<ds:DigestValue />`.
  *
  * - Includes, in the the XML token, the X.509 certificate associated to the
  *   private key that will be used to perform the signing (see the next steps
@@ -167,10 +177,16 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * **The signature validation process consist in the following actions:**
  *
- * - Load the XML Digital Singature in a DOM document.
+ * - Load the XML Digital Singature in a DOM document. A document with a
+ *   document type declaration (DOCTYPE), or not encoded in UTF-8, is
+ *   refused before it is parsed, and the parser never accesses the network
+ *   (see `_loadXML()`).
  *
- * - Compute the SHA1 hash of the content of the node
- *   `<ds:Object Id="Token" />`.
+ * - Verify that the algorithms of the XML Digital Signature are the
+ *   expected ones.
+ *
+ * - Compute the hash of the content of the node `<ds:Object Id="Token" />`
+ *   with the digest algorithm.
  *
  * - Compare the computed hash with the one stored in the node
  *   `<ds:DigestValue />`. If the hash are different, this means that the
@@ -197,8 +213,9 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * - NOTE: If data decryption is required, this process will take place here
  *   (this will be described later).
  *
- * - Extract the timestamp stored in the content of the node
- *   `<ds:Object Id="Token" />` and memorise it.
+ * - Extract the timestamp and the identifier stored in the content of the
+ *   node `<ds:Object Id="Token" />` and memorise them. A token without
+ *   identifier is rejected.
  *
  * - Extract the data stored in the content of the node
  *   `<ds:Object Id="Token" />`.
@@ -227,12 +244,12 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
  *   <ds:SignedInfo>
  *     <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
- *     <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+ *     <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
  *     <ds:Reference URI="#Token">
  *       <ds:Transforms>
  *         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
  *       </ds:Transforms>
- *       <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+ *       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
  *       <ds:DigestValue>---- TOKEN HASH ----</ds:DigestValue>
  *     </ds:Reference>
  *   </ds:SignedInfo>
@@ -287,6 +304,19 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Decrypt the content of the last node `<xenc:CipherValue />` using the
  *   deciphered session key.
+ *
+ * The decryption only takes place once the digest, the signature, the trust
+ * in the signing certificate and the algorithms have been verified, and
+ * every failure that depends on the encrypted content gives the same error,
+ * `Token decryption failed!`. RSA 1.5 is refused, and a CBC algorithm is
+ * only accepted when the analysis declares it (see `__construct()`).
+ *
+ * **Replay:**
+ *
+ * A valid token can be submitted again for as long as `isOutOfDate()`
+ * accepts it. The class keeps no list of the tokens it has analyzed: the
+ * caller must keep the identifiers it accepted (`getTokenId()`) and refuse a
+ * token whose identifier is among them.
  */
 class XMLDSigToken
 {
@@ -304,6 +334,13 @@ class XMLDSigToken
 
     /** @const string The name of the token timestamp node. */
     const TOKEN_TIMESTAMP_NAME = 'TokenTimestamp';
+
+    /** @const string The name of the token identifier node. */
+    const TOKEN_ID_NAME = 'TokenId';
+
+    /** @const int The number of random bytes of the token identifier, written
+    in hexadecimal (see getTokenId()). */
+    const TOKEN_ID_BYTES = 16;
 
     /** @const string The format of the token timestamp (YYYY-MM-DDThh:mm:ssZ).
     NOTE: The timestamp should always be expressed in UTC. */
@@ -450,6 +487,9 @@ class XMLDSigToken
     /** @var string The token timestamp (format : 'yyyy-MM-ddThh:mm:ssZ'). */
     private $timestamp = null;
 
+    /** @var string The token identifier (see getTokenId()). */
+    private $tokenId = null;
+
     /** @var X509Cert The X.509 certificate included in the XML Digital
     Signature. */
     private $x509Certificate = null;
@@ -505,6 +545,7 @@ class XMLDSigToken
             'isCertTrusted'          => $this->isCertTrusted,
             'isDataEncrypted'        => $this->isDataEncrypted,
             'timestamp'              => $this->timestamp,
+            'tokenId'                => $this->getTokenId(),
             'data'                   => $this->data,
             'error'                  => $this->error,
             'anomalies'              => $this->anomalies
@@ -536,15 +577,14 @@ class XMLDSigToken
      * If `$xmlOrData` is an array (a flat or multidimensional associative
      * array), the object will create an enveloping XML digital signature
      * containing an XML token that holds the provided data and a timestamp
-     * generated automatically. The envoloped XML token will be encrypted if an
-     * X.509 certificate is provided for that. In this case, the `$signKeyPath`
-     * and `$signCertPath` parameters are required. If the `$cryptCertPath`
-     * parameter is also provided, the XML token will be encrypted. If the
-     * `$cryptCertPath` parameter is also provided, the $cryptKeyPath parameter
-     * must be provided too, in order to verify that the created XML Digital
-     * Signature is well formed. If the X.509 certificate used for encryption
-     * (cf. `$cryptCertPath` parameter) is protected by a password, this
-     * password may be passed using the `$cryptKeyPassword` parameter.
+     * generated automatically, with a random identifier (see `getTokenId()`).
+     * In this case, the `$signKeyPath` and `$signCertPath` parameters are
+     * required. If the `$cryptCertPath` parameter is also provided, the XML
+     * token will be encrypted, and the `$cryptKeyPath` parameter must be
+     * provided too, in order to verify that the created XML Digital Signature
+     * is well formed. If the private key used for decryption (cf.
+     * `$cryptKeyPath` parameter) is protected by a password, this password may
+     * be passed using the `$cryptKeyPassword` parameter.
      *
      * **XML token analysis:**
      *
@@ -597,7 +637,7 @@ class XMLDSigToken
      * token must have been built with. A token built with other algorithms is
      * rejected (`getError()` lists them), unless `checkSigningAlgorithms` or
      * `checkCryptingAlgorithms` is FALSE. To analyze a token built with
-     * RSA-SHA1 and SHA-1 (the defaults of the 0.x versions):
+     * RSA-SHA1 and SHA-1:
      *
      * <code>
      * $options = [
@@ -1297,8 +1337,8 @@ class XMLDSigToken
      * @param array $options Configuration options
      *     (see `__construct()` for details).
      *
-     * @return XMLDSigToken An XMLDSigToken object or NULL if the object
-     *     creation failed.
+     * @return XMLDSigToken An XMLDSigToken object. If the token cannot be
+     *     created, `getError()` tells why.
      *
      * @throws Exception
      *
@@ -1358,8 +1398,8 @@ class XMLDSigToken
      * @param array $options Configuration options
      *     (see `__construct()` for details).
      *
-     * @return XMLDSigToken An XMLDSigToken object or NULL if the object
-     *     creation failed.
+     * @return XMLDSigToken An XMLDSigToken object. If the token cannot be
+     *     created, `getError()` tells why.
      *
      * @throws Exception
      *
@@ -1413,8 +1453,9 @@ class XMLDSigToken
      * @param array $options Configuration options, trust anchor included
      *     (see `__construct()` for details).
      *
-     * @return XMLDSigToken An XMLDSigToken object or NULL if the object
-     *     creation failed.
+     * @return XMLDSigToken An XMLDSigToken object. If the token is not
+     *     valid, `isSignatureValid()` returns FALSE and `getError()` tells
+     *     why.
      *
      * @throws Exception
      *
@@ -1459,8 +1500,9 @@ class XMLDSigToken
      * @param array $options Configuration options, trust anchor included
      *     (see `__construct()` for details).
      *
-     * @return XMLDSigToken An XMLDSigToken object or NULL if the object
-     *     creation failed.
+     * @return XMLDSigToken An XMLDSigToken object. If the token is not
+     *     valid, `isSignatureValid()` returns FALSE and `getError()` tells
+     *     why.
      *
      * @throws Exception
      *
@@ -1530,6 +1572,13 @@ class XMLDSigToken
         $dt->setTimeZone(new DateTimeZone('UTC'));
         $tokenTimestampElement = $xmlDoc->createElement('TokenTimestamp', $dt->format(self::TOKEN_TIMESTAMP_FORMAT));
         $tokenTimestampNode = $tokenNode->appendChild($tokenTimestampElement);
+
+        // Create a node "TokenId" that holds a random identifier, in
+        // hexadecimal, and append it to the node "Token". The signature
+        // covers it: the receiver can refuse a token whose identifier it has
+        // already accepted (see getTokenId()).
+        $tokenIdElement = $xmlDoc->createElement(self::TOKEN_ID_NAME, bin2hex(random_bytes(self::TOKEN_ID_BYTES)));
+        $tokenNode->appendChild($tokenIdElement);
 
         /**
          * Inline function to build a node tree, whose root node will be named
@@ -1696,40 +1745,10 @@ class XMLDSigToken
         // Store the provided XML Digital Signature.
         $this->xml = $xml;
 
-        // Check that the provided string is a valid XML document.
-        $isValidXml = true;
-        $prevState = libxml_use_internal_errors(true); // Told PHP to not output warnings on errors.
-
-        try
-        {
-            new SimpleXMLElement($this->xml);
-        }
-        catch (Exception $e)
-        {
-            $isValidXml = false;
-        }
-
-        if (count(libxml_get_errors()) > 0)
-        {
-            // There has been XML errors.
-            $isValidXml = false;
-        }
-
-        libxml_clear_errors(); // Clean up libxml errors.
-        libxml_use_internal_errors($prevState); // Restore libxml to its previous state.
-
-        if (!$isValidXml)
-        {
-            throw new Exception("XML Digital Signature is not a valid XML document!");
-        }
-
-        // Prepair a DOM document where to load the XML Digital Signature.
-        $xmlDoc = new DOMDocument('1.0', 'UTF-8');
-
-        // Load the enveloping XML Digital Signature into the DOM document
-        // preserving its formatting.
-        $xmlDoc->preserveWhiteSpaces = true;
-        $xmlDoc->loadXML($xml);
+        // Load the enveloping XML Digital Signature into a DOM document,
+        // preserving its formatting. A document with a document type
+        // declaration is refused before it is parsed (see _loadXML()).
+        $xmlDoc = self::_loadXML($xml, "XML Digital Signature");
 
         // Instantiate and store a DOMXpath object to navigate through the DOM
         // document that holds the XML Digital Signature.
@@ -2131,6 +2150,30 @@ class XMLDSigToken
             $this->anomalies[] = "Token timestamp is malformed!";
         }
 
+        // Get the node "ds:Signature/ds:Object/Token/TokenId". A token without
+        // identifier (as created by the 0.x versions) is rejected: the
+        // receiver could not tell it from a replayed one (see getTokenId()).
+        $query = self::TOKEN_NAME . "/" . self::TOKEN_ID_NAME;
+        $nodeTokenIds = $this->xpath->query($query, $nodeObject);
+        if (0 === $nodeTokenIds->length)
+        {
+            // ANOMALY: Missing token identifier.
+            $this->anomalies[] = "Token identifier is missing!";
+        }
+        elseif (1 === $nodeTokenIds->length
+            && 1 === $nodeTokenIds->item(0)->childNodes->length
+            && XML_TEXT_NODE === $nodeTokenIds->item(0)->firstChild->nodeType
+            && preg_match('/\A[0-9a-f]{' . (2 * self::TOKEN_ID_BYTES) . '}\z/', $nodeTokenIds->item(0)->nodeValue))
+        {
+            // Store token identifier.
+            $this->tokenId = $nodeTokenIds->item(0)->nodeValue;
+        }
+        else
+        {
+            // ANOMALY: Malformed token identifier.
+            $this->anomalies[] = "Token identifier is malformed!";
+        }
+
         // Get the node "ds:Signature/ds:Object/Token/TokenData".
         $query = self::TOKEN_NAME . "/" . self::TOKEN_DATA_NAME;
         $nodeTokenData = $this->xpath->query($query, $nodeObject)->item(0);
@@ -2195,6 +2238,92 @@ class XMLDSigToken
         {
             $this->_throwAnomalies();
         }
+    }
+
+
+    /**
+     * Load an XML document into a DOM document.
+     *
+     * A document type declaration (DOCTYPE) declares entities, which the
+     * parser expands where the document references them: nested internal
+     * entities make a small document expand into gigabytes ("billion
+     * laughs"), and external entities read files or URLs. An XML token never
+     * has one, so a document holding the bytes `<!DOCTYPE` is refused before
+     * it is parsed, whatever it declares. This check reads the raw bytes: it
+     * only holds for an encoding in which `<!DOCTYPE` can only be written as
+     * these very bytes, which is why a document is also refused, before it is
+     * parsed, when it is not in UTF-8, the encoding of the tokens: one that
+     * holds a NUL byte (UTF-16, UTF-32), that declares another encoding, or
+     * that does not start with `<` (EBCDIC, among others). The parsed document is refused too
+     * if it has a document type node, should the check above miss one.
+     *
+     * The document is parsed with `LIBXML_NONET`: the parser never accesses
+     * the network. Any libxml error refuses the document, and none is output.
+     * Whitespace is preserved: digests are computed over the document as it
+     * was signed.
+     *
+     * @param string $xml The XML document.
+     *
+     * @param string $what What the document is, for the error messages.
+     *
+     * @return DOMDocument The loaded document.
+     *
+     * @throws Exception If the document is refused.
+     */
+    static private function _loadXML($xml, $what)
+    {
+        if (!is_string($xml) || '' === $xml)
+        {
+            throw new Exception($what . " is not a valid XML document!");
+        }
+
+        $start = ltrim(preg_replace('/\A\xEF\xBB\xBF/', '', $xml), " \t\r\n");
+        if (false !== strpos($xml, "\0")
+            || (preg_match('/\A<\?xml\s[^>]*?\bencoding\s*=\s*(["\'])([^"\']*)\1/', $start, $matches)
+                && 0 !== strcasecmp($matches[2], 'UTF-8')))
+        {
+            throw new Exception($what . " must be encoded in UTF-8!");
+        }
+        if ('<' !== substr($start, 0, 1))
+        {
+            throw new Exception($what . " is not a valid XML document!");
+        }
+
+        if (false !== strpos($xml, '<!DOCTYPE'))
+        {
+            throw new Exception($what . " must not have a document type declaration (DOCTYPE)!");
+        }
+
+        $xmlDoc = new DOMDocument('1.0', 'UTF-8');
+        $xmlDoc->preserveWhiteSpace = true;
+
+        $prevState = libxml_use_internal_errors(true);
+        libxml_clear_errors();
+        try
+        {
+            $loaded = $xmlDoc->loadXML($xml, LIBXML_NONET);
+            $isValidXml = $loaded && 0 === count(libxml_get_errors());
+        }
+        finally
+        {
+            libxml_clear_errors();
+            libxml_use_internal_errors($prevState);
+        }
+
+        if (!$isValidXml)
+        {
+            throw new Exception($what . " is not a valid XML document!");
+        }
+
+        foreach ($xmlDoc->childNodes as $node)
+        {
+            if (XML_DOCUMENT_TYPE_NODE === $node->nodeType)
+            {
+                throw new Exception($what . " must not have a document type declaration (DOCTYPE)!");
+            }
+        }
+
+        return $xmlDoc;
     }
 
 
@@ -2483,8 +2612,13 @@ class XMLDSigToken
     /**
      * Indicates whether the XML token is out of date or not.
      *
-     * NOTE: If token timestamp is over the current date/time, we assume token
-     * is peremted too.
+     * The token is out of date if its timestamp is more than `$ttl` seconds
+     * in the past, or more than `DESYNC_TOLERANCE` seconds in the future
+     * (clocks of sender and receiver out of sync), or if it has no valid
+     * timestamp.
+     *
+     * NOTE: A token that is not out of date can still be a replayed one: see
+     * `getTokenId()`.
      *
      * @param int $ttl The time to live (in seconds) allowed for the token.
      *
@@ -2526,7 +2660,8 @@ class XMLDSigToken
      * NOTE: If not evaluated (because an error occured before), this function
      * return NULL.
      *
-     * @return boolean TRUE if token data is encrypted, FALSE otherwise.
+     * @return boolean|null TRUE if token data is encrypted, FALSE otherwise,
+     *     NULL if cannot be evaluated.
      */
     public function isDataEncrypted()
     {
@@ -2580,6 +2715,11 @@ class XMLDSigToken
     /**
      * Get the user data contained in the XML token.
      *
+     * The data can only be trusted if `isSignatureValid()` returns TRUE (and
+     * the token is neither out of date nor replayed). They are only read
+     * once the digest, the signature and the signing certificate have been
+     * verified.
+     *
      * @return array|null The associative array containing token data, NULL if
      *     not available.
      */
@@ -2601,6 +2741,31 @@ class XMLDSigToken
 
 
     /**
+     * Get the identifier of the XML token.
+     *
+     * Each token created by this class holds a random identifier of 128 bits
+     * (32 hexadecimal characters), generated with `random_bytes()` and
+     * covered by the signature. A valid token can be submitted again for as
+     * long as `isOutOfDate()` accepts it: the class keeps no list of the
+     * tokens it has analyzed, so the caller must refuse a token whose
+     * identifier it has already accepted. A token is accepted from
+     * `DESYNC_TOLERANCE` seconds before its timestamp to `$ttl` seconds after
+     * it (see `isOutOfDate()`): keep each accepted identifier for at least
+     * `$ttl + XMLDSigToken::DESYNC_TOLERANCE` seconds after accepting it.
+     *
+     * A token without identifier (as created by the 0.x versions) is not
+     * valid.
+     *
+     * @return string|null The token identifier, NULL if the token is not
+     *     valid (see `isSignatureValid()`).
+     */
+    public function getTokenId()
+    {
+        return $this->isSignatureValid() ? $this->tokenId : null;
+    }
+
+
+    /**
      * Get the message of the error that occured while parsing the XML token.
      *
      * @return string|null The error message. If no error, NULL is returned.
@@ -2614,7 +2779,7 @@ class XMLDSigToken
     /**
      * Get the list of anomalies that occured while parsing the XML token.
      *
-     * @return array|null The list of anomalies if any, NULL otherwise.
+     * @return array The list of anomalies, empty if none.
      */
     public function getAnomalies()
     {
@@ -2697,7 +2862,7 @@ class XMLDSigToken
      * Get the UTC date from which the X.509 certificate that is included in the
      * XML token is valid.
      *
-     * @param string The format of the returned date (Default:
+     * @param string $dateFormat The format of the returned date (Default:
      *     XMLDSigToken::TOKEN_TIMESTAMP_FORMAT).
      *
      * @return string|null|false The date from which the X.509 certificate is
@@ -2718,10 +2883,11 @@ class XMLDSigToken
      * Get the UTC date to which the X.509 certificate that is included in the
      * XML token is valid.
      *
-     * @param string The format of the returned date (Default:
+     * @param string $dateFormat The format of the returned date (Default:
      *     XMLDSigToken::TOKEN_TIMESTAMP_FORMAT).
      *
-     * @return string|null|false The date to which the X.509 certificate, NULL
+     * @return string|null|false The date to which the X.509 certificate is
+     *     valid, NULL
      *     if not available, FALSE if $dateFormat is invalid.
      */
     public function getCertValidTo($dateFormat = self::TOKEN_TIMESTAMP_FORMAT)
@@ -3090,6 +3256,12 @@ class XMLDSigToken
     /**
      * Utility function for modifying a node of an XML content.
      *
+     * The XML content is loaded as an XML token is: a document with a
+     * document type declaration (DOCTYPE), or not encoded in UTF-8, is
+     * refused before it is parsed, and the parser never accesses the network
+     * (see `_loadXML()`). A refused or invalid document is left unchanged and
+     * the function returns FALSE.
+     *
      * @param string $xml XML content, passed by reference.
      *
      * @param string $nodePath The xpath query to select the node to modify.
@@ -3114,9 +3286,15 @@ class XMLDSigToken
         $oldValue = false;
 
         // Load the XML content into a DOM document.
-        $xmlDoc = new DOMDocument();
+        try
+        {
+            $xmlDoc = self::_loadXML($xml, "XML content");
+        }
+        catch (Exception $e)
+        {
+            return false;
+        }
         $xmlDoc->formatOutput = false;
-        $xmlDoc->loadXML($xml);
 
         // Instantiate a DOMXpath object to navigate in the XML document.
         $xpath = new DOMXPath($xmlDoc);
@@ -3200,7 +3378,12 @@ class XMLDSigToken
         {
             $xpathQuery = str_replace('ds:', $prefix, $xpathQuery);
             $nodeValue = XMLDSigToken::alterXML($xml, $xpathQuery, null, 'placeholer', false);
-            $nodeValue = PHP_EOL . implode(str_split($nodeValue, 64), PHP_EOL) . PHP_EOL;
+            if (false === $nodeValue)
+            {
+                // No such node, or the XML token is not a valid XML document.
+                return;
+            }
+            $nodeValue = PHP_EOL . implode(PHP_EOL, str_split($nodeValue, 64)) . PHP_EOL;
             XMLDSigToken::alterXML($xml, $xpathQuery, null, $nodeValue, false);
             // Remove XML encoded carriage return introduced when spliting node
             // value.
@@ -3264,22 +3447,44 @@ class XMLDSigToken
     /**
      * Utility function that returns information on the XML token in HTML
      * format.
+     *
+     * The output shows what the token carries, valid or not: data,
+     * certificate fields and error messages come from whoever sent the token.
+     * Every value is therefore escaped with `htmlspecialchars()`
+     * (`ENT_QUOTES | ENT_SUBSTITUTE`, UTF-8), the outputs of `var_dump()`
+     * included, so that it can be displayed as is in an HTML page. The output
+     * loads no external resource (script, style sheet, image).
+     *
+     * @return string An HTML fragment.
      */
     public function getHTMLDump()
     {
+        // Inline function to escape a value for HTML output.
+        $escape = function($value)
+        {
+            return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        };
 
         // Inline function to output var_dump() into a string.
         $dumpToString = function($var)
         {
-            // Capture var_dump() output.
+            // Capture var_dump() output. When Xdebug overloads var_dump(), it
+            // writes HTML if html_errors is on: turn it off so that the
+            // output is plain text, which is then escaped like any value.
+            $htmlErrors = ini_set('html_errors', '0');
             ob_start();
             var_dump($var);
             $res = ob_get_clean();
+            if (false !== $htmlErrors)
+            {
+                ini_set('html_errors', $htmlErrors);
+            }
 
-            // Sanitize.
-            $res = preg_replace('@<pre.+>@', '', $res, 1);
-            $res = preg_replace('@</pre>@', '', $res, 1);
-            $res = preg_replace('@<small>.+</small>.*\n@', '', $res, 1);
+            // Remove the location ("file:line:") Xdebug writes first.
+            if (extension_loaded('xdebug'))
+            {
+                $res = preg_replace('@\A[^\n]*:\d+:\n@', '', $res, 1);
+            }
 
             // Return result.
             return $res;
@@ -3289,6 +3494,7 @@ class XMLDSigToken
         $results['isSignatureValid()'] = $this->isSignatureValid() ? 'TRUE' : 'FALSE';
         $results['isDataEncrypted()'] = $this->isDataEncrypted() ? 'TRUE' : 'FALSE';
         $results['getTimestamp()'] = $this->getTimestamp();
+        $results['getTokenId()'] = is_null($this->getTokenId()) ? 'NULL' : $this->getTokenId();
         $results['getData()'] = $dumpToString($this->getData());
         $results['getError()'] = is_null($this->getError()) ? 'NULL' : $this->getError();
         $results['getAnomalies()'] = $dumpToString($this->getAnomalies());
@@ -3299,15 +3505,14 @@ class XMLDSigToken
         $results['getCertValidTo()'] = $this->getCertValidTo();
         $results['isCertOutOfDate()'] = $this->isCertOutOfDate() ? 'TRUE' : 'FALSE';
 
-        $html = '<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>';
-        $html .= '<table cellpadding="5">';
+        $html = '<table cellpadding="5">';
         $html .= '<tr><td colspan="2"><pre class="xdebug-var-dump"><b><span style="color: red">XML Digital Signature</span></b></pre></td></tr>';
-        $html .= '<tr><td colspan="2"><pre class=\"prettyprint\">' . htmlentities($this->getPrettyXML()) . '</pre></td></tr>';
+        $html .= '<tr><td colspan="2"><pre>' . $escape($this->getPrettyXML()) . '</pre></td></tr>';
         $html .= '<tr><td width="1%"><pre><b><span style="color: red">METHOD CALLS</span></b></pre></td>';
         $html .= '<td valign="top" width="99%"><pre><b><span style="color: red">RESULTS</span></b></pre></td></tr>';
         foreach ($results as $key => $value) {
-            $html .= '<tr><td valign="top"><pre><b>' . $key . '</b></pre></td>';
-            $html .= '<td valign="top"><pre>' . $value . '</pre></td></tr>';
+            $html .= '<tr><td valign="top"><pre><b>' . $escape($key) . '</b></pre></td>';
+            $html .= '<td valign="top"><pre>' . $escape($value) . '</pre></td></tr>';
         }
         $html .= '</table>';
 
