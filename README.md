@@ -9,6 +9,8 @@ The author of the **ezxmldsig** library is Thierry Thiers.
 
 The library **ezxmldsig** requires PHP version 7.4 or greater, with the OpenSSL extension, and the library **xmlseclibs** developed by Rob Richards, version ^3.1.5 (3.1.5 or a later 3.x version).
 
+The [demo](#demo) and the [tests](#tests) are not part of the Composer package and have their own requirements (a running Docker daemon).
+
 
 ## How to Install?
 
@@ -518,9 +520,11 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 
 ## Demo
 
-An interactive demo runs on your machine with one command. It requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
+An interactive demo runs on your machine. It requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
 
 ```
+git clone https://github.com/webcoder31/ezxmldsig.git
+cd ezxmldsig
 bin/demo          # http://127.0.0.1:8080/
 bin/demo 9000     # another port (or DEMO_PORT=9000)
 ```
@@ -531,8 +535,8 @@ The script first brings `vendor/` in line with `composer.json` with `bin/deps` (
 
 Every token of the demo is created and analyzed by the library, in PHP; the page only displays them:
 
-* **Issuer**: user data (nested values allowed), encryption on or off, and the signature, digest and encryption algorithms. The PHP code that creates the same token is shown.
-* **Token**: the XML token, highlighted, each block explained when you point at it or select it with the arrow keys: what it does, and whether the signature covers it. It can be copied, or edited by hand before it is verified.
+* **Issuer**: user data (nested values allowed), encryption on or off, and the signature, digest and encryption algorithms.
+* **Token**: the XML token, highlighted, each block explained when you point at it or select it with the arrow keys: what it does, and whether the signature covers it. It can be copied, or edited by hand before it is verified. Below it, a collapsed section shows the PHP code of the issuer that created this token; it changes only when a token is created.
 * **Receiver**: the trust anchor (`caCertPath`, `signerCertPath`, `expectedSubject`), the decryption key, the expected algorithms, the time to live and the replay protection. The verification is shown as a pipeline of checks: those of `isSignatureValid()` (structure, algorithms, digest, signature, trust in the certificate, decryption, content), then the two checks left to the caller, freshness (`isOutOfDate()`) and replay (`getTokenId()`, stored in a file of `demo/var/`, under a lock). The PHP code of this receiver is shown.
 * **Attack lab**: each attack alters the last token of the issuer (or a new one, when the last one does not suit the attack) on the server and submits it to the receiver, with a replay memory of its own: data tampering, signature wrapping, look-alike certificate, EC key substitution, replay, expired token, DOCTYPE with entities, altered ciphertext signed again by a trusted signer, certificate of an untrusted CA, and a script in the data. Each one shows what was changed (as a diff), the check that stops it, the exact message, and the security advisory of the 0.x versions it relates to. No vulnerable code runs: the lab shows what the current version does.
 
@@ -540,8 +544,7 @@ Every token of the demo is created and analyzed by the library, in PHP; the page
 
 The certificates of the demo (`demo/certs/`: a root CA, the intermediate CA that issued the signing and encryption certificates, these certificates with their keys, and the certificates of the attacks) are valid for 10 years from their generation. To issue new ones, run `bin/gen-test-certs --demo`.
 
-The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `tests/`, `docs/` and `bin/` out of the archives Composer installs. Clone the repository to run it.
-
+The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `tests/`, `docs/` and `bin/` out of the archives Composer installs.
 
 ## Tests
 
