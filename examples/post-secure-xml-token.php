@@ -19,20 +19,21 @@ $signKey = './certs/sign.key.pem';
 $signCert = './certs/sign.cert.pem';
 $signKeyPassword = 'signKeyPassword'; // Use null if it is not needed.
 
-// Asymmetric cryptographic key pair for crypting (in PEM format).
-$cryptKey = './certs/crypt.key.pem';
+// Encryption certificate of the recipient (in PEM format): the token is
+// encrypted for the owner of this certificate. Its private key stays with
+// the recipient (see parse-xml-token.php): the sender does not need it.
 $cryptCert = './certs/crypt.cert.pem';
-$cryptKeyPassword = 'cryptKeyPassword'; // Use null if it is not needed.
 
 // User data.
 $data = [
-    'name' => 'Ragnar Lothbrock',
+    'name' => 'Ragnar Lothbrok',
     'role' => 'Jarl',
     'location' => 'Kattegat'
 ];
 
-// Create token for user data.
-$token = XMLDSigToken::createSecureXMLToken($data, $signKey, $signCert, $cryptKey, $cryptCert, $signKeyPassword, $cryptKeyPassword);
+// Create token for user data. The private key of the recipient is not
+// given (null): the created token is checked without being decrypted.
+$token = XMLDSigToken::createSecureXMLToken($data, $signKey, $signCert, null, $cryptCert, $signKeyPassword);
 
 // Get the XML Digital Signature.
 $sig = $token->getXML();

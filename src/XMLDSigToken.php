@@ -2,7 +2,7 @@
 /**
  * XMLDSigToken.php
  *
- * Copyright © 2017 - Thierry Thiers <webcoder31@gmail.com>
+ * Copyright © 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  *
  * This  software  is governed  by  the CeCILL-C  license under French  law  and
  * abiding  by the rules of distribution of free  software. You can  use, modify
@@ -30,7 +30,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  *
  * @author    Thierry Thiers <webcoder31@gmail.com>
- * @copyright 2017 - Thierry Thiers <webcoder31@gmail.com>
+ * @copyright 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
  * @version   1.0.0
  */
@@ -60,7 +60,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * **This class uses the following default algorithms to operate:**
  *
- * - Algorithm used to canonalize data before signing is:
+ * - Algorithm used to canonicalize data before signing is:
  *   http://www.w3.org/TR/2001/REC-xml-c14n-20010315.
  *
  * - Algorithm used to generate the signature is:
@@ -100,7 +100,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   </ds:KeyInfo>
  *   <ds:Object Id="Token">
  *     <Token>
- *       <TokenTimestamp>2016-10-24T08:33:14Z</TokenTimestamp>
+ *       <TokenTimestamp>2026-10-17T04:43:05Z</TokenTimestamp>
  *       <TokenId>---- 128-BIT RANDOM IDENTIFIER (HEXADECIMAL) ----</TokenId>
  *       <TokenData>
  *         <data1 Algorithm="base64">---- BASE64 ENCODED DATA ----</data1>
@@ -116,7 +116,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * </ds:Signature>
  * ```
  *
- * **The signing process consists in the following actions:**
+ * **The signing process consists of the following actions:**
  *
  * - Load data from an associative array.
  *
@@ -149,21 +149,21 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Add the node `<Token />` to the node `<ds:Object Id="Token" />`.
  *
- * - NOTE : If data encryption is requested, this process will take place here
+ * - NOTE: If data encryption is requested, this process will take place here
  *   (this will be described later).
  *
  * - Build a node `<ds:Reference URI="#Token" />` and append it to the node
- *   `<ds:SignedInfo />`. This consists in:
+ *   `<ds:SignedInfo />`. This consists of:
  *
  *   - Canonicalizing the content of the node `<ds:Object Id="Token" />`.
  *
  *   - Computing the hash (SHA-256 by default) of the canonicalized node and
  *     storing it in the node `<ds:DigestValue />`.
  *
- * - Includes, in the the XML token, the X.509 certificate associated to the
+ * - Include, in the XML token, the X.509 certificate associated to the
  *   private key that will be used to perform the signing (see the next steps
- *   below). This cerficate will be used to perform the signature validation
- *   process, avoiding the need, for the receiver of the XML Digital Signature
+ *   below). This certificate will be used to perform the signature validation
+ *   process, avoiding the need, for the receiver of the XML Digital Signature,
  *   to own it on its side.
  *
  * - Canonicalize the content of the node `<ds:SignedInfo />`.
@@ -175,9 +175,9 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Save the DOM document in XML format.
  *
- * **The signature validation process consist in the following actions:**
+ * **The signature validation process consists of the following actions:**
  *
- * - Load the XML Digital Singature in a DOM document. A document with a
+ * - Load the XML Digital Signature in a DOM document. A document with a
  *   document type declaration (DOCTYPE), or not encoded in UTF-8, is
  *   refused before it is parsed, and the parser never accesses the network
  *   (see `_loadXML()`).
@@ -189,7 +189,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   with the digest algorithm.
  *
  * - Compare the computed hash with the one stored in the node
- *   `<ds:DigestValue />`. If the hash are different, this means that the
+ *   `<ds:DigestValue />`. If the hashes are different, this means that the
  *   content of the node `<ds:Object Id="Token" />` has been altered.
  *
  * - Canonicalize the content of the node `<ds:SignedInfo />`.
@@ -199,9 +199,9 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Compare the computed signature with the one stored in the node
  *   `<ds:SignatureValue>`. If the signatures are different, this means that
- *   content the node `<ds:SignedInfo />` has not been signed using the private
- *   key associated to the X.509 certificate included in the XML Digital
- *   Signature.
+ *   the content of the node `<ds:SignedInfo />` has not been signed using the
+ *   private key associated to the X.509 certificate included in the XML
+ *   Digital Signature.
  *
  * - Verify that the X.509 certificate included in the XML Digital Signature
  *   is trusted, against the trust anchor given to the analysis: CA
@@ -222,7 +222,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Decode data values using Base64.
  *
- * - Buid an associative array containing the decoded data.
+ * - Build an associative array containing the decoded data.
  *
  * **Token data encryption / decryption:**
  *
@@ -231,13 +231,13 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * decryption of data:
  *
  * - Algorithm used to encrypt / decrypt data is:
- *   http://www.w3.org/2009/xmlenc11#aes256-gcm (authenticated symetric
+ *   http://www.w3.org/2009/xmlenc11#aes256-gcm (authenticated symmetric
  *   ciphering).
  *
  * - Algorithm used to encrypt / decrypt the session key is:
- *   http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymetric ciphering).
+ *   http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymmetric ciphering).
  *
- * **A secure (crypted) XML token looks like this:**
+ * **A secure (encrypted) XML token looks like this:**
  *
  * ```xml
  * <?xml version="1.0"?>
@@ -425,7 +425,7 @@ class XMLDSigToken
     /** @var string The algorithm that should be used to canonicalize the token
     before computing its hash. NOTE: In our case, it is the same algorithm as
     the one used to canonicalize the node "ds:Signature/ds:signedInfo"
-    (see : $canonicalizationAlgorithm property). */
+    (see: $canonicalizationAlgorithm property). */
     private $transformAlgorithm = self::C14N;
 
     /** @var boolean Whether to check the algorithms actually used (read from
@@ -484,7 +484,7 @@ class XMLDSigToken
     encoded when building the XML token or not. */
     private $base64EncodeData = true;
 
-    /** @var string The token timestamp (format : 'yyyy-MM-ddThh:mm:ssZ'). */
+    /** @var string The token timestamp (format: 'yyyy-MM-ddThh:mm:ssZ'). */
     private $timestamp = null;
 
     /** @var string The token identifier (see getTokenId()). */
@@ -524,11 +524,11 @@ class XMLDSigToken
     private $isSignatureValueOk = null;
 
     /** @var string Error encountered during the analysis of
-      the XML digital signature envoloping the token. */
+      the XML digital signature enveloping the token. */
     private $error = null;
 
     /** @var array List of the anomalies encountered during the analysis
-      of the XML digital signature envoloping the token. */
+      of the XML digital signature enveloping the token. */
     private $anomalies = array();
 
     /**
@@ -569,8 +569,8 @@ class XMLDSigToken
      * - `analyzeSecureXMLToken()`
      *
      * An XMLDSigToken object allows creating an XML token and also analyzing an
-     * existing XML token. The type of the `$xmlOrData` parameter determine how
-     * the object behave.
+     * existing XML token. The type of the `$xmlOrData` parameter determines how
+     * the object behaves.
      *
      * **XML token creation:**
      *
@@ -580,11 +580,11 @@ class XMLDSigToken
      * generated automatically, with a random identifier (see `getTokenId()`).
      * In this case, the `$signKeyPath` and `$signCertPath` parameters are
      * required. If the `$cryptCertPath` parameter is also provided, the XML
-     * token will be encrypted, and the `$cryptKeyPath` parameter must be
-     * provided too, in order to verify that the created XML Digital Signature
-     * is well formed. If the private key used for decryption (cf.
-     * `$cryptKeyPath` parameter) is protected by a password, this password may
-     * be passed using the `$cryptKeyPassword` parameter.
+     * token will be encrypted for the owner of this certificate. The
+     * `$cryptKeyPath` parameter, the private key of the recipient, is
+     * optional: given, it is used to decrypt the created token and check its
+     * content too. If this private key is protected by a password, this
+     * password may be passed using the `$cryptKeyPassword` parameter.
      *
      * **XML token analysis:**
      *
@@ -601,13 +601,16 @@ class XMLDSigToken
      * options `caCertPath` and/or `signerCertPath`, see below) are required:
      * without a trust anchor, no token is valid. If the XML
      * token is encrypted, the `$cryptKeyPath` parameter must also be provided.
-     * If the private key used for encryption (cf. `$cryptKeyPath` parameter) is
-     * protected by a password this password may be passed using the
+     * If the private key used for decryption (cf. `$cryptKeyPath` parameter) is
+     * protected by a password, this password may be passed using the
      * `$cryptKeyPassword` parameter.
      *
      * When the object creates a token, it analyzes it right away to check it,
      * and trusts the certificate of its own signing key (`$signCertPath`) for
-     * that: the trust options do not apply to token creation.
+     * that: the trust options do not apply to token creation. An encrypted
+     * token created without `$cryptKeyPath` is checked up to its decryption
+     * (structure, algorithms, digest, signature, trust in the signing
+     * certificate) and its content is not read (see `createSecureXMLToken()`).
      *
      * **Configuring the object:**
      *
@@ -710,13 +713,13 @@ class XMLDSigToken
      *   <br/>Default value: **`TRUE`**.
      *
      * - **`checkCryptingAlgorithms`** [boolean] Analysis with a decryption
-     *   key only. Whether to check that the algorithms used to crypt the
+     *   key only. Whether to check that the algorithms used to encrypt the
      *   token are the expected ones or not. Even when FALSE, an algorithm
      *   that is not in the lists below is rejected.
      *   <br/>Default value: **`TRUE`**.
      *
      * - **`canonicalizationAlgorithm`** [string] Creation and analysis. The
-     *   algorithm used to canonicalize the XMLdigital signature and to
+     *   algorithm used to canonicalize the XML digital signature and to
      *   canonicalize token data before computing its hash.
      *   <br/>Possible values:
      *
@@ -826,12 +829,13 @@ class XMLDSigToken
      *     that will be included in the XML digital signature, in order to
      *     verify the signature.
      *
-     * @param string $cryptKeyPath The path to the PEM private key file that
-     *     will be used to decrypt the session key which was used to encrypt the
-     *     token.
-     *
-     * @param string $cryptKeyPassword The password to access the private key
+     * @param string|null $cryptKeyPath The path to the PEM private key file
      *     that will be used to decrypt the session key which was used to
+     *     encrypt the token. Required to analyze an encrypted token, optional
+     *     to create one.
+     *
+     * @param string|null $cryptKeyPassword The password to access the private
+     *     key that will be used to decrypt the session key which was used to
      *     encrypt the token. Use NULL if no password needed.
      *
      * @param string $cryptCertPath The path to the PEM X.509 certificate file
@@ -891,7 +895,7 @@ class XMLDSigToken
             }
             else
             {
-                throw new Exception("Invalid parameter 'canonicalizationAlgorithm'! Unknwon canonicalization algorithm.");
+                throw new Exception("Invalid parameter 'canonicalizationAlgorithm'! Unknown canonicalization algorithm.");
             }
         }
 
@@ -904,7 +908,7 @@ class XMLDSigToken
             }
             else
             {
-                throw new Exception("Invalid parameter 'signatureAlgorithm'! Unknwon signature algorithm.");
+                throw new Exception("Invalid parameter 'signatureAlgorithm'! Unknown signature algorithm.");
             }
         }
 
@@ -917,7 +921,7 @@ class XMLDSigToken
             }
             else
             {
-                throw new Exception("Invalid parameter 'digestAlgorithm'! Unknwon digest algorithm.");
+                throw new Exception("Invalid parameter 'digestAlgorithm'! Unknown digest algorithm.");
             }
         }
 
@@ -1021,28 +1025,31 @@ class XMLDSigToken
                 }
                 $this->cryptCert = $cryptCert;
 
-                // Ensures the private key associated to the X.509 certificate
-                // that willbe used to perform encryption is also provided, in
-                // order to verify that the created XML token is well formed.
-                if (is_null($cryptKeyPath)) {
-                    throw new Exception("Missing parameter 'cryptKeyPath'! A private key must be provided to decrypt token.");
-                }
-
-                // Get and store the private key that will be used to decrypt
-                // the session key which was used to encrypt the token data.
-                // NOTE : This key will be used to verify that the generated
-                //        XML token is well formed.
-                $cryptKey = @file_get_contents($cryptKeyPath);
-                if (false === $cryptKey)
+                // If provided, get and store the private key of the recipient,
+                // which decrypts the session key: it is only used to check
+                // the decrypted content of the created token. Without it, the
+                // created token is checked up to its decryption (see
+                // _readXML()), so that the sender needs no private key of the
+                // recipient.
+                if (!is_null($cryptKeyPath))
                 {
-                    throw new Exception("Invalid parameter 'cryptKeyPath'! Cannot read private key to decrypt token.");
+                    $cryptKey = @file_get_contents($cryptKeyPath);
+                    if (false === $cryptKey)
+                    {
+                        throw new Exception("Invalid parameter 'cryptKeyPath'! Cannot read private key to decrypt token.");
+                    }
+                    $this->cryptKey = $cryptKey;
                 }
-                $this->cryptKey = $cryptKey;
 
                 // If provided, store the password to access the private key
-                // that will be used used to decrypt the session key.
+                // that will be used to decrypt the session key. A password
+                // without a key would be ignored: it throws instead.
                 if (!is_null($cryptKeyPassword))
                 {
+                    if (is_null($cryptKeyPath))
+                    {
+                        throw new Exception("Invalid parameter 'cryptKeyPassword'! It only applies with the parameter 'cryptKeyPath'.");
+                    }
                     if (!is_string($cryptKeyPassword))
                     {
                         throw new Exception("Invalid parameter 'cryptKeyPassword'! Parameter must be a string.");
@@ -1059,7 +1066,7 @@ class XMLDSigToken
                     }
                     else
                     {
-                        throw new Exception("Invalid parameter 'sessionKeyCipheringAlgorithm'! Unknwon session key ciphering algorithm.");
+                        throw new Exception("Invalid parameter 'sessionKeyCipheringAlgorithm'! Unknown session key ciphering algorithm.");
                     }
                 }
 
@@ -1072,7 +1079,7 @@ class XMLDSigToken
                     }
                     else
                     {
-                        throw new Exception("Invalid parameter 'cryptAlgorithm'! Unknwon crypt algorithm.");
+                        throw new Exception("Invalid parameter 'cryptAlgorithm'! Unknown crypt algorithm.");
                     }
                 }
 
@@ -1088,12 +1095,12 @@ class XMLDSigToken
             {
                 // NOTE: This function will call the _readXML() function which
                 // will verify that the created token is correct and which will
-                // terminate setting object preperties.
+                // terminate setting object properties.
                 $this->_writeXML($xmlOrData);
             }
             catch (Exception $e)
             {
-                // ERROR : XML token analysis failed on fatal error.
+                // ERROR: XML token analysis failed on fatal error.
                 $this->error = $e->getMessage();
             }
         }
@@ -1118,7 +1125,7 @@ class XMLDSigToken
                 $this->cryptKey = $cryptKey;
 
                 // If provided, store the password to access the private key
-                // that will be used used to decrypt the session key.
+                // that will be used to decrypt the session key.
                 if (!is_null($cryptKeyPassword))
                 {
                     if (!is_string($cryptKeyPassword))
@@ -1137,7 +1144,7 @@ class XMLDSigToken
                     }
                     else
                     {
-                        throw new Exception("Invalid parameter 'sessionKeyCipheringAlgorithm'! Unknwon session key ciphering algorithm.");
+                        throw new Exception("Invalid parameter 'sessionKeyCipheringAlgorithm'! Unknown session key ciphering algorithm.");
                     }
                 }
 
@@ -1150,7 +1157,7 @@ class XMLDSigToken
                     }
                     else
                     {
-                        throw new Exception("Invalid parameter 'cryptAlgorithm'! Unknwon crypt algorithm.");
+                        throw new Exception("Invalid parameter 'cryptAlgorithm'! Unknown crypt algorithm.");
                     }
                 }
 
@@ -1169,7 +1176,7 @@ class XMLDSigToken
             }
             catch (Exception $e)
             {
-                // ERROR : XML token analysis failed on fatal error.
+                // ERROR: XML token analysis failed on fatal error.
                 $this->error = $e->getMessage();
             }
         }
@@ -1319,7 +1326,7 @@ class XMLDSigToken
     /**
      * Creates an XML token for the given user data.
      *
-     * The created XML token can be retrieved using the fucnction `getXML()`.
+     * The created XML token can be retrieved using the function `getXML()`.
      *
      * @param array $data Token data (an associative array that may be
      *     multi-dimensional).
@@ -1366,9 +1373,31 @@ class XMLDSigToken
 
 
     /**
-     * Creates a secure (crypted) XML token for the given user data.
+     * Creates a secure (encrypted) XML token for the given user data.
      *
      * The created XML token can be retrieved using the function `getXML()`.
+     *
+     * The token is encrypted for the owner of the encryption certificate
+     * (`$cryptCertPath`): only the private key of this certificate decrypts
+     * it. The sender does not need this private key: pass NULL as
+     * `$cryptKeyPath`.
+     *
+     * ```php
+     * $token = XMLDSigToken::createSecureXMLToken($data, $signKeyPath, $signCertPath, null, $cryptCertPath, $signKeyPassword);
+     * ```
+     *
+     * The created token is checked right away:
+     *
+     * - Without `$cryptKeyPath`, the check covers everything that can be
+     *   verified without decrypting the token: its structure, its
+     *   algorithms, its digest, its signature and the trust in the signing
+     *   certificate. `isSignatureValid()` and `isDataEncrypted()` return
+     *   TRUE, while `getData()`, `getTimestamp()` and `getTokenId()` return
+     *   NULL: they are inside the encrypted content, which is not decrypted.
+     *
+     * - With `$cryptKeyPath`, the token is also decrypted and its content
+     *   read, as by `analyzeSecureXMLToken()`: `getData()`, `getTimestamp()`
+     *   and `getTokenId()` return what the decrypted token holds.
      *
      * @param array $data Token data (an associative array that may be
      *     multi-dimensional).
@@ -1380,9 +1409,10 @@ class XMLDSigToken
      *     that will be included in the XML digital signature, in order to
      *     verify the signature.
      *
-     * @param string $cryptKeyPath The path to the PEM private key file that
-     *     will be used to decrypt the session key which was used to encrypt the
-     *     token.
+     * @param string|null $cryptKeyPath The path to the PEM private key file of
+     *     the recipient, associated to `$cryptCertPath`, used to decrypt the
+     *     created token in order to check its content. Use NULL to create the
+     *     token without it.
      *
      * @param string $cryptCertPath The path to the PEM X.509 certificate file
      *     that will be used to encrypt the session key which will be used to
@@ -1391,9 +1421,9 @@ class XMLDSigToken
      * @param string $signKeyPassword The password to access the private key
      *     that will be used to sign the token. Use NULL if no password needed.
      *
-     * @param string $cryptKeyPassword The password to access the private key
-     *     that will be used to decrypt the session key which was used to
-     *     encrypt the token. Use NULL if no password needed.
+     * @param string|null $cryptKeyPassword The password to access the private
+     *     key `$cryptKeyPath`. Use NULL if no password needed, and when
+     *     `$cryptKeyPath` is NULL.
      *
      * @param array $options Configuration options
      *     (see `__construct()` for details).
@@ -1480,9 +1510,9 @@ class XMLDSigToken
 
 
     /**
-     * Parse an XML token whose data are crypted.
+     * Parse an XML token whose data are encrypted.
      *
-     * NOTE: Uncrypted token can also be parsed using this function.
+     * NOTE: An unencrypted token can also be parsed using this function.
      *
      * The options must hold a trust anchor, `caCertPath` and/or
      * `signerCertPath`; without it, `isSignatureValid()` returns FALSE.
@@ -1532,7 +1562,7 @@ class XMLDSigToken
      * Write the XML Digital Signature representing the XML token for the
      * provided user data.
      *
-     * The XML token can then be obtained usind the `getXML()` function.
+     * The XML token can then be obtained using the `getXML()` function.
      *
      * @param array $data A flat or multidimensional associative array
      *     containing the token data.
@@ -1582,11 +1612,11 @@ class XMLDSigToken
 
         /**
          * Inline function to build a node tree, whose root node will be named
-         * $nodeName, from the array $data and appends it to the given
-         * $parentNode node. The value of the leaves are base64 encoded by this
+         * $nodeName, from the array $data and append it to the given
+         * $parentNode node. The values of the leaves are base64 encoded by this
          * function.
          *
-         * NOTE : This function is called recursively if $data is a
+         * NOTE: This function is called recursively if $data is a
          * multi-dimensional associative array.
          *
          * @param array $data A flat or multi-dimensional associative array that
@@ -1647,7 +1677,7 @@ class XMLDSigToken
             $sessionKey = new XMLSecurityKey($this->sessionKeyCipheringAlgorithm);
             $sessionKey->generateSessionKey();
 
-            // Create an asymetric key from the X.509 certificate using RSA-OAEP
+            // Create an asymmetric key from the X.509 certificate using RSA-OAEP
             // algorithm. This key will be used to encrypt the session key.
             $asymKey = new XMLSecurityKey($this->cryptAlgorithm, array('type' => 'public'));
             $asymKey->loadKey($this->cryptCert, false, true);
@@ -1657,7 +1687,7 @@ class XMLDSigToken
                 throw new Exception("Failed loading certificate to encrypt session key!");
             }
 
-            // Encrypt the session key using the asymetric key.
+            // Encrypt the session key using the asymmetric key.
             $objXMLSecEnc = new XMLSecEnc();
             $objXMLSecEnc->encryptKey($asymKey, $sessionKey);
 
@@ -1671,10 +1701,10 @@ class XMLDSigToken
 
         // Add a reference to the node "ds:Object" which is contained in the
         // XML Digital Signature itself (case of an enveloping signature).
-        // This consists in :
+        // This consists of:
         //     - Adding a node "ds:Reference" to the node "ds:SignedInfo".
         //     - Computing a hash, using the digest algorithm, from the
-        //       canonicalized XML sting corresponding to the node "ds:Object".
+        //       canonicalized XML string corresponding to the node "ds:Object".
         //     - Adding this hash in a child node named "ds:DigestValue".
         //
         // NOTE: Only the first child node of the node "ds:Object" is taken in
@@ -1700,22 +1730,22 @@ class XMLDSigToken
         // Add the X.509 certificate associated to the private key to the XML
         // Digital Signature. So, the recipient of the XML token will not need
         // to own it, in order to verify the signature. It will simply get it
-        // from the XML token. This consists in adding a node "ds:KeyInfo" that
+        // from the XML token. This consists of adding a node "ds:KeyInfo" that
         // holds the content of the X.509 certificate.
         $XMLDSig->add509Cert($this->signCert);
 
         // Sign the token data using the private security key associated to the
         // X.509 certificate.
-        // This consists in :
+        // This consists of:
         //     - Computing the signature of the node "ds:SignedInfo".
         //     - Adding a node named "ds:SignatureValue" that contains the
         //       computed signature.
         $XMLDSig->sign($privateKey);
 
         // Check that the created XML token is well formed (if it's valid and if
-        // timestamp and data can be retrived from it) and, by the way,
+        // timestamp and data can be retrieved from it) and, by the way,
         // terminate to initialize the properties of our XMLDSigToken object.
-        $this->_readXML($XMLDSig->sigNode->ownerDocument->saveXML());
+        $this->_readXML($XMLDSig->sigNode->ownerDocument->saveXML(), true);
     }
 
 
@@ -1727,20 +1757,27 @@ class XMLDSigToken
      * will decrypt the token data it contains if this one is encrypted
      * and then will extract timestamp and data.
      *
-     * The data can then be obtained using the `getData()` function. Neverless,
+     * The data can then be obtained using the `getData()` function. Nevertheless,
      * you have to ensure that you can trust it using `isSignatureValid()` and
      * `isOutOfDate()`.
      *
      * NOTE: This function is called by the `_writeXML()` function to ensure the
-     * XML token it built is correct and because this function set most of the
+     * XML token it built is correct and because this function sets most of the
      * properties of the XMLDSigToken object that are issued from the analysis
-     * of the XML token.
+     * of the XML token. A token created encrypted without the private key of
+     * the recipient is checked up to its decryption: structure, algorithms,
+     * digest, signature and trust in the signing certificate. Its content is
+     * not decrypted, and neither its timestamp, its identifier nor its data
+     * are read.
      *
      * @param string $xml The XML Digital Signature representing an XML token.
      *
+     * @param boolean $isCreation TRUE if the object has just created the
+     *     token.
+     *
      * @throws Exception
      */
-    private function _readXML($xml)
+    private function _readXML($xml, $isCreation = false)
     {
         // Store the provided XML Digital Signature.
         $this->xml = $xml;
@@ -1981,7 +2018,7 @@ class XMLDSigToken
         }
 
         // Configure the $objKeyX509 XMLSecurityKey object with its related
-        // informations which should be stored in the node
+        // information which should be stored in the node
         // "ds:Signature/ds:KeyInfo".
         if (is_null(XMLSecEnc::staticLocateKeyInfo($objKeyX509, $nodeSignature)))
         {
@@ -2096,6 +2133,14 @@ class XMLDSigToken
                 $this->_throwAnomalies();
             }
 
+            // A token created without the private key of the recipient
+            // cannot be decrypted: everything that can be checked without
+            // decrypting it has been, and its content is left unread.
+            if ($isCreation && is_null($this->cryptKey))
+            {
+                return;
+            }
+
             // Decrypt it now.
             $this->_decryptToken($encryptedDataNode);
         }
@@ -2180,10 +2225,10 @@ class XMLDSigToken
 
         /**
          * Inline function to build a flat or multi-dimensional associative
-         * array from a node tree whose leaves values are base64 encoded. The
+         * array from a node tree whose leaf values are base64 encoded. The
          * values of the leaves are base64 decoded by this function.
          *
-         * NOTE : This function is called recursively if the node tree is more
+         * NOTE: This function is called recursively if the node tree is more
          * than one level deep.
          *
          * @param string $rootNode The node that holds the node tree.
@@ -2225,7 +2270,7 @@ class XMLDSigToken
             }
         };
 
-        // Check that token data if well formed and extract data.
+        // Check that token data is well formed and extract data.
         $tokenData = array();
         $nodeTreeToData($nodeTokenData, $tokenData);
 
@@ -2385,7 +2430,7 @@ class XMLDSigToken
             throw new Exception("Session key is not encrypted!");
         }
 
-        // Loads the private key to be used for deciphering the crypted
+        // Loads the private key to be used for deciphering the encrypted
         // session key. If a password is provided, use it to access the
         // private key.
         if (!is_null($this->cryptKeyPassword))
@@ -2564,7 +2609,7 @@ class XMLDSigToken
      *
      * This means that:
      *
-     * - No error occured during the analysis of the XML digital signature.
+     * - No error occurred during the analysis of the XML digital signature.
      *
      * - No anomaly detected during the analysis of the XML digital signature.
      *
@@ -2579,7 +2624,28 @@ class XMLDSigToken
      *
      * Without a trust anchor given to the analysis, it returns FALSE.
      *
-     * The token timestamp is not checked: use `isOutOfDate()`.
+     * **It checks neither the freshness of the token nor whether it is
+     * replayed.** A token that was valid once stays valid here, however old
+     * it is and however many times it is submitted. Before trusting the data
+     * of a received token, the caller must check that:
+     *
+     * - `isSignatureValid()` returns TRUE;
+     *
+     * - `isOutOfDate($ttl)` returns FALSE, for the time to live the
+     *   application accepts;
+     *
+     * - the identifier returned by `getTokenId()` has not been accepted
+     *   before: store it atomically, and refuse the token if it already is.
+     *
+     * The trust anchor `caCertPath` accepts any certificate its CA issues: if
+     * this CA also issues certificates to others than the expected sender,
+     * any of them can sign a token that passes this check. Restrict it then
+     * to the sender with the option `expectedSubject`, or pin its certificate
+     * with `signerCertPath`.
+     *
+     * For a token created encrypted without the private key of the
+     * recipient, it tells whether the checks made without decrypting the
+     * token passed (see `createSecureXMLToken()`).
      *
      * @return boolean TRUE if XML token is valid, FALSE otherwise.
      */
@@ -2597,8 +2663,8 @@ class XMLDSigToken
      * trusted or not, according to the trust anchor given to the analysis
      * (options `caCertPath`, `signerCertPath` and `expectedSubject`).
      *
-     * NOTE: If not evaluated (because an error occured before), this function
-     * return NULL. When it returns FALSE, `getError()` gives the reason.
+     * NOTE: If not evaluated (because an error occurred before), this function
+     * returns NULL. When it returns FALSE, `getError()` gives the reason.
      *
      * @return boolean|null TRUE if the certificate is trusted, FALSE
      *     otherwise, NULL if cannot be evaluated.
@@ -2628,7 +2694,7 @@ class XMLDSigToken
     {
         if (is_null($this->timestamp))
         {
-            // Timestamp is missing! So we assume token is peremted.
+            // Timestamp is missing! So we assume token is expired.
             return true;
         }
 
@@ -2640,7 +2706,7 @@ class XMLDSigToken
         if (false === $tokenUTCDate)
         {
             // Token timestamp format is incorrect! So we assume token is
-            // peremted.
+            // expired.
             return true;
         }
         $tokenUTCTimestamp = $tokenUTCDate->getTimestamp();
@@ -2657,8 +2723,11 @@ class XMLDSigToken
     /**
      * Indicates whether token data is encrypted or not.
      *
-     * NOTE: If not evaluated (because an error occured before), this function
-     * return NULL.
+     * For a token created encrypted, it returns TRUE, whether or not the
+     * private key of the recipient was given (see `createSecureXMLToken()`).
+     *
+     * NOTE: If not evaluated (because an error occurred before), this function
+     * returns NULL.
      *
      * @return boolean|null TRUE if token data is encrypted, FALSE otherwise,
      *     NULL if cannot be evaluated.
@@ -2673,8 +2742,8 @@ class XMLDSigToken
      * Indicates whether the digest of token data (a hash) has been verified and
      * is valid or not.
      *
-     * NOTE: If not evaluated (because an error occured before), this function
-     * return NULL.
+     * NOTE: If not evaluated (because an error occurred before), this function
+     * returns NULL.
      *
      * @return boolean|null TRUE if token hash has been verified and is valid,
      *     FALSE otherwise, NULL if cannot be evaluated.
@@ -2689,8 +2758,8 @@ class XMLDSigToken
      * Indicates whether signature of the digest of the token data has been
      * verified and is valid or not.
      *
-     * NOTE: If not evaluated (because an error occured before), this function
-     * return NULL.
+     * NOTE: If not evaluated (because an error occurred before), this function
+     * returns NULL.
      *
      * @return boolean|null TRUE if token hash signature has been verified and
      *     is valid, FALSE otherwise, NULL if cannot be evaluated.
@@ -2720,6 +2789,10 @@ class XMLDSigToken
      * once the digest, the signature and the signing certificate have been
      * verified.
      *
+     * A token created encrypted without the private key of the recipient is
+     * not decrypted: its data are not available (see
+     * `createSecureXMLToken()`).
+     *
      * @return array|null The associative array containing token data, NULL if
      *     not available.
      */
@@ -2731,6 +2804,10 @@ class XMLDSigToken
 
     /**
      * Get the timestamp of the XML token.
+     *
+     * A token created encrypted without the private key of the recipient is
+     * not decrypted: its timestamp is not available (see
+     * `createSecureXMLToken()`).
      *
      * @return string|null The token timestamp, NULL if not available.
      */
@@ -2757,7 +2834,9 @@ class XMLDSigToken
      * valid.
      *
      * @return string|null The token identifier, NULL if the token is not
-     *     valid (see `isSignatureValid()`).
+     *     valid (see `isSignatureValid()`), or if it was created encrypted
+     *     without the private key of the recipient, which leaves its content
+     *     unread (see `createSecureXMLToken()`).
      */
     public function getTokenId()
     {
@@ -2766,7 +2845,7 @@ class XMLDSigToken
 
 
     /**
-     * Get the message of the error that occured while parsing the XML token.
+     * Get the message of the error that occurred while parsing the XML token.
      *
      * @return string|null The error message. If no error, NULL is returned.
      */
@@ -2777,7 +2856,7 @@ class XMLDSigToken
 
 
     /**
-     * Get the list of anomalies that occured while parsing the XML token.
+     * Get the list of anomalies that occurred while parsing the XML token.
      *
      * @return array The list of anomalies, empty if none.
      */
@@ -2887,8 +2966,8 @@ class XMLDSigToken
      *     XMLDSigToken::TOKEN_TIMESTAMP_FORMAT).
      *
      * @return string|null|false The date to which the X.509 certificate is
-     *     valid, NULL
-     *     if not available, FALSE if $dateFormat is invalid.
+     *     valid, NULL if
+     *     not available, FALSE if $dateFormat is invalid.
      */
     public function getCertValidTo($dateFormat = self::TOKEN_TIMESTAMP_FORMAT)
     {
@@ -2923,7 +3002,7 @@ class XMLDSigToken
      * Check that the issuer information of the X.509 certificate that is
      * included in the XML token matches the expected one.
      *
-     * The expected issuer information must me passed as an array to the
+     * The expected issuer information must be passed as an array to the
      * function:
      *
      * ```php
@@ -2937,11 +3016,11 @@ class XMLDSigToken
      * ];
      * ```
      *
-     *  NOTE: Character case of data is significant.
+     * NOTE: Character case of data is significant.
      *
-     *  NOTE: This only compares names, which any certificate can copy: it
-     *  tells nothing about who issued the certificate. `isSignatureValid()`
-     *  verifies the certificate against the trust anchor of the analysis.
+     * NOTE: This only compares names, which any certificate can copy: it
+     * tells nothing about who issued the certificate. `isSignatureValid()`
+     * verifies the certificate against the trust anchor of the analysis.
      *
      * @param array $expectedIssuerInfo The issuer information that the X.509
      * certificate should match.
@@ -2976,11 +3055,11 @@ class XMLDSigToken
      * expected CA.
      *
      * Note that more than one CA certificate can give a positive result, some
-     * certificates re-issue signing certificates after having only changed the
+     * CAs re-issue signing certificates after having only changed the
      * expiration dates.
      *
      * Note that it also works with self-signed certificates. In this case,
-     * passes the X.509 certificate that is supposed been included in the XML
+     * pass the X.509 certificate that is supposed to be included in the XML
      * token to the function.
      *
      * Only the link between the certificate and the given CA certificate is
@@ -2988,7 +3067,7 @@ class XMLDSigToken
      * whole chain against the trust anchor of the analysis.
      *
      * @param string $caCertPath The PEM certificate (public key) that is
-     *     supposed been used by CA to sign the X.509 certificate included in
+     *     supposed to be used by the CA to sign the X.509 certificate included in
      *     the XML token.
      *
      * @return boolean TRUE if the X.509 certificate has been signed by the
@@ -3004,7 +3083,7 @@ class XMLDSigToken
             return false;
         }
 
-        // Get the CA public key that is supposed be used to sign the X.509
+        // Get the CA public key that is supposed to be used to sign the X.509
         // certificate.
         $caCert = @file_get_contents($caCertPath);
         if (false === $caCert)
@@ -3271,7 +3350,7 @@ class XMLDSigToken
      *     the specified node, provide its name here, otherwise set this
      *     parameter to NULL.
      *
-     * @param string $newValue The value that will replace original the value of
+     * @param string $newValue The value that will replace the original value of
      *     the node or of the attribute of the node if $nodeAttribute parameter
      *     is provided.
      *
@@ -3359,7 +3438,7 @@ class XMLDSigToken
     /**
      * Return the XML token in a pretty readable format.
      *
-     * This function is intented for display purpose only. Use the `getXML()`
+     * This function is intended for display purposes only. Use the `getXML()`
      * function to obtain the raw XML token you want to work with.
      *
      * @return string The pretty formatted XMLDSigToken signature.
@@ -3372,8 +3451,8 @@ class XMLDSigToken
         $indent_size = 2;
         $matches = array();
 
-        // Inline function that split the value of a node
-        // into multiple lines of 64 characters long.
+        // Inline function that splits the value of a node
+        // into multiple lines of 64 characters.
         $splitNodeValue = function(&$xml, $prefix, $xpathQuery)
         {
             $xpathQuery = str_replace('ds:', $prefix, $xpathQuery);
@@ -3385,7 +3464,7 @@ class XMLDSigToken
             }
             $nodeValue = PHP_EOL . implode(PHP_EOL, str_split($nodeValue, 64)) . PHP_EOL;
             XMLDSigToken::alterXML($xml, $xpathQuery, null, $nodeValue, false);
-            // Remove XML encoded carriage return introduced when spliting node
+            // Remove XML encoded carriage return introduced when splitting node
             // value.
             $xml = str_replace('&#xD;', '', $xml);
         };
@@ -3409,17 +3488,17 @@ class XMLDSigToken
             // Test for the various tag states
             if (preg_match('/.+<\/\w[^>]*>$/', $tok, $matches))
             {
-                // Opening and closing tags on same line : no change.
+                // Opening and closing tags on same line: no change.
                 $indent = 0;
             }
             elseif (preg_match('/^<\/\w/', $tok, $matches))
             {
-                // Closing tag : outdent now.
+                // Closing tag: outdent now.
                 $pad = $pad - $indent_size;
             }
             elseif (preg_match('/^<\w[^>]*[^\/]>.*$/', $tok, $matches))
             {
-                // Opening tag : don't pad this one, only subsequent tags.
+                // Opening tag: don't pad this one, only subsequent tags.
                 $indent = $indent_size;
             }
             else

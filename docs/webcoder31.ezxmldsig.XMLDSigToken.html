@@ -92,7 +92,7 @@ encrypted. In this case we talk about Secure XML token.</p>
 <p><strong>This class uses the following default algorithms to operate:</strong></p>
 <ul>
 <li>
-<p>Algorithm used to canonalize data before signing is:
+<p>Algorithm used to canonicalize data before signing is:
 <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a>.</p>
 </li>
 <li>
@@ -133,7 +133,7 @@ Without it, no token is valid.</p>
   &lt;/ds:KeyInfo&gt;
   &lt;ds:Object Id=&quot;Token&quot;&gt;
     &lt;Token&gt;
-      &lt;TokenTimestamp&gt;2016-10-24T08:33:14Z&lt;/TokenTimestamp&gt;
+      &lt;TokenTimestamp&gt;2026-10-17T04:43:05Z&lt;/TokenTimestamp&gt;
       &lt;TokenId&gt;---- 128-BIT RANDOM IDENTIFIER (HEXADECIMAL) ----&lt;/TokenId&gt;
       &lt;TokenData&gt;
         &lt;data1 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----&lt;/data1&gt;
@@ -148,7 +148,7 @@ Without it, no token is valid.</p>
   &lt;/ds:Object&gt;
 &lt;/ds:Signature&gt;
 </code></pre>
-<p><strong>The signing process consists in the following actions:</strong></p>
+<p><strong>The signing process consists of the following actions:</strong></p>
 <ul>
 <li>
 <p>Load data from an associative array.</p>
@@ -191,12 +191,12 @@ token, it lets the receiver refuse a token it has already accepted (see
 <p>Add the node <code>&lt;Token /&gt;</code> to the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>.</p>
 </li>
 <li>
-<p>NOTE : If data encryption is requested, this process will take place here
+<p>NOTE: If data encryption is requested, this process will take place here
 (this will be described later).</p>
 </li>
 <li>
 <p>Build a node <code>&lt;ds:Reference URI=&quot;#Token&quot; /&gt;</code> and append it to the node
-<code>&lt;ds:SignedInfo /&gt;</code>. This consists in:</p>
+<code>&lt;ds:SignedInfo /&gt;</code>. This consists of:</p>
 <ul>
 <li>
 <p>Canonicalizing the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>.</p>
@@ -208,10 +208,10 @@ storing it in the node <code>&lt;ds:DigestValue /&gt;</code>.</p>
 </ul>
 </li>
 <li>
-<p>Includes, in the the XML token, the X.509 certificate associated to the
+<p>Include, in the XML token, the X.509 certificate associated to the
 private key that will be used to perform the signing (see the next steps
-below). This cerficate will be used to perform the signature validation
-process, avoiding the need, for the receiver of the XML Digital Signature
+below). This certificate will be used to perform the signature validation
+process, avoiding the need, for the receiver of the XML Digital Signature,
 to own it on its side.</p>
 </li>
 <li>
@@ -228,10 +228,10 @@ dedicated to perform signing.</p>
 <p>Save the DOM document in XML format.</p>
 </li>
 </ul>
-<p><strong>The signature validation process consist in the following actions:</strong></p>
+<p><strong>The signature validation process consists of the following actions:</strong></p>
 <ul>
 <li>
-<p>Load the XML Digital Singature in a DOM document. A document with a
+<p>Load the XML Digital Signature in a DOM document. A document with a
 document type declaration (DOCTYPE), or not encoded in UTF-8, is
 refused before it is parsed, and the parser never accesses the network
 (see <code>_loadXML()</code>).</p>
@@ -246,7 +246,7 @@ with the digest algorithm.</p>
 </li>
 <li>
 <p>Compare the computed hash with the one stored in the node
-<code>&lt;ds:DigestValue /&gt;</code>. If the hash are different, this means that the
+<code>&lt;ds:DigestValue /&gt;</code>. If the hashes are different, this means that the
 content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> has been altered.</p>
 </li>
 <li>
@@ -259,9 +259,9 @@ certificate included in the XML token.</p>
 <li>
 <p>Compare the computed signature with the one stored in the node
 <code>&lt;ds:SignatureValue&gt;</code>. If the signatures are different, this means that
-content the node <code>&lt;ds:SignedInfo /&gt;</code> has not been signed using the private
-key associated to the X.509 certificate included in the XML Digital
-Signature.</p>
+the content of the node <code>&lt;ds:SignedInfo /&gt;</code> has not been signed using the
+private key associated to the X.509 certificate included in the XML
+Digital Signature.</p>
 </li>
 <li>
 <p>Verify that the X.509 certificate included in the XML Digital Signature
@@ -288,7 +288,7 @@ identifier is rejected.</p>
 <p>Decode data values using Base64.</p>
 </li>
 <li>
-<p>Buid an associative array containing the decoded data.</p>
+<p>Build an associative array containing the decoded data.</p>
 </li>
 </ul>
 <p><strong>Token data encryption / decryption:</strong></p>
@@ -298,15 +298,15 @@ decryption of data:</p>
 <ul>
 <li>
 <p>Algorithm used to encrypt / decrypt data is:
-<a href="http://www.w3.org/2009/xmlenc11#aes256-gcm">http://www.w3.org/2009/xmlenc11#aes256-gcm</a> (authenticated symetric
+<a href="http://www.w3.org/2009/xmlenc11#aes256-gcm">http://www.w3.org/2009/xmlenc11#aes256-gcm</a> (authenticated symmetric
 ciphering).</p>
 </li>
 <li>
 <p>Algorithm used to encrypt / decrypt the session key is:
-<a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a> (asymetric ciphering).</p>
+<a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a> (asymmetric ciphering).</p>
 </li>
 </ul>
-<p><strong>A secure (crypted) XML token looks like this:</strong></p>
+<p><strong>A secure (encrypted) XML token looks like this:</strong></p>
 <pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;ds:Signature xmlns:ds=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
   &lt;ds:SignedInfo&gt;
@@ -452,13 +452,13 @@ security reasons.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#556-1176" title="Go to source code">__construct</a>(
+				<code><a href="source-XMLDSigToken.html#556-1183" title="Go to source code">__construct</a>(
 	<span>mixed <var>$xmlOrData</var></span>,
 	<span>string <var>$signKeyPath</var> = <span class="php-kw">null</span></span>,
 	<span>string <var>$signKeyPassword</var> = <span class="php-kw">null</span></span>,
 	<span>string <var>$signCertPath</var> = <span class="php-kw">null</span></span>,
-	<span>string <var>$cryptKeyPath</var> = <span class="php-kw">null</span></span>,
-	<span>string <var>$cryptKeyPassword</var> = <span class="php-kw">null</span></span>,
+	<span>string|null <var>$cryptKeyPath</var> = <span class="php-kw">null</span></span>,
+	<span>string|null <var>$cryptKeyPassword</var> = <span class="php-kw">null</span></span>,
 	<span>string <var>$cryptCertPath</var> = <span class="php-kw">null</span></span>,
 	<span>array <var>$options</var> = []</span>,
 )</code>
@@ -489,8 +489,8 @@ object is intended for:</p>
 </li>
 </ul>
 <p>An XMLDSigToken object allows creating an XML token and also analyzing an
-existing XML token. The type of the <code>$xmlOrData</code> parameter determine how
-the object behave.</p>
+existing XML token. The type of the <code>$xmlOrData</code> parameter determines how
+the object behaves.</p>
 <p><strong>XML token creation:</strong></p>
 <p>If <code>$xmlOrData</code> is an array (a flat or multidimensional associative
 array), the object will create an enveloping XML digital signature
@@ -498,11 +498,11 @@ containing an XML token that holds the provided data and a timestamp
 generated automatically, with a random identifier (see <code>getTokenId()</code>).
 In this case, the <code>$signKeyPath</code> and <code>$signCertPath</code> parameters are
 required. If the <code>$cryptCertPath</code> parameter is also provided, the XML
-token will be encrypted, and the <code>$cryptKeyPath</code> parameter must be
-provided too, in order to verify that the created XML Digital Signature
-is well formed. If the private key used for decryption (cf.
-<code>$cryptKeyPath</code> parameter) is protected by a password, this password may
-be passed using the <code>$cryptKeyPassword</code> parameter.</p>
+token will be encrypted for the owner of this certificate. The
+<code>$cryptKeyPath</code> parameter, the private key of the recipient, is
+optional: given, it is used to decrypt the created token and check its
+content too. If this private key is protected by a password, this
+password may be passed using the <code>$cryptKeyPassword</code> parameter.</p>
 <p><strong>XML token analysis:</strong></p>
 <p>If <code>$xmlOrData</code> is a string, the object will treat it as an enveloping
 XML digital signature containing a token:</p>
@@ -521,12 +521,15 @@ XML digital signature containing a token:</p>
 options <code>caCertPath</code> and/or <code>signerCertPath</code>, see below) are required:
 without a trust anchor, no token is valid. If the XML
 token is encrypted, the <code>$cryptKeyPath</code> parameter must also be provided.
-If the private key used for encryption (cf. <code>$cryptKeyPath</code> parameter) is
-protected by a password this password may be passed using the
+If the private key used for decryption (cf. <code>$cryptKeyPath</code> parameter) is
+protected by a password, this password may be passed using the
 <code>$cryptKeyPassword</code> parameter.</p>
 <p>When the object creates a token, it analyzes it right away to check it,
 and trusts the certificate of its own signing key (<code>$signCertPath</code>) for
-that: the trust options do not apply to token creation.</p>
+that: the trust options do not apply to token creation. An encrypted
+token created without <code>$cryptKeyPath</code> is checked up to its decryption
+(structure, algorithms, digest, signature, trust in the signing
+certificate) and its content is not read (see <code>createSecureXMLToken()</code>).</p>
 <p><strong>Configuring the object:</strong></p>
 <p>The <code>$options</code> parameter of this function allows to override the default
 configuration of the object passing it the desired options via an
@@ -629,14 +632,14 @@ below is rejected.
 </li>
 <li>
 <p><strong><code>checkCryptingAlgorithms</code></strong> [boolean] Analysis with a decryption
-key only. Whether to check that the algorithms used to crypt the
+key only. Whether to check that the algorithms used to encrypt the
 token are the expected ones or not. Even when FALSE, an algorithm
 that is not in the lists below is rejected.
 <br/>Default value: <strong><code>TRUE</code></strong>.</p>
 </li>
 <li>
 <p><strong><code>canonicalizationAlgorithm</code></strong> [string] Creation and analysis. The
-algorithm used to canonicalize the XMLdigital signature and to
+algorithm used to canonicalize the XML digital signature and to
 canonicalize token data before computing its hash.
 <br/>Possible values:</p>
 <ul>
@@ -799,15 +802,16 @@ verify the signature.</p>
 									</tr>
 									<tr>
 										<td><var>$cryptKeyPath</var>&nbsp;&nbsp;</td>
-										<td><p>The path to the PEM private key file that
-will be used to decrypt the session key which was used to encrypt the
-token.</p>
+										<td><p>The path to the PEM private key file
+that will be used to decrypt the session key which was used to
+encrypt the token. Required to analyze an encrypted token, optional
+to create one.</p>
 </td>
 									</tr>
 									<tr>
 										<td><var>$cryptKeyPassword</var>&nbsp;&nbsp;</td>
-										<td><p>The password to access the private key
-that will be used to decrypt the session key which was used to
+										<td><p>The password to access the private
+key that will be used to decrypt the session key which was used to
 encrypt the token. Use NULL if no password needed.</p>
 </td>
 									</tr>
@@ -851,7 +855,7 @@ encrypt the token.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1319-1365" title="Go to source code">createXMLToken</a>(
+				<code><a href="source-XMLDSigToken.html#1326-1372" title="Go to source code">createXMLToken</a>(
 	<span>array <var>$data</var></span>,
 	<span>string <var>$signKeyPath</var></span>,
 	<span>string <var>$signCertPath</var></span>,
@@ -867,7 +871,7 @@ encrypt the token.</p>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Creates an XML token for the given user data.</p>
-<p>The created XML token can be retrieved using the fucnction <code>getXML()</code>.</p>
+<p>The created XML token can be retrieved using the function <code>getXML()</code>.</p>
 </div>
 
 							<h4>Parameters</h4>
@@ -935,26 +939,48 @@ created, <code>getError()</code> tells why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1368-1436" title="Go to source code">createSecureXMLToken</a>(
+				<code><a href="source-XMLDSigToken.html#1375-1466" title="Go to source code">createSecureXMLToken</a>(
 	<span>array <var>$data</var></span>,
 	<span>string <var>$signKeyPath</var></span>,
 	<span>string <var>$signCertPath</var></span>,
-	<span>string <var>$cryptKeyPath</var></span>,
+	<span>string|null <var>$cryptKeyPath</var></span>,
 	<span>string <var>$cryptCertPath</var></span>,
 	<span>string <var>$signKeyPassword</var> = <span class="php-kw">null</span></span>,
-	<span>string <var>$cryptKeyPassword</var> = <span class="php-kw">null</span></span>,
+	<span>string|null <var>$cryptKeyPassword</var> = <span class="php-kw">null</span></span>,
 	<span>array <var>$options</var> = []</span>,
 ): <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">XMLDSigToken</span></b></code>
 
 
 	<div class="expandable-collapsedView">
-		<p>Creates a secure (crypted) XML token for the given user data.</p>
+		<p>Creates a secure (encrypted) XML token for the given user data.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Creates a secure (crypted) XML token for the given user data.</p>
+	<div class="description"><p>Creates a secure (encrypted) XML token for the given user data.</p>
 <p>The created XML token can be retrieved using the function <code>getXML()</code>.</p>
+<p>The token is encrypted for the owner of the encryption certificate
+(<code>$cryptCertPath</code>): only the private key of this certificate decrypts
+it. The sender does not need this private key: pass NULL as
+<code>$cryptKeyPath</code>.</p>
+<pre><code class="language-php">$token = XMLDSigToken::createSecureXMLToken($data, $signKeyPath, $signCertPath, null, $cryptCertPath, $signKeyPassword);
+</code></pre>
+<p>The created token is checked right away:</p>
+<ul>
+<li>
+<p>Without <code>$cryptKeyPath</code>, the check covers everything that can be
+verified without decrypting the token: its structure, its
+algorithms, its digest, its signature and the trust in the signing
+certificate. <code>isSignatureValid()</code> and <code>isDataEncrypted()</code> return
+TRUE, while <code>getData()</code>, <code>getTimestamp()</code> and <code>getTokenId()</code> return
+NULL: they are inside the encrypted content, which is not decrypted.</p>
+</li>
+<li>
+<p>With <code>$cryptKeyPath</code>, the token is also decrypted and its content
+read, as by <code>analyzeSecureXMLToken()</code>: <code>getData()</code>, <code>getTimestamp()</code>
+and <code>getTokenId()</code> return what the decrypted token holds.</p>
+</li>
+</ul>
 </div>
 
 							<h4>Parameters</h4>
@@ -980,9 +1006,10 @@ verify the signature.</p>
 									</tr>
 									<tr>
 										<td><var>$cryptKeyPath</var>&nbsp;&nbsp;</td>
-										<td><p>The path to the PEM private key file that
-will be used to decrypt the session key which was used to encrypt the
-token.</p>
+										<td><p>The path to the PEM private key file of
+the recipient, associated to <code>$cryptCertPath</code>, used to decrypt the
+created token in order to check its content. Use NULL to create the
+token without it.</p>
 </td>
 									</tr>
 									<tr>
@@ -1000,9 +1027,9 @@ that will be used to sign the token. Use NULL if no password needed.</p>
 									</tr>
 									<tr>
 										<td><var>$cryptKeyPassword</var>&nbsp;&nbsp;</td>
-										<td><p>The password to access the private key
-that will be used to decrypt the session key which was used to
-encrypt the token. Use NULL if no password needed.</p>
+										<td><p>The password to access the private
+key <code>$cryptKeyPath</code>. Use NULL if no password needed, and when
+<code>$cryptKeyPath</code> is NULL.</p>
 </td>
 									</tr>
 									<tr>
@@ -1043,7 +1070,7 @@ created, <code>getError()</code> tells why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1439-1479" title="Go to source code">analyzeXMLToken</a>(<span>string <var>$xml</var></span>, <span>array <var>$options</var> = []</span>): <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">XMLDSigToken</span></b></code>
+				<code><a href="source-XMLDSigToken.html#1469-1509" title="Go to source code">analyzeXMLToken</a>(<span>string <var>$xml</var></span>, <span>array <var>$options</var> = []</span>): <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">XMLDSigToken</span></b></code>
 
 
 	<div class="expandable-collapsedView">
@@ -1107,7 +1134,7 @@ why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1482-1528" title="Go to source code">analyzeSecureXMLToken</a>(
+				<code><a href="source-XMLDSigToken.html#1512-1558" title="Go to source code">analyzeSecureXMLToken</a>(
 	<span>string <var>$xml</var></span>,
 	<span>string <var>$cryptKeyPath</var></span>,
 	<span>string <var>$cryptKeyPassword</var> = <span class="php-kw">null</span></span>,
@@ -1116,13 +1143,13 @@ why.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Parse an XML token whose data are crypted.</p>
+		<p>Parse an XML token whose data are encrypted.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Parse an XML token whose data are crypted.</p>
-<p>NOTE: Uncrypted token can also be parsed using this function.</p>
+	<div class="description"><p>Parse an XML token whose data are encrypted.</p>
+<p>NOTE: An unencrypted token can also be parsed using this function.</p>
 <p>The options must hold a trust anchor, <code>caCertPath</code> and/or
 <code>signerCertPath</code>; without it, <code>isSignatureValid()</code> returns FALSE.</p>
 </div>
@@ -1187,7 +1214,7 @@ why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2562-2592" title="Go to source code">isSignatureValid</a>(): boolean</code>
+				<code><a href="source-XMLDSigToken.html#2607-2658" title="Go to source code">isSignatureValid</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1200,7 +1227,7 @@ why.</p>
 <p>This means that:</p>
 <ul>
 <li>
-<p>No error occured during the analysis of the XML digital signature.</p>
+<p>No error occurred during the analysis of the XML digital signature.</p>
 </li>
 <li>
 <p>No anomaly detected during the analysis of the XML digital signature.</p>
@@ -1219,7 +1246,31 @@ subject is the expected one, if any (see <code>isCertTrusted()</code>).</p>
 </li>
 </ul>
 <p>Without a trust anchor given to the analysis, it returns FALSE.</p>
-<p>The token timestamp is not checked: use <code>isOutOfDate()</code>.</p>
+<p><strong>It checks neither the freshness of the token nor whether it is
+replayed.</strong> A token that was valid once stays valid here, however old
+it is and however many times it is submitted. Before trusting the data
+of a received token, the caller must check that:</p>
+<ul>
+<li>
+<p><code>isSignatureValid()</code> returns TRUE;</p>
+</li>
+<li>
+<p><code>isOutOfDate($ttl)</code> returns FALSE, for the time to live the
+application accepts;</p>
+</li>
+<li>
+<p>the identifier returned by <code>getTokenId()</code> has not been accepted
+before: store it atomically, and refuse the token if it already is.</p>
+</li>
+</ul>
+<p>The trust anchor <code>caCertPath</code> accepts any certificate its CA issues: if
+this CA also issues certificates to others than the expected sender,
+any of them can sign a token that passes this check. Restrict it then
+to the sender with the option <code>expectedSubject</code>, or pin its certificate
+with <code>signerCertPath</code>.</p>
+<p>For a token created encrypted without the private key of the
+recipient, it tells whether the checks made without decrypting the
+token passed (see <code>createSecureXMLToken()</code>).</p>
 </div>
 
 
@@ -1245,7 +1296,7 @@ subject is the expected one, if any (see <code>isCertTrusted()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2595-2609" title="Go to source code">isCertTrusted</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#2661-2675" title="Go to source code">isCertTrusted</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1259,8 +1310,8 @@ trusted or not, according to the trust anchor given to the analysis
 	<div class="description"><p>Indicates whether the X.509 certificate included in the XML token is
 trusted or not, according to the trust anchor given to the analysis
 (options <code>caCertPath</code>, <code>signerCertPath</code> and <code>expectedSubject</code>).</p>
-<p>NOTE: If not evaluated (because an error occured before), this function
-return NULL. When it returns FALSE, <code>getError()</code> gives the reason.</p>
+<p>NOTE: If not evaluated (because an error occurred before), this function
+returns NULL. When it returns FALSE, <code>getError()</code> gives the reason.</p>
 </div>
 
 
@@ -1287,7 +1338,7 @@ otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2612-2654" title="Go to source code">isOutOfDate</a>(<span>int <var>$ttl</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_DEFAULT_TTL">TOKEN_DEFAULT_TTL</a></span>): boolean</code>
+				<code><a href="source-XMLDSigToken.html#2678-2720" title="Go to source code">isOutOfDate</a>(<span>int <var>$ttl</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_DEFAULT_TTL">TOKEN_DEFAULT_TTL</a></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1336,7 +1387,7 @@ timestamp.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2657-2669" title="Go to source code">isDataEncrypted</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#2723-2738" title="Go to source code">isDataEncrypted</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1346,8 +1397,10 @@ timestamp.</p>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether token data is encrypted or not.</p>
-<p>NOTE: If not evaluated (because an error occured before), this function
-return NULL.</p>
+<p>For a token created encrypted, it returns TRUE, whether or not the
+private key of the recipient was given (see <code>createSecureXMLToken()</code>).</p>
+<p>NOTE: If not evaluated (because an error occurred before), this function
+returns NULL.</p>
 </div>
 
 
@@ -1374,7 +1427,7 @@ NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2672-2685" title="Go to source code">isDigestValueOk</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#2741-2754" title="Go to source code">isDigestValueOk</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1386,8 +1439,8 @@ is valid or not.</p>
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether the digest of token data (a hash) has been verified and
 is valid or not.</p>
-<p>NOTE: If not evaluated (because an error occured before), this function
-return NULL.</p>
+<p>NOTE: If not evaluated (because an error occurred before), this function
+returns NULL.</p>
 </div>
 
 
@@ -1414,7 +1467,7 @@ FALSE otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2688-2701" title="Go to source code">isSignatureValueOk</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#2757-2770" title="Go to source code">isSignatureValueOk</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1426,8 +1479,8 @@ verified and is valid or not.</p>
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether signature of the digest of the token data has been
 verified and is valid or not.</p>
-<p>NOTE: If not evaluated (because an error occured before), this function
-return NULL.</p>
+<p>NOTE: If not evaluated (because an error occurred before), this function
+returns NULL.</p>
 </div>
 
 
@@ -1454,7 +1507,7 @@ is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2704-2712" title="Go to source code">getXML</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#2773-2781" title="Go to source code">getXML</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1489,7 +1542,7 @@ is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2715-2729" title="Go to source code">getData</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#2784-2802" title="Go to source code">getData</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1503,6 +1556,9 @@ is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
 the token is neither out of date nor replayed). They are only read
 once the digest, the signature and the signing certificate have been
 verified.</p>
+<p>A token created encrypted without the private key of the recipient is
+not decrypted: its data are not available (see
+<code>createSecureXMLToken()</code>).</p>
 </div>
 
 
@@ -1529,7 +1585,7 @@ not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2732-2740" title="Go to source code">getTimestamp</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#2805-2817" title="Go to source code">getTimestamp</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1539,6 +1595,9 @@ not available.</p>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Get the timestamp of the XML token.</p>
+<p>A token created encrypted without the private key of the recipient is
+not decrypted: its timestamp is not available (see
+<code>createSecureXMLToken()</code>).</p>
 </div>
 
 
@@ -1564,7 +1623,7 @@ not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2743-2765" title="Go to source code">getTokenId</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#2820-2844" title="Go to source code">getTokenId</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1590,7 +1649,9 @@ valid.</p>
 
 							<h4>Returns</h4>
 							<div><p>The token identifier, NULL if the token is not
-valid (see <code>isSignatureValid()</code>).</p>
+valid (see <code>isSignatureValid()</code>), or if it was created encrypted
+without the private key of the recipient, which leaves its content
+unread (see <code>createSecureXMLToken()</code>).</p>
 </div>
 
 
@@ -1611,16 +1672,16 @@ valid (see <code>isSignatureValid()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2768-2776" title="Go to source code">getError</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#2847-2855" title="Go to source code">getError</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
-		<p>Get the message of the error that occured while parsing the XML token.</p>
+		<p>Get the message of the error that occurred while parsing the XML token.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Get the message of the error that occured while parsing the XML token.</p>
+	<div class="description"><p>Get the message of the error that occurred while parsing the XML token.</p>
 </div>
 
 
@@ -1646,16 +1707,16 @@ valid (see <code>isSignatureValid()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2779-2787" title="Go to source code">getAnomalies</a>(): array</code>
+				<code><a href="source-XMLDSigToken.html#2858-2866" title="Go to source code">getAnomalies</a>(): array</code>
 
 
 	<div class="expandable-collapsedView">
-		<p>Get the list of anomalies that occured while parsing the XML token.</p>
+		<p>Get the list of anomalies that occurred while parsing the XML token.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Get the list of anomalies that occured while parsing the XML token.</p>
+	<div class="description"><p>Get the list of anomalies that occurred while parsing the XML token.</p>
 </div>
 
 
@@ -1681,7 +1742,7 @@ valid (see <code>isSignatureValid()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2790-2804" title="Go to source code">getCertificate</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#2869-2883" title="Go to source code">getCertificate</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1717,7 +1778,7 @@ available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2807-2822" title="Go to source code">getCertIssuer</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#2886-2901" title="Go to source code">getCertIssuer</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1755,7 +1816,7 @@ if not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2825-2840" title="Go to source code">getCertSubject</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#2904-2919" title="Go to source code">getCertSubject</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1793,7 +1854,7 @@ if not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2843-2858" title="Go to source code">getCertDN</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#2922-2937" title="Go to source code">getCertDN</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1831,7 +1892,7 @@ if not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2861-2879" title="Go to source code">getCertValidFrom</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
+				<code><a href="source-XMLDSigToken.html#2940-2958" title="Go to source code">getCertValidFrom</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1878,7 +1939,7 @@ valid, NULL if not available, FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2882-2901" title="Go to source code">getCertValidTo</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
+				<code><a href="source-XMLDSigToken.html#2961-2980" title="Go to source code">getCertValidTo</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1904,8 +1965,8 @@ XMLDSigToken::TOKEN_TIMESTAMP_FORMAT).</p>
 
 							<h4>Returns</h4>
 							<div><p>The date to which the X.509 certificate is
-valid, NULL
-if not available, FALSE if $dateFormat is invalid.</p>
+valid, NULL if
+not available, FALSE if $dateFormat is invalid.</p>
 </div>
 
 
@@ -1926,7 +1987,7 @@ if not available, FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2904-2919" title="Go to source code">isCertOutOfDate</a>(): boolean</code>
+				<code><a href="source-XMLDSigToken.html#2983-2998" title="Go to source code">isCertOutOfDate</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1964,7 +2025,7 @@ otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2922-2971" title="Go to source code">isValidCertIssuer</a>(<span>array <var>$expectedIssuerInfo</var></span>): boolean</code>
+				<code><a href="source-XMLDSigToken.html#3001-3050" title="Go to source code">isValidCertIssuer</a>(<span>array <var>$expectedIssuerInfo</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1976,7 +2037,7 @@ included in the XML token matches the expected one.</p>
 	<div class="expandable-expandedView">
 	<div class="description"><p>Check that the issuer information of the X.509 certificate that is
 included in the XML token matches the expected one.</p>
-<p>The expected issuer information must me passed as an array to the
+<p>The expected issuer information must be passed as an array to the
 function:</p>
 <pre><code class="language-php">$ExpectedIssuerInfo = [
     'C' =&gt; 'DK',
@@ -2033,7 +2094,7 @@ expected information, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2974-3016" title="Go to source code">isValidCertCA</a>(<span>string <var>$caCertPath</var></span>): boolean</code>
+				<code><a href="source-XMLDSigToken.html#3053-3095" title="Go to source code">isValidCertCA</a>(<span>string <var>$caCertPath</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2046,10 +2107,10 @@ expected CA.</p>
 	<div class="description"><p>Check that the X.509 certificate included in the XML token comes from the
 expected CA.</p>
 <p>Note that more than one CA certificate can give a positive result, some
-certificates re-issue signing certificates after having only changed the
+CAs re-issue signing certificates after having only changed the
 expiration dates.</p>
 <p>Note that it also works with self-signed certificates. In this case,
-passes the X.509 certificate that is supposed been included in the XML
+pass the X.509 certificate that is supposed to be included in the XML
 token to the function.</p>
 <p>Only the link between the certificate and the given CA certificate is
 checked (see <code>X509Cert::isValidCA()</code>). <code>isSignatureValid()</code> verifies the
@@ -2061,7 +2122,7 @@ whole chain against the trust anchor of the analysis.</p>
 									<tr>
 										<td><var>$caCertPath</var>&nbsp;&nbsp;</td>
 										<td><p>The PEM certificate (public key) that is
-supposed been used by CA to sign the X.509 certificate included in
+supposed to be used by the CA to sign the X.509 certificate included in
 the XML token.</p>
 </td>
 									</tr>
@@ -2098,7 +2159,7 @@ from the token).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3256-3356" title="Go to source code">alterXML</a>(<span>string &amp;<var>$xml</var></span>, <span>string <var>$nodePath</var></span>, <span>string <var>$nodeAttribute</var></span>, <span>string <var>$newValue</var></span>, <span>boolean <var>$delete</var> = <span class="php-kw">false</span></span>): string|false</code>
+				<code><a href="source-XMLDSigToken.html#3335-3435" title="Go to source code">alterXML</a>(<span>string &amp;<var>$xml</var></span>, <span>string <var>$nodePath</var></span>, <span>string <var>$nodeAttribute</var></span>, <span>string <var>$newValue</var></span>, <span>boolean <var>$delete</var> = <span class="php-kw">false</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2137,7 +2198,7 @@ parameter to NULL.</p>
 									</tr>
 									<tr>
 										<td><var>$newValue</var>&nbsp;&nbsp;</td>
-										<td><p>The value that will replace original the value of
+										<td><p>The value that will replace the original value of
 the node or of the attribute of the node if $nodeAttribute parameter
 is provided.</p>
 </td>
@@ -2172,7 +2233,7 @@ modification or deletion, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3359-3444" title="Go to source code">getPrettyXML</a>(): string</code>
+				<code><a href="source-XMLDSigToken.html#3438-3523" title="Go to source code">getPrettyXML</a>(): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2182,7 +2243,7 @@ modification or deletion, FALSE otherwise.</p>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Return the XML token in a pretty readable format.</p>
-<p>This function is intented for display purpose only. Use the <code>getXML()</code>
+<p>This function is intended for display purposes only. Use the <code>getXML()</code>
 function to obtain the raw XML token you want to work with.</p>
 </div>
 
@@ -2209,7 +2270,7 @@ function to obtain the raw XML token you want to work with.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3447-3520" title="Go to source code">getHTMLDump</a>(): string</code>
+				<code><a href="source-XMLDSigToken.html#3526-3599" title="Go to source code">getHTMLDump</a>(): string</code>
 
 
 	<div class="expandable-collapsedView">

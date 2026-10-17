@@ -59,15 +59,16 @@ class ExampleCertsTest extends TestCase
     {
         $this->requireSymmetricEncryption();
 
+        // As examples/post-secure-xml-token.php does, the sender creates the
+        // token without the private key of the recipient.
         $data = self::sampleData();
         $sig = XMLDSigToken::createSecureXMLToken(
             $data,
             self::exampleCert('sign.key.pem'),
             self::exampleCert('sign.cert.pem'),
-            self::exampleCert('crypt.key.pem'),
+            null,
             self::exampleCert('crypt.cert.pem'),
-            'signKeyPassword',
-            'cryptKeyPassword'
+            'signKeyPassword'
         )->getXML();
 
         $token = XMLDSigToken::analyzeSecureXMLToken(

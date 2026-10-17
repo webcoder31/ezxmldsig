@@ -22,7 +22,7 @@ if (!isset($_POST['xmltoken']))
 }
 $sig = base64_decode($_POST['xmltoken']);
 
-// Private key (and eventualy its passphrase) to be used 
+// Private key (and possibly its passphrase) to be used
 // to decrypt token (required if user data is encrypted).
 $cryptKey = './certs/crypt.key.pem';
 $cryptKeyPassword = 'cryptKeyPassword'; // Use null if it is not needed.
@@ -32,7 +32,8 @@ $cryptKeyPassword = 'cryptKeyPassword'; // Use null if it is not needed.
 // To trust the certificates issued by an intermediate CA, give its
 // certificate AND the certificates up to its root: OpenSSL rejects a chain
 // that stops at an intermediate CA.
-// Optionally, the subject of the signing certificate can be constrained too.
+// The subject of the signing certificate is constrained too: the CA may
+// also issue certificates to others than the expected sender.
 $options = [
     'caCertPath' => ['./certs/intermediate.cert.pem', './certs/root.cert.pem'],
     'expectedSubject' => ['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept'],
@@ -51,7 +52,7 @@ echo '<html><body>';
 echo '<h1>XMLDSig Token Analysis</h1>';
 
 // Verify that:
-// - the XML digital signature meets the XMLDSIG specifications.
+// - the XML digital signature has the structure of an XML token.
 // - the algorithms used to construct the XML digital signature are those
 //   expected (here, the default ones).
 // - the token contained in the XML digital signature has not been altered.
@@ -71,7 +72,7 @@ else if ($token->isOutOfDate(120))
     echo "<h2>ERROR: Token is out of date!</h2>";
 }
 
-// All is fine ! We can trust user data.
+// All is fine! We can trust user data.
 // NOTE: A valid token can be posted again for as long as it is not out of
 // date. An application must also refuse a token whose identifier
 // ($token->getTokenId()) it has already accepted: the library keeps no list

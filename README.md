@@ -32,30 +32,32 @@ You can also clone it (or download it as a ZIP archive) from its [GitHub reposit
 
 ### XMLDSigToken class
 
-The ``XMLDSigToken`` class allows creating and analyzing enveloping XML Digital Signature containing timestamped user data that may also be encrypted, also called XML token. With such tokens, you may create your own Single Sign On solution. You can secure access to your Web Services, as with JSON Web Token. You can transmit data in a secure way without having SSL connection. Or anything you can think of that requires such kind of features.
+The ``XMLDSigToken`` class allows creating and analyzing enveloping XML Digital Signature containing timestamped user data that may also be encrypted, also called XML token. With such tokens, you may create your own Single Sign On solution. You can secure access to your Web Services, as with JSON Web Token. You can transmit data whose integrity and origin, and also confidentiality when they are encrypted, are protected by the token itself, whatever the connection that carries it. Or anything you can think of that requires such kind of features.
+
+The token protects its own content only: not the request that carries it (URL, headers, other fields), nor the response, nor the identity of the server it is sent to. Use an HTTPS connection for these.
 
 **The ``XMLDSigToken`` class offers the following features:**
 
-1) It build an XML token from a flat or multidimensional associative array representing the user data and retrieve it in the same way.
+1) It builds an XML token from a flat or multidimensional associative array representing the user data and retrieves it in the same way.
 
-2) It allows chossing the various algorithms that should be used to build the XML Digital Signature (see [Options](#options)). The ones used by default are the following:
-    * Algorithm used to canonalize data before signing is: http://www.w3.org/TR/2001/REC-xml-c14n-20010315.
+2) It allows choosing the various algorithms that should be used to build the XML Digital Signature (see [Options](#options)). The ones used by default are the following:
+    * Algorithm used to canonicalize data before signing is: http://www.w3.org/TR/2001/REC-xml-c14n-20010315.
     * Algorithm used to generate the signature is: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256.
     * Algorithm used to compute the hash of contained data is: http://www.w3.org/2001/04/xmlenc#sha256.
     * Algorithm used to encode user data values is: Base64.
 
-3) It is also capable of encrypting / decrypting token data for safe use with an unsecured HTTP connection, providing the same level of security as an SSL connection. 
-The class allows chosing the algorithms that should be used to perform data encryption. By default it uses the following ones:
+3) It is also capable of encrypting / decrypting token data, so that only the recipient can read them, even when the token travels over an unencrypted HTTP connection. Only the token data are encrypted: unlike an SSL/TLS connection, this protects neither the rest of the request nor the response, does not authenticate the server, and does not prevent an intercepted token from being submitted again (see [Replay](#replay)).
+The class allows choosing the algorithms that should be used to perform data encryption. By default it uses the following ones:
     * Algorithm used to encrypt data is: http://www.w3.org/2009/xmlenc11#aes256-gcm (authenticated symmetric ciphering).
-    * Algorithm used to encrypt the session key that will be used to cypher data is: http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymmetric ciphering).
+    * Algorithm used to encrypt the session key that will be used to encrypt data is: http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymmetric ciphering).
 
 4) It guarantees the integrity and the origin of the user data stored in the XMLDSig token by verifying that:
-    * The XML digital signature meets the XMLDSIG specifications.
+    * The XML digital signature has the structure of an XML token: an enveloping signature whose single reference covers the token it holds. The library checks the elements of this fixed structure, not every rule of the XMLDSIG specification.
     * The algorithms used to construct the XML digital signature are those expected.
     * The token contained in the XML digital signature has not been altered.
     * The X.509 certificate included in the XML digital signature is trusted: it is valid at the current date, OpenSSL verifies its chain up to the CA certificates you trust and/or it is the very certificate you pinned, and its subject is the one you expect, if you ask for it (see [Trust anchor](#trust-anchor)).
 
-5) It is also able to verify with confidence that the token is not out of date because the token timestamp is signed too. Each token also holds a signed random identifier, which lets the receiver refuse a token it has already accepted (see [Replay](#replay)).
+5) It is also able to verify with confidence that the token is not out of date because the token timestamp is signed too. Each token also holds a signed random identifier, which lets the receiver refuse a token it has already accepted (see [Replay](#replay)). These two checks are up to the receiver: ``isSignatureValid()`` makes neither (see [Checking an XML token](#xmldsigtoken-checking-an-xml-token)).
 
 6) It gives access to the information of the X.509 certificate included in the XML Digital Signature (subject, issuer, validity dates), and keeps individual checks on it:
     * Ensure that the certificate is not out of date.
@@ -67,12 +69,7 @@ The class allows chosing the algorithms that should be used to perform data encr
 
 ### X509Cert class
 
-The ``X509Cert`` class provides a set of convenient methods for extracting essential information contained in an X.509 certificate and for performing some useful checkings, all of them with OpenSSL: whether the certificate was issued by a given CA certificate (``isValidCA()``), whether OpenSSL verifies its chain up to trusted CA certificates (``isTrustedBy()``), whether its key usage allows signing (``canSign()``). This class is used internaly by the ``XMLDSigToken`` class.
-
-
-### Other classes coming soon...
-
-More classes will be provided soon, in order to support other useful usages of XML Digital Signatures, i.e. signing an internet resource or a mail attachment.
+The ``X509Cert`` class provides a set of convenient methods for extracting essential information contained in an X.509 certificate and for performing some useful checks, all of them with OpenSSL: whether the certificate was issued by a given CA certificate (``isValidCA()``), whether OpenSSL verifies its chain up to trusted CA certificates (``isTrustedBy()``), whether its key usage allows signing (``canSign()``). This class is used internally by the ``XMLDSigToken`` class.
 
 
 ## How to use?
@@ -84,16 +81,16 @@ More classes will be provided soon, in order to support other useful usages of X
 
 The example below shows basic usage of the ``XMLDSigToken`` class for creating a signed token enveloped in an XML Digital Signature.
 
-To do so, the ``XMLDSigToken`` class requires an assymmetric cryptographic key pair:
+To do so, the ``XMLDSigToken`` class requires an asymmetric cryptographic key pair:
 * A private key the class will use to sign the token.
 * The password that allows reading the private key (Optional - Depends on how the private key was created).
-* The X.509 certificate related to the private key that will be included within the XML Digital Signature in order to allow the recipient verifying the token integrity.
+* The X.509 certificate related to the private key that will be included within the XML Digital Signature in order to allow the recipient to verify the token integrity.
 
 
 #### Source code
 
 ```php
-// Load required classes manualy.
+// Load required classes manually.
 // require(dirname(__DIR__) . '/vendor/robrichards/xmlseclibs/xmlseclibs.php');
 // require(dirname(__DIR__) . '/ezxmldsig.php');
 
@@ -110,7 +107,7 @@ $signKeyPassword = 'signing-key-password'; // Use null if it is not needed.
 
 // User data.
 $data = [
-    'name' => 'Ragnar Lothbrock',
+    'name' => 'Ragnar Lothbrok',
     'role' => 'Jarl',
     'location' => 'Kattegat'
 ];
@@ -118,7 +115,7 @@ $data = [
 // Create token for user data.
 $token = XMLDSigToken::createXMLToken($data, $signKey, $signCert, $signKeyPassword);
 
-// Get the XML Digital Signature. 
+// Get the XML Digital Signature.
 $sig = $token->getXML();
 
 // Display the XML Digital Signature.
@@ -126,6 +123,8 @@ echo htmlentities($sig);
 ```
 
 #### Result
+
+The result below was produced by this code with the certificates of `examples/certs/`, then indented and its long Base64 values shortened to their first and last 8 characters. The user data are Base64 encoded: ``UmFnbmFyIExvdGhicm9r`` is ``Ragnar Lothbrok``.
 
 ```xml
 <?xml version="1.0"?>
@@ -138,23 +137,23 @@ echo htmlentities($sig);
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-      <ds:DigestValue>K3f2nX9a ... 1hQ6sE0=</ds:DigestValue>
+      <ds:DigestValue>nOzBeO2Z ... 7+c3tgk=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
-  <ds:SignatureValue>rmSevcH4 ... WsEX9A==</ds:SignatureValue>
+  <ds:SignatureValue>XQH+v2GC ... cRppBA==</ds:SignatureValue>
   <ds:KeyInfo>
     <ds:X509Data>
-      <ds:X509Certificate>MIIFbTCC ... jb5e4w==</ds:X509Certificate>
+      <ds:X509Certificate>MIIFMjCC ... oubIJoA=</ds:X509Certificate>
     </ds:X509Data>
   </ds:KeyInfo>
   <ds:Object Id="Token">
     <Token>
-      <TokenTimestamp>2017-05-20T07:20:49Z</TokenTimestamp>
-      <TokenId>3f9c2a7e0b1d4c58a6e2f7091b3d5c4e</TokenId>
+      <TokenTimestamp>2026-10-17T04:43:05Z</TokenTimestamp>
+      <TokenId>b64d860a9b38e2734ed658b30dc0ef82</TokenId>
       <TokenData>
-        <name Algorithm="base64">UmFnbmFyIExvdGhicm9jaw==</name>
-        <role Algorithm="base64">S2luZyBvZiBWaWNraW5ncw==</role>
-        <location Algorithm="base64">S2F0dGVnYXQsIEp5bGxhbmQgKERFTk1BUksp</location>
+        <name Algorithm="base64">UmFnbmFyIExvdGhicm9r</name>
+        <role Algorithm="base64">SmFybA==</role>
+        <location Algorithm="base64">S2F0dGVnYXQ=</location>
       </TokenData>
     </Token>
   </ds:Object>
@@ -165,16 +164,17 @@ echo htmlentities($sig);
 
 The example below shows how to use the ``XMLDSigToken`` class for creating a signed token whose user data will be encrypted.
 
-To do so, the ``XMLDSigToken`` class requires another assymmetric cryptographic key pair in order to perform user data encryption:
-* An X.509 certificate whose public key will be used by the class to encrypt a session key that will be used to cypher user data.
-* The private key related to the certificate. This key will be used by the class only to verify that it has correctly cyphered the user data once encryption is done. The token recipient must have this key in order to decrypt the user data.
-* The password that allows reading the private key (Optional - Depends on how the private key was created).
+To do so, the ``XMLDSigToken`` class requires the encryption certificate of the recipient: an X.509 certificate whose public key will be used by the class to encrypt a session key that will be used to encrypt user data. Only the private key related to this certificate, which the recipient keeps, can decrypt the user data.
+
+The sender does not need this private key: pass ``null`` in its place (the fourth parameter of ``createSecureXMLToken()``), as below. The created token is then checked right away up to its decryption: its structure, its algorithms, its digest, its signature and the trust in the signing certificate. ``isSignatureValid()`` and ``isDataEncrypted()`` return ``TRUE``, while ``getData()``, ``getTimestamp()`` and ``getTokenId()`` return ``NULL``: they are inside the encrypted content, which is not decrypted.
+
+When the sender does hold this private key (for instance, when it encrypts tokens for itself), it can pass it, with its password (or ``null``) as seventh parameter: the created token is then also decrypted and its content checked, and ``getData()``, ``getTimestamp()`` and ``getTokenId()`` return what it holds.
 
 
 #### Source code
 
 ```php
-// Load required classes manualy.
+// Load required classes manually.
 // require(dirname(__DIR__) . '/vendor/robrichards/xmlseclibs/xmlseclibs.php');
 // require(dirname(__DIR__) . '/ezxmldsig.php');
 
@@ -189,20 +189,20 @@ $signKey = 'path/to/signing/private/key';
 $signCert = 'path/to/signing/public/certificate';
 $signKeyPassword = 'signing-key-password'; // Use null if it is not needed.
 
-// Asymmetric cryptographic key pair for crypting (in PEM format).
-$cryptKey = 'path/to/crypting/private/key';
-$cryptCert = 'path/to/crypting/public/certificate';
-$cryptKeyPassword = 'crypting-key-password'; // Use null if it is not needed.
+// Encryption certificate of the recipient (in PEM format). Its private key
+// stays with the recipient.
+$cryptCert = 'path/to/encryption/public/certificate';
 
 // User data.
 $data = [
-    'name' => 'Ragnar Lothbrock',
+    'name' => 'Ragnar Lothbrok',
     'role' => 'Jarl',
     'location' => 'Kattegat'
 ];
 
-// Create token for user data.
-$token = XMLDSigToken::createSecureXMLToken($data, $signKey, $signCert, $cryptKey, $cryptCert, $signKeyPassword, $cryptKeyPassword);
+// Create token for user data, without the private key of the recipient
+// (null).
+$token = XMLDSigToken::createSecureXMLToken($data, $signKey, $signCert, null, $cryptCert, $signKeyPassword);
 
 // Get the XML Digital Signature.
 $sig = $token->getXML();
@@ -214,6 +214,8 @@ echo htmlentities($sig);
 
 #### Result
 
+The result below was produced by this code with the certificates of `examples/certs/`, then indented and its long Base64 values shortened to their first and last 8 characters. The user data, the timestamp and the identifier of the token are in the last ``xenc:CipherValue``, encrypted.
+
 ```xml
 <?xml version="1.0"?>
 <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
@@ -225,13 +227,13 @@ echo htmlentities($sig);
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-      <ds:DigestValue>p0Rw7mVd ... cT4yLk8=</ds:DigestValue>
+      <ds:DigestValue>gIDVpJ0T ... Y+9IGcQ=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
-  <ds:SignatureValue>oJsmcOx6 ... 1whi1w==</ds:SignatureValue>
+  <ds:SignatureValue>eOXWZL9N ... cNoCgA==</ds:SignatureValue>
   <ds:KeyInfo>
     <ds:X509Data>
-      <ds:X509Certificate>MIIFbTCC ... jb5e4w==</ds:X509Certificate>
+      <ds:X509Certificate>MIIFMjCC ... oubIJoA=</ds:X509Certificate>
     </ds:X509Data>
   </ds:KeyInfo>
   <ds:Object Id="Token">
@@ -241,12 +243,12 @@ echo htmlentities($sig);
         <xenc:EncryptedKey>
           <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
           <xenc:CipherData>
-            <xenc:CipherValue>N0VUlXCG ... A5wPPw==</xenc:CipherValue>
+            <xenc:CipherValue>Ij28kW0Y ... qI6yrA==</xenc:CipherValue>
           </xenc:CipherData>
         </xenc:EncryptedKey>
       </ds:KeyInfo>
       <xenc:CipherData>
-        <xenc:CipherValue>9Bj3iB9y ... 5ohEIA==</xenc:CipherValue>
+        <xenc:CipherValue>NiP+aL74 ... CZf8wWA=</xenc:CipherValue>
       </xenc:CipherData>
     </xenc:EncryptedData>
   </ds:Object>
@@ -256,15 +258,23 @@ echo htmlentities($sig);
 
 ### XMLDSigToken: Checking an XML token
 
-In the following example, we will assume that we will receive the XML digital signature (in a Base64 coded field of an HTTP POST request) from an approved source that we want to ensure is the issuer. We will extract the signature from the POST request and we will perform all checkings to make sure we can trust the received user data.
+In the following example, we will assume that we will receive the XML digital signature (in a Base64 coded field of an HTTP POST request) from an approved source that we want to ensure is the issuer. We will extract the signature from the POST request and we will perform all the checks needed to make sure we can trust the received user data.
 
 The analysis requires a trust anchor, described below: without it, no token is valid.
+
+**``isSignatureValid()`` checks neither the freshness of the token nor whether it is replayed.** A token that was valid once stays valid for it, however old it is and however many times it is submitted. Before trusting the data of a received token, the receiver must make three checks, as the example below does:
+
+1. ``isSignatureValid()`` returns ``TRUE``: structure, algorithms, digest, signature, trust in the signing certificate;
+2. ``isOutOfDate($ttl)`` returns ``FALSE``, for the time to live the application accepts (freshness);
+3. the identifier returned by ``getTokenId()`` has not been accepted before: store it atomically, and refuse the token if it already is (replay, see [Replay](#replay)).
+
+**Restrict the trust anchor to the sender.** ``caCertPath`` accepts any certificate its CA issues. As soon as this CA also issues certificates to others than the expected sender (a public CA, or a company CA that issues one per server or per partner), any of them can sign a token that ``isSignatureValid()`` accepts: add ``expectedSubject`` (the subject of the certificate of the sender), or pin the certificate of the sender with ``signerCertPath`` (see [Trust anchor](#trust-anchor)).
 
 
 #### Source code
 
 ```php
-// Load required classes manualy.
+// Load required classes manually.
 // require(dirname(__DIR__) . '/vendor/robrichards/xmlseclibs/xmlseclibs.php');
 // require(dirname(__DIR__) . '/ezxmldsig.php');
 
@@ -282,14 +292,15 @@ if (!isset($_POST['xmltoken']))
 }
 $sig = base64_decode($_POST['xmltoken']);
 
-// Private key (and eventualy its passphrase) to be used 
+// Private key (and possibly its passphrase) to be used
 // to decrypt token (required if user data is encrypted).
-$cryptKey = 'path/to/crypting/private/key';
-$cryptKeyPassword = 'crypting-key-password'; // Use null if it is not needed.
+$cryptKey = 'path/to/decryption/private/key';
+$cryptKeyPassword = 'decryption-key-password'; // Use null if it is not needed.
 
 // Trust anchor (required): the CA that issued the signing certificate of the
-// sender, and the certificates up to its root. Optionally, the subject the
-// signing certificate must have.
+// sender, and the certificates up to its root. The subject the signing
+// certificate must have restricts it to the sender: the CA may also issue
+// certificates to others.
 $options = [
     'caCertPath' => [
         'path/to/ca/intermediate/certificate',
@@ -298,23 +309,25 @@ $options = [
     'expectedSubject' => ['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept'],
 ];
 
-// Create token object from the XML Digital Signature 
+// Create token object from the XML Digital Signature.
 $token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword, $options);
 
 // NOTE: The above instruction works even if user data is not encrypted.
-// However, if user data is not encrypted and you don't own a private key 
+// However, if user data is not encrypted and you don't own a private key
 // then use the following method:
 // $token = XMLDSigToken::analyzeXMLToken($sig, $options);
 
-// Verify that:
-// - the XML digital signature meets the XMLDSIG specifications.
-// - the algorithms used to construct the XML digital signature are those 
+// Check 1 of 3. Verify that:
+// - the XML digital signature has the structure of an XML token.
+// - the algorithms used to construct the XML digital signature are those
 //   expected (here, the default ones).
 // - the token contained in the XML digital signature has not been altered.
 // - the signing certificate is valid at the current date, has been issued
 //   by a trusted CA and has the expected subject.
 // - the token contained in the XML digital signature is correctly timestamped
 //   and contains user data.
+// It checks neither the freshness of the token nor whether it is replayed:
+// see the two checks that follow.
 if (!$token->isSignatureValid())
 {
     // The error may quote what the token holds: escape it.
@@ -322,14 +335,15 @@ if (!$token->isSignatureValid())
     exit();
 }
 
-// Verify that the XML token was issued less than 2 minutes ago.
-if ($token->isOutOfDate(120)) 
+// Check 2 of 3: verify that the XML token was issued less than 2 minutes
+// ago.
+if ($token->isOutOfDate(120))
 {
     echo "ERROR: Token is out of date!";
     exit();
 }
 
-// Refuse a token already accepted (see Replay below). apcu_add() only adds
+// Check 3 of 3: refuse a token already accepted (see Replay below). apcu_add() only adds
 // the identifier if it is not stored yet, and keeps it for as long as the
 // token could be accepted: 120 seconds of validity plus the clock tolerance.
 if (!apcu_add('xmltoken-' . $token->getTokenId(), true, 120 + XMLDSigToken::DESYNC_TOLERANCE))
@@ -338,7 +352,7 @@ if (!apcu_add('xmltoken-' . $token->getTokenId(), true, 120 + XMLDSigToken::DESY
     exit();
 }
 
-// All is fine ! We can trust user data.
+// All is fine! We can trust user data.
 echo "Token data:";
 echo '<pre>' . htmlspecialchars(print_r($token->getData(), true), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
 ```
@@ -370,7 +384,7 @@ The signature of a token is verified with the X.509 certificate the token carrie
 
 * **``caCertPath``** (string or array of strings): PEM files holding the CA certificates you trust. OpenSSL must build and verify the chain of the signing certificate up to a self-signed certificate of these files: signature of each link, validity dates, CA constraints and key usage of each issuer.
 * **``signerCertPath``** (string): a PEM certificate the token must be signed with (pinning). Given alone, it is the trust anchor; given with ``caCertPath``, both are required.
-* **``expectedSubject``** (array or string, optional): the subject the signing certificate must have. Character case is significant. It does not replace ``caCertPath`` or ``signerCertPath``.
+* **``expectedSubject``** (array or string, optional): the subject the signing certificate must have. Character case is significant. It does not replace ``caCertPath`` or ``signerCertPath``. **Give it, or ``signerCertPath``, whenever the CA of ``caCertPath`` also issues certificates to others than the expected sender**: without it, any certificate of this CA is accepted.
     * As an array, the fields to check, as returned by ``getCertSubject()``: ``['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']``. Fields that are not given are not checked.
     * As a string, the full Distinguished Name, compared as is with the one ``getCertDN()`` returns. This is the OpenSSL "oneline" format: every field of the subject, in the order of the certificate, each written ``/<short name>=<value>`` with no space and no escaping:
 
@@ -394,18 +408,20 @@ With the intermediate certificate alone, every token is rejected and ``getError(
 Signing certificate is not issued by a trusted CA: its chain could not be verified up to the CA certificates of the option 'caCertPath', which must hold the issuing CA and the certificates up to its root!
 ```
 
-Only the signing certificate is taken from the token, never intermediate certificates: a certificate issued by another intermediate CA of the same root is rejected, since its issuer is not in your files. A certificate issued directly by one of the CA certificates you give (the root included) is accepted: add ``expectedSubject`` to narrow it down.
+Only the signing certificate is taken from the token, never intermediate certificates: a certificate issued by another intermediate CA of the same root is rejected, since its issuer is not in your files. A certificate issued directly by one of the CA certificates you give (the root included) is accepted: add ``expectedSubject`` to narrow it down to the sender.
 
 **Without a trust anchor**, ``isSignatureValid()`` returns ``FALSE`` and ``getError()`` returns ``No trust anchor! Pass the option 'caCertPath' (trusted CA certificates) and/or 'signerCertPath' (pinned signing certificate) to analyze a token: without them, no signing certificate can be trusted.``. An option of the wrong type, or naming a file that cannot be read, throws an exception.
 
 ``isCertTrusted()`` tells whether the certificate passed these checks. The individual checks ``isCertOutOfDate()``, ``isValidCertIssuer()`` and ``isValidCertCA()`` remain available, but ``isSignatureValid()`` does not need them. ``isValidCertIssuer()`` only compares names, which any certificate can copy.
 
-When a token is created, it is analyzed right away to check it, with the certificate of its own signing key as trust anchor.
+When a token is created, it is analyzed right away to check it, with the certificate of its own signing key as trust anchor. An encrypted token created without the private key of the recipient is checked up to its decryption (see [Encryption](#encryption)).
 
 
 ### Encryption
 
 The token data are encrypted with a session key generated for each token, and the session key is encrypted for the recipient with the encryption certificate (key transport). The encryption takes place before the signature, which therefore covers the encrypted data.
+
+* **The sender needs no private key of the recipient.** ``createSecureXMLToken()`` takes the private key of the recipient (``$cryptKeyPath``) only to decrypt the created token and check its content: pass ``null`` instead, and the created token is checked up to its decryption (structure, algorithms, digest, signature, trust in the signing certificate), its content left unread (``getData()``, ``getTimestamp()`` and ``getTokenId()`` return ``NULL``). A password (``$cryptKeyPassword``) given without this key throws an exception.
 
 * **Default algorithms.** The data are encrypted with AES-256-GCM (``AES256_GCM``) and the session key with RSA-OAEP (``RSA_OAEP_MGF1P``, http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p). AES-GCM checks an authentication tag before returning any data: altered data are rejected as a whole. A 256-bit key costs no more than a 128-bit one for data of this size.
 * **Decryption after verification.** A token is only decrypted once its digest, its signature, the trust in its certificate (see [Trust anchor](#trust-anchor)) and its algorithms have been verified. A token that fails one of these checks is never decrypted.
@@ -488,7 +504,14 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 * **Token identifier.** Each token holds a signed random identifier (``Token/TokenId``, see [Replay](#replay)). A token without identifier, as created by a 0.x version, is rejected (``Token identifier is missing!``), whatever the options: upgrade the senders together with the receivers. A token is valid for a few seconds or minutes (``isOutOfDate()``): no token created before the upgrade needs to be read after it. Receivers should refuse the identifiers they have already accepted.
 * **XML parsing.** A document with a document type declaration (``<!DOCTYPE``), or not encoded in UTF-8, is rejected before it is parsed, and ``alterXML()`` returns ``FALSE`` for it without changing it (see [XML parsing](#xml-parsing)). The tokens created by the library are in UTF-8 and have none.
 * **``getHTMLDump()``** escapes every value it shows and no longer loads the ``run_prettify.js`` script of Google Code Prettify from a CDN: the XML token is shown without syntax highlighting.
-* **Encryption.** The data are encrypted with AES-256-GCM (AES-128-CBC before), and the analysis rejects a token encrypted with CBC unless it declares the algorithm (see [Encryption](#encryption)). A 0.x analysis rejects AES-GCM (``Session Key Ciphering algorithm is invalid!``): upgrade the receivers first, declaring ``'sessionKeyCipheringAlgorithm' => XMLDSigToken::AES128_CBC`` while the senders create tokens with the 0.x defaults, then upgrade the senders and remove the option. With ``'checkCryptingAlgorithms' => false`` too, a receiver accepts both the declared CBC algorithm and AES-GCM during the transition. A sender upgraded first can pass the same option to ``createSecureXMLToken()`` until its receivers are upgraded. RSA 1.5 is refused and the constant ``XMLDSigToken::RSA_1_5`` is removed: use ``RSA_OAEP_MGF1P``, the default. A decryption failure gives ``Token decryption failed!`` instead of ``Session key decryption failed! Reason: ...`` or ``Token data decryption failed! Reason: ...``.
+* **Encryption.**
+    * The data are encrypted with AES-256-GCM (AES-128-CBC before), and the analysis rejects a token encrypted with CBC unless it declares the algorithm (see [Encryption](#encryption)).
+    * A 0.x analysis rejects AES-GCM (``Session Key Ciphering algorithm is invalid!``): upgrade the receivers first, declaring ``'sessionKeyCipheringAlgorithm' => XMLDSigToken::AES128_CBC`` while the senders create tokens with the 0.x defaults, then upgrade the senders and remove the option.
+    * With ``'checkCryptingAlgorithms' => false`` too, a receiver accepts both the declared CBC algorithm and AES-GCM during the transition.
+    * A sender upgraded first can pass the same option to ``createSecureXMLToken()`` until its receivers are upgraded.
+    * RSA 1.5 is refused and the constant ``XMLDSigToken::RSA_1_5`` is removed: use ``RSA_OAEP_MGF1P``, the default.
+    * A decryption failure gives ``Token decryption failed!`` instead of ``Session key decryption failed! Reason: ...`` or ``Token data decryption failed! Reason: ...``.
+    * The sender no longer needs the private key of the recipient: ``createSecureXMLToken()`` accepts ``null`` as ``$cryptKeyPath`` (see [Encryption](#encryption)). Calls that pass it keep working.
 
 
 ## Examples
@@ -498,7 +521,7 @@ Simply visit the file `index.html` to see them in action (need to be hosted on a
 
 > **WARNING: the private keys of `examples/certs/` are public.** They are published with the source code of this library, with their passwords: anyone can sign tokens that the examples trust, and decrypt the tokens they encrypt. Use them for the examples only, never in an application or on a server reachable by others, and never trust their CA certificates: generate your own keys and certificates (see `examples/certs/README.md`). The same goes for the keys of `tests/fixtures/certs/`, which only serve the tests.
 
-**NOTE:** To work out of the box, theses examples require that you've installed the library **ezxmldsig** using **composer**.
+**NOTE:** To work out of the box, these examples require that you've installed the library **ezxmldsig** using **composer**.
 
 The certificates of the examples (`examples/certs/`: a root CA, the intermediate CA that issued the signing and encryption certificates, and these certificates with their keys) are valid for 10 years from their generation. `examples/parse-xml-token.php` trusts the intermediate CA and its root. To issue new ones, run `bin/gen-test-certs --examples`.
 
@@ -522,7 +545,7 @@ The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, a
 
 ## Documentation
 
-Online documentation is available here : [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig/).
+Online documentation is available here: [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig/).
 
 This site is published by GitHub Pages from the `docs/` directory of the branch `master` (home page: `docs/index.html`). Its pages are generated from the docblocks of `src/` by [ApiGen](https://github.com/ApiGen/ApiGen), in Docker: run `bin/gen-docs` after changing a docblock, and commit `docs/` with the code.
 
@@ -531,6 +554,11 @@ bin/gen-docs
 ```
 
 The script runs the official `apigen/apigen` image, pinned by digest since ApiGen publishes no versioned image, and installs the dependencies with `composer install` when `vendor/` is missing (ApiGen also documents the classes of PHP and xmlseclibs the code refers to). ApiGen runs with the configuration of `bin/apigen/`, which keeps the blank lines and the indentation of the docblocks: ApiGen alone drops them, and with them the lists and code blocks of the docblocks. Docblocks are written in Markdown: a code example is a fenced code block (```` ```php ````, ```` ```xml ````), not a `<code>` tag. It replaces `docs/` as a whole, so that the pages of removed classes or methods do not remain, and refuses to do so if a generated file holds an absolute path. The pages load their style sheet and scripts from `docs/assets/` only: the site loads nothing from other servers.
+
+
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md): report it privately, not in a public issue. Only the 1.x versions are maintained; the 0.x versions must no longer be used.
 
 
 ## How to Contribute?

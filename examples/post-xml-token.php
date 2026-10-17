@@ -21,7 +21,7 @@ $signKeyPassword = 'signKeyPassword'; // Use null if it is not needed.
 
 // User data.
 $data = [
-    'name' => 'Ragnar Lothbrock',
+    'name' => 'Ragnar Lothbrok',
     'role' => 'Jarl',
     'location' => 'Kattegat'
 ];
