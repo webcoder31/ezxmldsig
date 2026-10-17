@@ -76,6 +76,8 @@ The ``X509Cert`` class provides a set of convenient methods for extracting essen
 
 **NOTE:** The library **ezxmldsig** is designed to work with cryptographic material in PEM format.
 
+To see it work before writing any code, run the [demo](#demo) (`bin/demo`): it creates, explains and verifies tokens, and replays the attacks the library refuses.
+
 
 ### XMLDSigToken: Creating a signed XML token
 
@@ -124,7 +126,7 @@ echo htmlentities($sig);
 
 #### Result
 
-The result below was produced by this code with the certificates of `examples/certs/`, then indented and its long Base64 values shortened to their first and last 8 characters. The user data are Base64 encoded: ``UmFnbmFyIExvdGhicm9r`` is ``Ragnar Lothbrok``.
+The result below was produced by this code with the certificates of `demo/certs/`, then indented and its long Base64 values shortened to their first and last 8 characters. The user data are Base64 encoded: ``UmFnbmFyIExvdGhicm9r`` is ``Ragnar Lothbrok``.
 
 ```xml
 <?xml version="1.0"?>
@@ -137,19 +139,19 @@ The result below was produced by this code with the certificates of `examples/ce
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-      <ds:DigestValue>nOzBeO2Z ... 7+c3tgk=</ds:DigestValue>
+      <ds:DigestValue>8TdHTRsJ ... FpKRsBk=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
-  <ds:SignatureValue>XQH+v2GC ... cRppBA==</ds:SignatureValue>
+  <ds:SignatureValue>ANXIS2CZ ... CF/GYw==</ds:SignatureValue>
   <ds:KeyInfo>
     <ds:X509Data>
-      <ds:X509Certificate>MIIFMjCC ... oubIJoA=</ds:X509Certificate>
+      <ds:X509Certificate>MIIFMTCC ... tV4guQ==</ds:X509Certificate>
     </ds:X509Data>
   </ds:KeyInfo>
   <ds:Object Id="Token">
     <Token>
-      <TokenTimestamp>2026-10-17T04:43:05Z</TokenTimestamp>
-      <TokenId>b64d860a9b38e2734ed658b30dc0ef82</TokenId>
+      <TokenTimestamp>2026-10-17T06:58:55Z</TokenTimestamp>
+      <TokenId>9e0325fac353152dd7c241a719da0f72</TokenId>
       <TokenData>
         <name Algorithm="base64">UmFnbmFyIExvdGhicm9r</name>
         <role Algorithm="base64">SmFybA==</role>
@@ -214,7 +216,7 @@ echo htmlentities($sig);
 
 #### Result
 
-The result below was produced by this code with the certificates of `examples/certs/`, then indented and its long Base64 values shortened to their first and last 8 characters. The user data, the timestamp and the identifier of the token are in the last ``xenc:CipherValue``, encrypted.
+The result below was produced by this code with the certificates of `demo/certs/`, then indented and its long Base64 values shortened to their first and last 8 characters. The user data, the timestamp and the identifier of the token are in the last ``xenc:CipherValue``, encrypted.
 
 ```xml
 <?xml version="1.0"?>
@@ -227,13 +229,13 @@ The result below was produced by this code with the certificates of `examples/ce
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-      <ds:DigestValue>gIDVpJ0T ... Y+9IGcQ=</ds:DigestValue>
+      <ds:DigestValue>IDS0UTTp ... 5wuPKks=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
-  <ds:SignatureValue>eOXWZL9N ... cNoCgA==</ds:SignatureValue>
+  <ds:SignatureValue>Q65Aoros ... 1pKHUQ==</ds:SignatureValue>
   <ds:KeyInfo>
     <ds:X509Data>
-      <ds:X509Certificate>MIIFMjCC ... oubIJoA=</ds:X509Certificate>
+      <ds:X509Certificate>MIIFMTCC ... tV4guQ==</ds:X509Certificate>
     </ds:X509Data>
   </ds:KeyInfo>
   <ds:Object Id="Token">
@@ -243,12 +245,12 @@ The result below was produced by this code with the certificates of `examples/ce
         <xenc:EncryptedKey>
           <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
           <xenc:CipherData>
-            <xenc:CipherValue>Ij28kW0Y ... qI6yrA==</xenc:CipherValue>
+            <xenc:CipherValue>T7VtnPzT ... LM83BA==</xenc:CipherValue>
           </xenc:CipherData>
         </xenc:EncryptedKey>
       </ds:KeyInfo>
       <xenc:CipherData>
-        <xenc:CipherValue>NiP+aL74 ... CZf8wWA=</xenc:CipherValue>
+        <xenc:CipherValue>cFU72/hC ... RC2xH8M=</xenc:CipherValue>
       </xenc:CipherData>
     </xenc:EncryptedData>
   </ds:Object>
@@ -514,16 +516,31 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
     * The sender no longer needs the private key of the recipient: ``createSecureXMLToken()`` accepts ``null`` as ``$cryptKeyPath`` (see [Encryption](#encryption)). Calls that pass it keep working.
 
 
-## Examples
+## Demo
 
-Similar examples are provided in the `examples` directory along with cryptographic material.
-Simply visit the file `index.html` to see them in action (need to be hosted on an HTTP / PHP server).
+An interactive demo runs on your machine with one command. It requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
 
-> **WARNING: the private keys of `examples/certs/` are public.** They are published with the source code of this library, with their passwords: anyone can sign tokens that the examples trust, and decrypt the tokens they encrypt. Use them for the examples only, never in an application or on a server reachable by others, and never trust their CA certificates: generate your own keys and certificates (see `examples/certs/README.md`). The same goes for the keys of `tests/fixtures/certs/`, which only serve the tests.
+```
+bin/demo          # http://127.0.0.1:8080/
+bin/demo 9000     # another port (or DEMO_PORT=9000)
+```
 
-**NOTE:** To work out of the box, these examples require that you've installed the library **ezxmldsig** using **composer**.
+The script installs the dependencies when `vendor/` is missing (as `bin/test` does), runs the PHP built-in web server in the official `php:8.3-cli` image, publishes it on `127.0.0.1` only, and opens the page in the browser when it can (`DEMO_NO_BROWSER=1` skips it). Ctrl-C stops it.
 
-The certificates of the examples (`examples/certs/`: a root CA, the intermediate CA that issued the signing and encryption certificates, and these certificates with their keys) are valid for 10 years from their generation. `examples/parse-xml-token.php` trusts the intermediate CA and its root. To issue new ones, run `bin/gen-test-certs --examples`.
+![The demo: the issuer, the annotated token and the receiver's pipeline of checks](demo/screenshot.png)
+
+Every token of the demo is created and analyzed by the library, in PHP; the page only displays them:
+
+* **Issuer**: user data (nested values allowed), encryption on or off, and the signature, digest and encryption algorithms. The PHP code that creates the same token is shown.
+* **Token**: the XML token, highlighted, each block explained when you point at it or select it with the arrow keys: what it does, and whether the signature covers it. It can be copied, or edited by hand before it is verified.
+* **Receiver**: the trust anchor (`caCertPath`, `signerCertPath`, `expectedSubject`), the decryption key, the expected algorithms, the time to live and the replay protection. The verification is shown as a pipeline of checks: those of `isSignatureValid()` (structure, algorithms, digest, signature, trust in the certificate, decryption, content), then the two checks left to the caller, freshness (`isOutOfDate()`) and replay (`getTokenId()`, stored in a file of `demo/var/`, under a lock). The PHP code of this receiver is shown.
+* **Attack lab**: each attack alters the last token of the issuer (or a new one, when the last one does not suit the attack) on the server and submits it to the receiver, with a replay memory of its own: data tampering, signature wrapping, look-alike certificate, EC key substitution, replay, expired token, DOCTYPE with entities, altered ciphertext signed again by a trusted signer, certificate of an untrusted CA, and a script in the data. Each one shows what was changed (as a diff), the check that stops it, the exact message, and the security advisory of the 0.x versions it relates to. No vulnerable code runs: the lab shows what the current version does.
+
+> **WARNING: the private keys of `demo/certs/` are public.** They are published with the source code of this library, with their passwords: anyone can sign tokens that the demo trusts, and decrypt the tokens it encrypts. Use them for the demo only, never in an application or on a server reachable by others, and never trust their CA certificates: generate your own keys and certificates (see `demo/certs/README.md`). The same goes for the keys of `tests/fixtures/certs/`, which only serve the tests.
+
+The certificates of the demo (`demo/certs/`: a root CA, the intermediate CA that issued the signing and encryption certificates, these certificates with their keys, and the certificates of the attacks) are valid for 10 years from their generation. To issue new ones, run `bin/gen-test-certs --demo`.
+
+The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `tests/`, `docs/` and `bin/` out of the archives Composer installs. Clone the repository to run it.
 
 
 ## Tests
@@ -539,6 +556,8 @@ bin/test 7.4 -- --filter Secure # arguments after -- go to PHPUnit
 The script uses the official `php:<version>-cli` images. On first run, it downloads the PHPUnit 9.6 PHAR into `tests/.cache/` (checked against a pinned SHA-256) and, when `vendor/` is missing, runs `composer install` in the `composer:2` image.
 
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
+
+The suite also runs each attack of the attack lab of the [demo](#demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
 
 The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, an intermediate CA, signing and encryption certificates issued by the intermediate, and a certificate signed by its own key that copies the subject and issuer names of the signing certificate. Run `bin/gen-test-certs` to generate them again (it runs OpenSSL in the `alpine:3.22` Docker image, whatever OpenSSL the host has). The tests of the trust anchor also issue certificates on the fly (expired, issued by another intermediate CA, issued by a certificate that is not a CA) in a temporary directory removed after each test.
 

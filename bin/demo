@@ -1,0 +1,100 @@
+#!/bin/sh
+#
+# Runs the interactive demo of ezxmldsig in Docker.
+#
+# Usage:
+#   bin/demo [PORT]
+#
+# The demo is served at http://127.0.0.1:PORT/ (8080 by default, or the
+# DEMO_PORT environment variable), on this machine only: the port is
+# published on 127.0.0.1. The PHP built-in web server runs in the official
+# php:8.3-cli image, with demo/public/index.php as router script. The page
+# is opened in the browser when a command to do so is found
+# (DEMO_NO_BROWSER=1 skips it). Ctrl-C stops the server.
+#
+# When vendor/ is missing, dependencies are installed first with
+# `composer install`, in the composer:2 image, as bin/test does.
+#
+# The receiver of the demo keeps the token identifiers it has accepted in
+# demo/var/ (ignored by git).
+#
+# WARNING: the demo signs and decrypts with the keys of demo/certs/, which
+# are public (see demo/certs/README.md).
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+case "${1:-}" in
+    -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+esac
+PORT=${1:-${DEMO_PORT:-8080}}
+case "$PORT" in
+    ''|*[!0-9]*) echo "Invalid port: $PORT" >&2; exit 2 ;;
+esac
+if [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+    echo "Invalid port: $PORT" >&2
+    exit 2
+fi
+
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not reachable (with Colima: colima start)." >&2
+    exit 1
+fi
+
+DOCKER_USER="$(id -u):$(id -g)"
+
+# Dependencies.
+if [ ! -f "$ROOT_DIR/vendor/autoload.php" ]; then
+    echo "vendor/ is missing: running composer install (composer:2 image)." >&2
+    if ! docker run --rm -u "$DOCKER_USER" -e COMPOSER_HOME=/tmp/composer \
+        -e COMPOSER_NO_BLOCKING \
+        -v "$ROOT_DIR:/app" -w /app composer:2 \
+        install --no-interaction --no-progress --ignore-platform-reqs; then
+        echo "composer install failed. If it refused a dependency because of a" >&2
+        echo "security advisory, COMPOSER_NO_BLOCKING=1 bin/demo overrides the" >&2
+        echo "refusal, at your own risk." >&2
+        exit 1
+    fi
+fi
+
+URL="http://127.0.0.1:$PORT/"
+
+# Opens the page once the server answers (for up to 20 seconds).
+open_browser() {
+    if command -v open >/dev/null 2>&1; then
+        opener=open
+    elif command -v xdg-open >/dev/null 2>&1; then
+        opener=xdg-open
+    else
+        return 0
+    fi
+    i=0
+    while [ $i -lt 40 ]; do
+        if curl -fsS -o /dev/null "$URL" 2>/dev/null; then
+            "$opener" "$URL" >/dev/null 2>&1 || true
+            return 0
+        fi
+        sleep 0.5
+        i=$((i + 1))
+    done
+}
+
+echo "ezxmldsig demo: $URL (Ctrl-C to stop)" >&2
+if [ "${DEMO_NO_BROWSER:-}" != 1 ] && command -v curl >/dev/null 2>&1; then
+    open_browser &
+fi
+
+# A terminal lets Ctrl-C reach the server.
+TTY_FLAGS=
+if [ -t 0 ] && [ -t 1 ]; then
+    TTY_FLAGS=-it
+fi
+
+# The server listens on every interface of the container, and Docker
+# publishes its port on 127.0.0.1 only.
+# shellcheck disable=SC2086
+exec docker run --rm --init $TTY_FLAGS -u "$DOCKER_USER" \
+    -p "127.0.0.1:$PORT:8080" \
+    -v "$ROOT_DIR:/app" -w /app php:8.3-cli \
+    php -S 0.0.0.0:8080 -t demo/public demo/public/index.php

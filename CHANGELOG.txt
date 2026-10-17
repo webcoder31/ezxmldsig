@@ -1,3 +1,22 @@
+Unreleased
+----------
+- Replace `examples/` with an interactive demo, run with `bin/demo` (PHP
+  built-in web server in the php:8.3-cli Docker image, on 127.0.0.1 only).
+  It creates tokens, explains each block of their XML, shows the checks of
+  the receiver as a pipeline (freshness and replay included) with the
+  matching PHP code, and runs an attack lab in which each attack is refused
+  by the library or by the receiver's checks. See the README, section
+  "Demo".
+- `bin/gen-test-certs --demo` (formerly `--examples`) writes the certificates
+  of the demo to `demo/certs/` (formerly `examples/certs/`), regenerated,
+  with the certificates the attack lab needs: a certificate copying the
+  names of the signing certificate, a certificate of an untrusted CA, and an
+  EC certificate.
+- The test suite runs each attack of the attack lab and checks the API of
+  the demo.
+- Add `.gitattributes`: the archives Composer installs leave out `demo/`,
+  `tests/`, `docs/`, `bin/` and the development configuration files.
+
 1.0.0 (2026-10-17)
 -------------------
 Next major version. In short: a token is only valid if its signing
