@@ -268,7 +268,7 @@
     list.forEach(function (entry) {
       const keyInput = el('input', {
         attrs: { type: 'text', name: 'key-' + entry.id, value: entry.key, 'aria-label': 'Key', autocomplete: 'off', spellcheck: 'false' },
-        on: { input: function () { entry.key = keyInput.value; onDataChange(); } }
+        on: { input: function () { entry.key = keyInput.value; } }
       });
       const row = el('div', { class: 'data-row' + (entry.children ? ' is-group' : '') }, [
         el('div', { class: 'data-key' }, [keyInput])
@@ -276,7 +276,7 @@
       if (!entry.children) {
         const valueInput = el('input', {
           attrs: { type: 'text', name: 'value-' + entry.id, value: entry.value, 'aria-label': 'Value of ' + (entry.key || 'this key'), autocomplete: 'off', spellcheck: 'false' },
-          on: { input: function () { entry.value = valueInput.value; onDataChange(); } }
+          on: { input: function () { entry.value = valueInput.value; } }
         });
         row.appendChild(el('div', { class: 'data-value' }, [valueInput]));
       }
@@ -288,7 +288,6 @@
             if (!entry.children) entry.children = [];
             entry.children.push({ id: ++entryCounter, key: 'key' + (entry.children.length + 1), value: 'value', children: null });
             renderDataEditor();
-            onDataChange();
           }
         }
       }, [icon('child')]);
@@ -305,7 +304,6 @@
               found.parent.value = 'value';
             }
             renderDataEditor();
-            onDataChange();
           }
         }
       }, [icon('trash')]);
@@ -339,20 +337,6 @@
     const box = $('issuer-error');
     box.textContent = message || '';
     box.hidden = !message;
-  }
-
-  const refreshIssuerCode = debounce(async function () {
-    try {
-      const result = await api('/api/issuer-code', issuerInput());
-      renderPhp($('issuer-code'), result.code);
-      showIssuerError(null);
-    } catch (e) {
-      showIssuerError(e.message);
-    }
-  }, 250);
-
-  function onDataChange() {
-    refreshIssuerCode();
   }
 
   function syncEncryptionSelect() {
@@ -1463,12 +1447,10 @@
         refreshReceiverCode();
       }
       updateAlgoHint();
-      refreshIssuerCode();
     });
     $('add-field').addEventListener('click', function () {
       entries.push({ id: ++entryCounter, key: 'key' + (entries.length + 1), value: 'value', children: null });
       renderDataEditor();
-      onDataChange();
       const inputs = $('data-editor').querySelectorAll('.data-key input');
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
