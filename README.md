@@ -12,20 +12,20 @@ The library **ezxmldsig** requires PHP version 7.4 or greater, with the OpenSSL 
 
 ## How to Install?
 
-The library **ezxmldsig** is available on [www.pakagist.org](https://packagist.org/packages/webcoder31/ezxmldsig) and you can nstall it for your project with [`composer.phar`](http://getcomposer.org).
+The library **ezxmldsig** is available on [Packagist](https://packagist.org/packages/webcoder31/ezxmldsig) and you can install it for your project with [`composer.phar`](http://getcomposer.org).
 
 
 ```sh
 php composer.phar require "webcoder31/ezxmldsig"
 ```
 
-**NOTE:** As long as the library **ezxmldsig** is still a BETA version you should indicate the desired version tag to avoid **composer** issues due to stability requirements on package installation:
+To stay on the 1.x versions (no backward-incompatible change), pin the major version:
 
 ```sh
-php composer.phar require "webcoder31/ezxmldsig:<beta-version-tag>" (i.e. v0.1.0-beta)
+php composer.phar require "webcoder31/ezxmldsig:^1.0"
 ```
 
-You can also clone it (or download it as a ZIP archive) from its [GitHub repositary](https://github.com/webcoder31/ezxmldsig.git) and load it the way you want in your project. In this case, you will have to do the same from the [**xmlseclib** GitHub repositary](https://github.com/robrichards/xmlseclibs) of Rob Richards.
+You can also clone it (or download it as a ZIP archive) from its [GitHub repository](https://github.com/webcoder31/ezxmldsig.git) and load it the way you want in your project. In this case, you will have to do the same from the [**xmlseclibs** GitHub repository](https://github.com/robrichards/xmlseclibs) of Rob Richards.
 
 
 ## What's in the box?
