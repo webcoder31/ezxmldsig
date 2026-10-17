@@ -49,7 +49,6 @@ final class Api
             $routes = [
                 'GET /api/config' => 'config',
                 'POST /api/issue' => 'issue',
-                'POST /api/issuer-code' => 'issuerCode',
                 'POST /api/verify' => 'verify',
                 'POST /api/receiver-code' => 'receiverCode',
                 'POST /api/replay/clear' => 'clearReplay',
@@ -176,22 +175,6 @@ final class Api
             'encrypted' => $encrypt,
             'code' => Issuer::phpCode($data, $encrypt, $algorithms),
         ];
-    }
-
-    /**
-     * POST /api/issuer-code {data, encrypt, algorithms}: the PHP code of the
-     * issuer.
-     */
-    private function issuerCode(array $input)
-    {
-        $data = self::field($input, 'data', 'array', Issuer::DEFAULT_DATA);
-        Issuer::checkData($data);
-
-        return ['code' => Issuer::phpCode(
-            $data,
-            self::field($input, 'encrypt', 'bool', false),
-            self::field($input, 'algorithms', 'array', [])
-        )];
     }
 
     /**

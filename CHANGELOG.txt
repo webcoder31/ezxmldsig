@@ -7,6 +7,10 @@ Unreleased
   matching PHP code, and runs an attack lab in which each attack is refused
   by the library or by the receiver's checks. See the README, section
   "Demo".
+- In the demo, the PHP code of the issuer is shown in the Token panel, below
+  the XML of the token it produced, and no longer in the Issuer panel. It
+  shows the options of the displayed token and changes only when a new token
+  is created, no longer while the issuer form is edited.
 - `bin/gen-test-certs --demo` (formerly `--examples`) writes the certificates
   of the demo to `demo/certs/` (formerly `examples/certs/`), regenerated,
   with the certificates the attack lab needs: a certificate copying the
