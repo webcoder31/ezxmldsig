@@ -85,7 +85,8 @@
 
 	</table>
 		<div class="classLikeDescription">
-	<div class="description"><p>Analyze an X.509 certificate. The <code>X509Cert</code> class provides a set of convenient methods for extracting
+	<div class="description"><p>Analyze an X.509 certificate.</p>
+<p>The <code>X509Cert</code> class provides a set of convenient methods for extracting
 essential information contained in an X.509 certificate and for performing
 some useful checkings. Every cryptographic check (signature of the
 certificate, chain of trust, validity dates) is performed by OpenSSL. This
@@ -202,13 +203,13 @@ class is used internaly by the <code>XMLDSigToken</code> class.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Get the fingerprint of the certificate: the hash of its DER encoding. Two certificates are the same certificate if, and only if, their
-fingerprints are equal.</p>
+		<p>Get the fingerprint of the certificate: the hash of its DER encoding.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Get the fingerprint of the certificate: the hash of its DER encoding. Two certificates are the same certificate if, and only if, their
+	<div class="description"><p>Get the fingerprint of the certificate: the hash of its DER encoding.</p>
+<p>Two certificates are the same certificate if, and only if, their
 fingerprints are equal.</p>
 </div>
 
@@ -486,15 +487,14 @@ FALSE otherwise.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Indicates whether the key usage of the certificate allows it to sign
-data. The &quot;keyUsage&quot; extension, when the certificate has one, must allow
-&quot;digitalSignature&quot; or &quot;nonRepudiation&quot;. A certificate without this
-extension is not restricted.</p>
+data.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether the key usage of the certificate allows it to sign
-data. The &quot;keyUsage&quot; extension, when the certificate has one, must allow
+data.</p>
+<p>The &quot;keyUsage&quot; extension, when the certificate has one, must allow
 &quot;digitalSignature&quot; or &quot;nonRepudiation&quot;. A certificate without this
 extension is not restricted.</p>
 </div>
@@ -527,23 +527,14 @@ extension is not restricted.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Check that the certificate is trusted: OpenSSL builds and verifies its
-chain up to a certificate of the given CA files. Every certificate of the given files is trusted, and the chain is built
-from these certificates only. OpenSSL verifies the signature of each
-link, the validity dates of every certificate of the chain at the
-current date, that each issuer is a CA (basic constraints, key usage,
-path length) and that the chain ends at a self-signed certificate of
-the given files. A chain that stops at an intermediate CA is rejected:
-to trust the certificates issued by an intermediate CA, give its
-certificate and the certificates up to its root (in one file or in
-several). A certificate issued by another intermediate CA of the same
-root is then rejected, since the chain cannot be built without that
-other intermediate certificate.</p>
+chain up to a certificate of the given CA files.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Check that the certificate is trusted: OpenSSL builds and verifies its
-chain up to a certificate of the given CA files. Every certificate of the given files is trusted, and the chain is built
+chain up to a certificate of the given CA files.</p>
+<p>Every certificate of the given files is trusted, and the chain is built
 from these certificates only. OpenSSL verifies the signature of each
 link, the validity dates of every certificate of the chain at the
 current date, that each issuer is a CA (basic constraints, key usage,
@@ -600,28 +591,21 @@ FALSE otherwise.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Check the origin of the certificate. Verify that the X.509 certificate has been issued by the given CA
-certificate: OpenSSL verifies the signature of the certificate with the
-public key of the CA certificate, the issuer name of the certificate
-must be the subject name of the CA certificate, and the CA certificate
-must be a CA (&quot;CA:TRUE&quot; basic constraint and, if it has a &quot;keyUsage&quot;
-extension, &quot;keyCertSign&quot;). Only this link is checked: neither the validity dates nor the chain of
-the CA certificate. Use <code>isTrustedBy()</code> to verify the whole chain. NOTE : Note that more than one CA certificate can give a positive result,
-some certificates re-issue signing certificates after having only
-changed the expiration dates.
-Note that it also works with self-signed CA certificates. In this
-case, passes the X.509 certificate itself to the function.</p>
+		<p>Check the origin of the certificate.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Check the origin of the certificate. Verify that the X.509 certificate has been issued by the given CA
+	<div class="description"><p>Check the origin of the certificate.</p>
+<p>Verify that the X.509 certificate has been issued by the given CA
 certificate: OpenSSL verifies the signature of the certificate with the
 public key of the CA certificate, the issuer name of the certificate
 must be the subject name of the CA certificate, and the CA certificate
 must be a CA (&quot;CA:TRUE&quot; basic constraint and, if it has a &quot;keyUsage&quot;
-extension, &quot;keyCertSign&quot;). Only this link is checked: neither the validity dates nor the chain of
-the CA certificate. Use <code>isTrustedBy()</code> to verify the whole chain. NOTE : Note that more than one CA certificate can give a positive result,
+extension, &quot;keyCertSign&quot;).</p>
+<p>Only this link is checked: neither the validity dates nor the chain of
+the CA certificate. Use <code>isTrustedBy()</code> to verify the whole chain.</p>
+<p>NOTE : Note that more than one CA certificate can give a positive result,
 some certificates re-issue signing certificates after having only
 changed the expiration dates.
 Note that it also works with self-signed CA certificates. In this

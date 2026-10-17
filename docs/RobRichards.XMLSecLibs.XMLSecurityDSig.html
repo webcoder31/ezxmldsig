@@ -98,16 +98,30 @@
 
 	</table>
 		<div class="classLikeDescription">
-	<div class="description"><p>xmlseclibs.php Copyright (c) 2007-2024, Robert Richards <a href="mailto:rrichards@cdatazone.org">rrichards@cdatazone.org</a>.
-All rights reserved. Redistribution and use in source and binary forms, with or without
+	<div class="description"><p>xmlseclibs.php</p>
+<p>Copyright (c) 2007-2024, Robert Richards <a href="mailto:rrichards@cdatazone.org">rrichards@cdatazone.org</a>.
+All rights reserved.</p>
+<p>Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
-are met: * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright
+are met:</p>
+<ul>
+<li>
+<p>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</p>
+</li>
+<li>
+<p>Redistributions in binary form must reproduce the above copyright
 notice, this list of conditions and the following disclaimer in
 the documentation and/or other materials provided with the
-distribution. * Neither the name of Robert Richards nor the names of his
+distribution.</p>
+</li>
+<li>
+<p>Neither the name of Robert Richards nor the names of his
 contributors may be used to endorse or promote products derived
-from this software without specific prior written permission. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+from this software without specific prior written permission.</p>
+</li>
+</ul>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -689,9 +703,7 @@ Bool when verifying HMAC_SHA1;
 Int otherwise, with following meanings:
 1 on succesful signature verification,
 0 when signature verification failed,
--1 if an error occurred during processing. NOTE: be very careful when checking the int return value, because in
-PHP, -1 will be cast to True when in boolean context. Always check the
-return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
+-1 if an error occurred during processing.</p>
 
 	</div>
 
@@ -701,7 +713,8 @@ Bool when verifying HMAC_SHA1;
 Int otherwise, with following meanings:
 1 on succesful signature verification,
 0 when signature verification failed,
--1 if an error occurred during processing. NOTE: be very careful when checking the int return value, because in
+-1 if an error occurred during processing.</p>
+<p>NOTE: be very careful when checking the int return value, because in
 PHP, -1 will be cast to True when in boolean context. Always check the
 return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
 </div>
@@ -841,13 +854,13 @@ return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot
 
 
 	<div class="expandable-collapsedView">
-		<p>This function inserts the signature element. The signature element will be appended to the element, unless $beforeNode is specified. If $beforeNode
-is specified, the signature element will be inserted as the last element before $beforeNode.</p>
+		<p>This function inserts the signature element.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>This function inserts the signature element. The signature element will be appended to the element, unless $beforeNode is specified. If $beforeNode
+	<div class="description"><p>This function inserts the signature element.</p>
+<p>The signature element will be appended to the element, unless $beforeNode is specified. If $beforeNode
 is specified, the signature element will be inserted as the last element before $beforeNode.</p>
 </div>
 
@@ -1035,12 +1048,13 @@ is specified, the signature element will be inserted as the last element before 
 
 
 	<div class="expandable-collapsedView">
-		<p>This function appends a node to the KeyInfo. The KeyInfo element will be created if one does not exist in the document.</p>
+		<p>This function appends a node to the KeyInfo.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>This function appends a node to the KeyInfo. The KeyInfo element will be created if one does not exist in the document.</p>
+	<div class="description"><p>This function appends a node to the KeyInfo.</p>
+<p>The KeyInfo element will be created if one does not exist in the document.</p>
 </div>
 
 							<h4>Parameters</h4>
@@ -1078,15 +1092,15 @@ is specified, the signature element will be inserted as the last element before 
 
 
 	<div class="expandable-collapsedView">
-		<p>This function retrieves an associative array of the validated nodes. The array will contain the id of the referenced node as the key and the node itself
-as the value. Returns:
-An associative array of validated nodes or null if no nodes have been validated.</p>
+		<p>This function retrieves an associative array of the validated nodes.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>This function retrieves an associative array of the validated nodes. The array will contain the id of the referenced node as the key and the node itself
-as the value. Returns:
+	<div class="description"><p>This function retrieves an associative array of the validated nodes.</p>
+<p>The array will contain the id of the referenced node as the key and the node itself
+as the value.</p>
+<p>Returns:
 An associative array of validated nodes or null if no nodes have been validated.</p>
 </div>
 
