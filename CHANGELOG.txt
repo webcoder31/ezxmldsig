@@ -14,6 +14,12 @@ Unreleased
   EC certificate.
 - The test suite runs each attack of the attack lab and checks the API of
   the demo.
+- Add `bin/deps`, run first by `bin/test` and `bin/demo`: it checks, without
+  network, that composer.lock matches composer.json (`composer validate`)
+  and that vendor/ matches composer.lock, and runs `composer update` or
+  `composer install` when they do not, saying so. Until now, both scripts
+  only installed the dependencies when vendor/ was missing, and used an
+  outdated vendor/ as it was.
 - Add `.gitattributes`: the archives Composer installs leave out `demo/`,
   `tests/`, `docs/`, `bin/` and the development configuration files.
 

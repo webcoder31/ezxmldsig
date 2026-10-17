@@ -12,8 +12,9 @@
 # is opened in the browser when a command to do so is found
 # (DEMO_NO_BROWSER=1 skips it). Ctrl-C stops the server.
 #
-# When vendor/ is missing, dependencies are installed first with
-# `composer install`, in the composer:2 image, as bin/test does.
+# Before that, bin/deps brings vendor/ in line with composer.json (in the
+# composer:2 image), updating it when it is missing or outdated, as bin/test
+# does.
 #
 # The receiver of the demo keeps the token identifiers it has accepted in
 # demo/var/ (ignored by git).
@@ -26,7 +27,7 @@ set -eu
 ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 case "${1:-}" in
-    -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
 esac
 PORT=${1:-${DEMO_PORT:-8080}}
 case "$PORT" in
@@ -44,19 +45,8 @@ fi
 
 DOCKER_USER="$(id -u):$(id -g)"
 
-# Dependencies.
-if [ ! -f "$ROOT_DIR/vendor/autoload.php" ]; then
-    echo "vendor/ is missing: running composer install (composer:2 image)." >&2
-    if ! docker run --rm -u "$DOCKER_USER" -e COMPOSER_HOME=/tmp/composer \
-        -e COMPOSER_NO_BLOCKING \
-        -v "$ROOT_DIR:/app" -w /app composer:2 \
-        install --no-interaction --no-progress --ignore-platform-reqs; then
-        echo "composer install failed. If it refused a dependency because of a" >&2
-        echo "security advisory, COMPOSER_NO_BLOCKING=1 bin/demo overrides the" >&2
-        echo "refusal, at your own risk." >&2
-        exit 1
-    fi
-fi
+# Dependencies (see bin/deps).
+"$ROOT_DIR/bin/deps"
 
 URL="http://127.0.0.1:$PORT/"
 

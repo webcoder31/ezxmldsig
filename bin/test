@@ -15,8 +15,8 @@
 #
 # PHPUnit is not a composer dependency: its PHAR is downloaded once into
 # tests/.cache/ (ignored by git) and checked against a pinned SHA-256.
-# When vendor/ is missing, dependencies are installed first with
-# `composer install`, in the composer:2 image.
+# Before that, bin/deps brings vendor/ in line with composer.json (in the
+# composer:2 image), updating it when it is missing or outdated.
 
 set -eu
 
@@ -43,19 +43,8 @@ fi
 
 DOCKER_USER="$(id -u):$(id -g)"
 
-# Dependencies.
-if [ ! -f "$ROOT_DIR/vendor/autoload.php" ]; then
-    echo "vendor/ is missing: running composer install (composer:2 image)." >&2
-    if ! docker run --rm -u "$DOCKER_USER" -e COMPOSER_HOME=/tmp/composer \
-        -e COMPOSER_NO_BLOCKING \
-        -v "$ROOT_DIR:/app" -w /app composer:2 \
-        install --no-interaction --no-progress --ignore-platform-reqs; then
-        echo "composer install failed. If it refused a dependency because of a" >&2
-        echo "security advisory, COMPOSER_NO_BLOCKING=1 bin/test overrides the" >&2
-        echo "refusal, at your own risk." >&2
-        exit 1
-    fi
-fi
+# Dependencies (see bin/deps).
+"$ROOT_DIR/bin/deps"
 
 # PHPUnit PHAR.
 sha256() {

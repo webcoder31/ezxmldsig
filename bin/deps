@@ -1,0 +1,114 @@
+#!/bin/sh
+#
+# Brings vendor/ in line with composer.json, in Docker.
+#
+# Usage:
+#   bin/deps
+#
+# bin/test and bin/demo run it first. composer.lock is not versioned: each
+# copy of the repository has its own, which may predate composer.json. The
+# script checks it in the composer:2 image, without network:
+#   - composer.lock missing, or no longer matching composer.json (as
+#     `composer validate` reports it): runs `composer update`;
+#   - vendor/ missing, or holding other packages or versions than
+#     composer.lock: runs `composer install`;
+#   - otherwise: runs nothing else.
+# What it runs, and why, is printed on stderr.
+#
+# When Composer refuses a dependency because of a security advisory,
+# COMPOSER_NO_BLOCKING=1 in front of the command overrides the refusal, at
+# your own risk.
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+case "${1:-}" in
+    -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+esac
+
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not reachable (with Colima: colima start)." >&2
+    exit 1
+fi
+
+DOCKER_USER="$(id -u):$(id -g)"
+
+# Exits with 0 when the packages installed in vendor/ (Composer 1 or 2
+# format of installed.json) have the names and versions of composer.lock.
+# shellcheck disable=SC2016
+CHECK_VENDOR='
+function versions(array $packages) {
+    $versions = [];
+    foreach ($packages as $package) {
+        $versions[$package["name"]] = $package["version"];
+    }
+    ksort($versions);
+    return $versions;
+}
+$lock = json_decode((string) file_get_contents("composer.lock"), true);
+$installed = is_file("vendor/autoload.php")
+    ? json_decode((string) @file_get_contents("vendor/composer/installed.json"), true)
+    : null;
+if (!is_array($lock) || !is_array($installed)) {
+    exit(1);
+}
+$locked = array_merge($lock["packages"] ?? [], $lock["packages-dev"] ?? []);
+exit(versions($locked) === versions($installed["packages"] ?? $installed) ? 0 : 1);
+'
+
+# Runs a composer command that may download packages.
+composer() {
+    if ! docker run --rm -u "$DOCKER_USER" -e COMPOSER_HOME=/tmp/composer \
+        -e COMPOSER_NO_BLOCKING \
+        -v "$ROOT_DIR:/app" -w /app composer:2 \
+        "$1" --no-interaction --no-progress --ignore-platform-reqs; then
+        echo "composer $1 failed. If it refused a dependency because of a" >&2
+        echo "security advisory, COMPOSER_NO_BLOCKING=1 in front of the command" >&2
+        echo "overrides the refusal, at your own risk." >&2
+        exit 1
+    fi
+}
+
+if [ ! -f "$ROOT_DIR/composer.lock" ]; then
+    echo "composer.lock is missing: running composer update (composer:2 image)." >&2
+    composer update
+    exit 0
+fi
+
+# Exit status 3: composer.lock does not match composer.json (REASONS holds
+# the lines of `composer validate` that say why). 4: vendor/ does not match
+# composer.lock.
+STATUS=0
+REASONS=$(docker run --rm --network none -u "$DOCKER_USER" -e COMPOSER_HOME=/tmp/composer \
+    -v "$ROOT_DIR:/app" -w /app --entrypoint sh composer:2 -c '
+        if ! out=$(composer validate --no-check-all --no-check-publish 2>&1); then
+            printf "%s\n" "$out" | grep "^- "
+            exit 3
+        fi
+        php -r "$1" || exit 4
+    ' sh "$CHECK_VENDOR") || STATUS=$?
+
+case $STATUS in
+    0) ;;
+    3)
+        echo "composer.lock does not match composer.json:" >&2
+        if [ -n "$REASONS" ]; then
+            printf '%s\n' "$REASONS" >&2
+        fi
+        echo "Running composer update (composer:2 image)." >&2
+        composer update
+        ;;
+    4)
+        if [ -f "$ROOT_DIR/vendor/autoload.php" ]; then
+            echo "vendor/ does not match composer.lock: running composer install (composer:2 image)." >&2
+        else
+            echo "vendor/ is missing: running composer install (composer:2 image)." >&2
+        fi
+        composer install
+        ;;
+    *)
+        echo "Checking the dependencies failed (exit status $STATUS)." >&2
+        exit 1
+        ;;
+esac
