@@ -1,11 +1,11 @@
 #!/bin/sh
 #
 # Generates the X.509 certificates and keys used by the test suite and by the
-# examples.
+# demo.
 #
 # Usage:
-#   bin/gen-test-certs              writes tests/fixtures/certs/
-#   bin/gen-test-certs --examples   writes examples/certs/
+#   bin/gen-test-certs          writes tests/fixtures/certs/
+#   bin/gen-test-certs --demo   writes demo/certs/
 #
 # tests/fixtures/certs/ receives:
 #   root.cert.pem, root.key.pem                  root CA (self-signed)
@@ -19,10 +19,23 @@
 #                                                whose subject and issuer DN copy
 #                                                those of sign.cert.pem
 #
-# examples/certs/ receives the files the examples use: root.cert.pem and
-# intermediate.cert.pem (the trust anchor of examples/parse-xml-token.php),
+# demo/certs/ receives the files the demo uses: root.cert.pem and
+# intermediate.cert.pem (the trust anchor of the demo receiver),
 # sign.cert.pem, sign.key.pem (password "signKeyPassword"), crypt.cert.pem and
-# crypt.key.pem (password "cryptKeyPassword").
+# crypt.key.pem (password "cryptKeyPassword"), attacker.cert.pem and
+# attacker.key.pem (as above), and the certificates of the attacks of the
+# demo:
+#   rogue-root.cert.pem                          root CA that the demo does not
+#                                                trust (self-signed)
+#   rogue.cert.pem, rogue.key.pem                signing certificate issued by
+#                                                rogue-root.cert.pem, whose
+#                                                subject DN copies that of
+#                                                sign.cert.pem
+#   ec.cert.pem                                  certificate with an EC key
+#                                                (P-256) signed by its own key,
+#                                                whose subject DN copies that of
+#                                                sign.cert.pem (its key is not
+#                                                kept)
 #
 # Every certificate is valid for 10 years from the time of generation.
 #
@@ -39,8 +52,8 @@ ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 MODE=tests
 case "${1:-}" in
     "") ;;
-    --examples) MODE=examples ;;
-    *) echo "Usage: $0 [--examples]" >&2; exit 2 ;;
+    --demo) MODE=demo ;;
+    *) echo "Usage: $0 [--demo]" >&2; exit 2 ;;
 esac
 
 if [ "${GEN_CERTS_IN_DOCKER:-}" != 1 ]; then
@@ -62,8 +75,8 @@ if ! openssl version 2>/dev/null | grep -q '^OpenSSL'; then
     exit 1
 fi
 
-if [ "$MODE" = examples ]; then
-    OUT_DIR="$ROOT_DIR/examples/certs"
+if [ "$MODE" = demo ]; then
+    OUT_DIR="$ROOT_DIR/demo/certs"
     CRYPT_KEY_PASSWORD=cryptKeyPassword
 else
     OUT_DIR="$ROOT_DIR/tests/fixtures/certs"
@@ -72,12 +85,13 @@ fi
 SIGN_KEY_PASSWORD=signKeyPassword
 DAYS=3650
 
-# Distinguished names. The examples check the issuer of the signing
-# certificate against INTERMEDIATE_DN (see examples/parse-xml-token.php).
+# Distinguished names. The demo receiver expects the organization and the
+# organizational unit of SIGN_DN (see demo/src/Certs.php).
 ROOT_DN="/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Jarl Dept/CN=www.lothbrok.dk/emailAddress=ragnar@lothbrok.dk"
 INTERMEDIATE_DN="/C=DK/ST=Jylland/O=Lothbrok Ltd/OU=Shield Wall Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk"
 SIGN_DN="/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk"
 CRYPT_DN="/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Cryptography Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk"
+ROGUE_ROOT_DN="/C=DK/O=Kattegat Trust Services/CN=Kattegat Root CA"
 
 WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -100,6 +114,11 @@ keyUsage = critical, digitalSignature, nonRepudiation
 extendedKeyUsage = clientAuth, emailProtection
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid
+
+[ec]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, nonRepudiation
+subjectKeyIdentifier = hash
 
 [crypt]
 basicConstraints = CA:FALSE
@@ -164,6 +183,30 @@ openssl req -new -x509 -sha256 -days "$DAYS" -key "$WORK_DIR/attacker.key.pem" \
 issue attacker "$SIGN_DN" sign \
     "$WORK_DIR/attacker-issuer.cert.pem" "$WORK_DIR/attacker.key.pem"
 
+if [ "$MODE" = demo ]; then
+    # Untrusted root CA, and a signing certificate it issued with the subject
+    # DN of the signing certificate.
+    genkey "$WORK_DIR/rogue-root.key.pem" 2048
+    openssl req -new -x509 -sha256 -days "$DAYS" \
+        -key "$WORK_DIR/rogue-root.key.pem" \
+        -subj "$ROGUE_ROOT_DN" -set_serial "0x$(openssl rand -hex 16)" \
+        -config "$WORK_DIR/ext.cnf" -extensions root \
+        -out "$WORK_DIR/rogue-root.cert.pem" 2>/dev/null
+    genkey "$WORK_DIR/rogue.key.pem" 2048
+    issue rogue "$SIGN_DN" sign \
+        "$WORK_DIR/rogue-root.cert.pem" "$WORK_DIR/rogue-root.key.pem"
+    openssl verify -CAfile "$WORK_DIR/rogue-root.cert.pem" \
+        "$WORK_DIR/rogue.cert.pem" >/dev/null
+
+    # Certificate with an EC key, signed by its own key.
+    openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 \
+        -out "$WORK_DIR/ec.key.pem" 2>/dev/null
+    openssl req -new -x509 -sha256 -days "$DAYS" -key "$WORK_DIR/ec.key.pem" \
+        -subj "$SIGN_DN" -set_serial "0x$(openssl rand -hex 16)" \
+        -config "$WORK_DIR/ext.cnf" -extensions ec \
+        -out "$WORK_DIR/ec.cert.pem" 2>/dev/null
+fi
+
 # Consistency checks.
 openssl verify -CAfile "$WORK_DIR/root.cert.pem" \
     "$WORK_DIR/intermediate.cert.pem" >/dev/null
@@ -173,9 +216,10 @@ for name in sign crypt; do
         "$WORK_DIR/$name.cert.pem" >/dev/null
 done
 
-if [ "$MODE" = examples ]; then
+if [ "$MODE" = demo ]; then
     FILES="root.cert.pem intermediate.cert.pem sign.cert.pem sign.key.pem
-           crypt.cert.pem crypt.key.pem"
+           crypt.cert.pem crypt.key.pem attacker.cert.pem attacker.key.pem
+           rogue-root.cert.pem rogue.cert.pem rogue.key.pem ec.cert.pem"
 else
     FILES="root.cert.pem root.key.pem intermediate.cert.pem intermediate.key.pem
            sign.cert.pem sign.key.pem crypt.cert.pem crypt.key.pem

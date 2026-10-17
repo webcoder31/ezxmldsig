@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Interactive demo of ezxmldsig: create, inspect and verify signed XML tokens, and run the attacks the library refuses.">
+<title>ezxmldsig demo</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/app.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-logo" viewBox="0 0 32 32"><path d="M16 4l10 3.8v7.9c0 6.3-4.2 11-10 12.8C10.2 26.7 6 22 6 15.7V7.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12.5 13l-2.8 2.8 2.8 2.8M19.5 13l2.8 2.8-2.8 2.8M17.1 11.8l-2.2 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cross" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 16 16"><path d="M4.5 8h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-off" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 11.4l6.8-6.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-child" viewBox="0 0 16 16"><path d="M4 3v5.5A1.5 1.5 0 0 0 5.5 10H12M9.5 7.5L12 10l-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 16 16"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 16 16"><path d="M13 9.6A5.5 5.5 0 0 1 6.4 3a5.5 5.5 0 1 0 6.6 6.6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-external" viewBox="0 0 16 16"><path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 16 16"><path d="M10.5 2.5l3 3L6 13H3v-3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 16 16"><path d="M8 2l6.5 11.5h-13z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.2M8 11.6v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#main" aria-label="ezxmldsig demo, back to top">
+      <svg class="brand-mark" aria-hidden="true"><use href="#i-logo"/></svg>
+      <span class="brand-name">ezxmldsig</span>
+      <span class="brand-sep" aria-hidden="true">/</span>
+      <span class="brand-tag">token lab</span>
+    </a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#issuer"><span class="topnav-num">01</span>Issue</a>
+      <a href="#token"><span class="topnav-num">02</span>Inspect</a>
+      <a href="#receiver"><span class="topnav-num">03</span>Verify</a>
+      <a href="#lab"><span class="topnav-num">04</span>Attack lab</a>
+    </nav>
+    <div class="topbar-actions">
+      <span class="chip chip-version" id="version" title="Version of the library">ezxmldsig</span>
+      <button type="button" class="icon-btn" id="theme-toggle" aria-label="Color theme: automatic">
+        <svg aria-hidden="true"><use href="#i-auto"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <section class="hero" aria-labelledby="hero-title">
+    <p class="eyebrow">XML Digital Signature · enveloping tokens · PHP</p>
+    <h1 id="hero-title">Sign it, read it, verify it.<br><span class="hero-accent">Then try to break it.</span></h1>
+    <p class="hero-lead">Every token on this page is created and analyzed by the real <code>ezxmldsig</code> library, running in PHP behind this page. Read each block of the signature, follow the receiver's checks one by one, and replay the attacks that version 1.0.0 refuses.</p>
+    <p class="notice" role="note">
+      <svg aria-hidden="true"><use href="#i-warn"/></svg>
+      <span>The keys of <code>demo/certs/</code> are public: they are published with the library. Never use them, or trust their CA, outside this demo.</span>
+    </p>
+  </section>
+
+  <div class="workbench">
+    <section class="panel" id="issuer" aria-labelledby="issuer-title">
+      <header class="panel-head">
+        <span class="panel-num">01</span>
+        <div>
+          <h2 id="issuer-title">Issuer</h2>
+          <p class="panel-sub">Signs the user data with <code>sign.key.pem</code>.</p>
+        </div>
+      </header>
+      <form class="panel-body" id="issuer-form" novalidate>
+        <fieldset class="field-group">
+          <legend>User data</legend>
+          <div class="data-editor" id="data-editor"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="add-field">
+            <svg aria-hidden="true"><use href="#i-plus"/></svg>Add a value
+          </button>
+        </fieldset>
+
+        <div class="field-group">
+          <label class="switch">
+            <input type="checkbox" id="encrypt" role="switch">
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            <span class="switch-label">Encrypt the data <span class="muted">for <code>crypt.cert.pem</code></span></span>
+          </label>
+        </div>
+
+        <fieldset class="field-group">
+          <legend>Algorithms</legend>
+          <div class="algo-grid">
+            <label class="field"><span class="field-label">Signature</span><select id="issuer-signatureAlgorithm" data-option="signatureAlgorithm"></select></label>
+            <label class="field"><span class="field-label">Digest</span><select id="issuer-digestAlgorithm" data-option="digestAlgorithm"></select></label>
+            <label class="field"><span class="field-label">Encryption</span><select id="issuer-sessionKeyCipheringAlgorithm" data-option="sessionKeyCipheringAlgorithm"></select></label>
+          </div>
+          <p class="hint">Key transport is always RSA-OAEP: RSA 1.5 is refused.</p>
+        </fieldset>
+
+        <div class="form-error" id="issuer-error" role="alert" hidden></div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="create-token">
+            <svg aria-hidden="true"><use href="#i-lock"/></svg>Create token
+          </button>
+        </div>
+
+        <details class="code-details">
+          <summary>PHP code of the issuer</summary>
+          <div class="code-block">
+            <button type="button" class="icon-btn icon-btn-sm copy-code" data-copy="issuer-code" aria-label="Copy the PHP code of the issuer"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+            <pre class="code" id="issuer-code"></pre>
+          </div>
+        </details>
+      </form>
+    </section>
+
+    <section class="panel" id="token" aria-labelledby="token-title">
+      <header class="panel-head">
+        <span class="panel-num">02</span>
+        <div>
+          <h2 id="token-title">Token</h2>
+          <p class="panel-sub">Hover or select a block to read what it does.</p>
+        </div>
+        <div class="panel-tools">
+          <button type="button" class="btn btn-ghost btn-sm" id="toggle-full" aria-pressed="false">Full values</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="edit-token" aria-pressed="false"><svg aria-hidden="true"><use href="#i-edit"/></svg>Edit</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="copy-token"><svg aria-hidden="true"><use href="#i-copy"/></svg><span>Copy XML</span></button>
+        </div>
+      </header>
+      <div class="panel-body token-body">
+        <div class="token-meta" id="token-meta"></div>
+        <div class="token-layout">
+          <div class="xml-wrap">
+            <div class="xml-view" id="xml-view" tabindex="0" role="listbox" aria-label="XML token: use the arrow keys to select a block"></div>
+            <div class="xml-edit" id="xml-edit-wrap" hidden>
+              <label class="sr-only" for="xml-edit">Raw XML of the token</label>
+              <textarea id="xml-edit" spellcheck="false" autocomplete="off"></textarea>
+              <div class="xml-edit-actions">
+                <span class="hint">Change anything, then verify: the receiver gets these exact bytes.</span>
+                <button type="button" class="btn btn-ghost btn-sm" id="edit-cancel">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" id="edit-apply">Apply</button>
+              </div>
+            </div>
+          </div>
+          <aside class="annotation" id="annotation" aria-live="polite"></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="receiver-config" aria-labelledby="receiver-config-title">
+      <header class="panel-head">
+        <span class="panel-num">03</span>
+        <div>
+          <h2 id="receiver-config-title">Receiver</h2>
+          <p class="panel-sub">What it trusts and what it checks.</p>
+        </div>
+      </header>
+      <form class="panel-body" id="receiver-form" novalidate>
+        <fieldset class="field-group">
+          <legend>Trust anchor</legend>
+          <label class="check"><input type="checkbox" id="rc-ca"><span>CA chain <span class="muted"><code>caCertPath</code>: intermediate + root</span></span></label>
+          <label class="check"><input type="checkbox" id="rc-pin"><span>Pinned signer <span class="muted"><code>signerCertPath</code></span></span></label>
+          <label class="check"><input type="checkbox" id="rc-subject"><span>Expected subject <span class="muted"><code>expectedSubject</code></span></span></label>
+          <div class="subject-grid" id="rc-subject-fields">
+            <label class="field"><span class="field-label">O</span><input type="text" id="rc-subjectO" autocomplete="off" spellcheck="false"></label>
+            <label class="field"><span class="field-label">OU</span><input type="text" id="rc-subjectOU" autocomplete="off" spellcheck="false"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Decryption</legend>
+          <label class="check"><input type="checkbox" id="rc-decrypt"><span>Recipient's private key <span class="muted"><code>crypt.key.pem</code></span></span></label>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Expected algorithms</legend>
+          <div class="algo-grid">
+            <label class="field"><span class="field-label">Signature</span><select id="rc-signatureAlgorithm" data-option="signatureAlgorithm"></select></label>
+            <label class="field"><span class="field-label">Digest</span><select id="rc-digestAlgorithm" data-option="digestAlgorithm"></select></label>
+            <label class="field"><span class="field-label">Encryption</span><select id="rc-sessionKeyCipheringAlgorithm" data-option="sessionKeyCipheringAlgorithm"></select></label>
+          </div>
+          <p class="hint" id="algo-sync-hint">Follows the issuer. Change one to see the token refused.</p>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Your checks</legend>
+          <div class="ttl-row">
+            <label class="field-label" for="rc-ttl">Time to live</label>
+            <input type="range" id="rc-ttl-range" min="5" max="600" step="5" aria-label="Time to live, in seconds">
+            <span class="ttl-input"><input type="number" id="rc-ttl" min="5" max="86400" step="1" inputmode="numeric"><span class="muted">s</span></span>
+          </div>
+          <label class="check"><input type="checkbox" id="rc-replay"><span>Refuse replayed tokens <span class="muted">token ids stored server-side</span></span></label>
+          <div class="replay-row">
+            <span class="muted" id="replay-memory">Memory: 0 ids</span>
+            <button type="button" class="btn btn-ghost btn-xs" id="replay-clear">Forget all</button>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="verify-token">
+            <svg aria-hidden="true"><use href="#i-check"/></svg>Verify token
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" id="receiver" aria-labelledby="receiver-title">
+      <header class="panel-head">
+        <span class="panel-num">03</span>
+        <div>
+          <h2 id="receiver-title">Verification</h2>
+          <p class="panel-sub">The library's checks, then yours.</p>
+        </div>
+      </header>
+      <div class="panel-body">
+        <div class="verdict" id="verdict" aria-live="polite"></div>
+        <ol class="pipeline" id="pipeline"></ol>
+        <div class="readback" id="readback" hidden>
+          <h3 class="h-small">Data read back</h3>
+          <div class="data-tree" id="data-tree"></div>
+        </div>
+        <details class="code-details" open>
+          <summary>PHP code of this receiver</summary>
+          <div class="code-block">
+            <button type="button" class="icon-btn icon-btn-sm copy-code" data-copy="receiver-code" aria-label="Copy the PHP code of the receiver"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+            <pre class="code" id="receiver-code"></pre>
+          </div>
+        </details>
+      </div>
+    </section>
+  </div>
+
+  <section class="lab" id="lab" aria-labelledby="lab-title">
+    <header class="lab-head">
+      <div>
+        <p class="eyebrow"><span class="panel-num">04</span> Attack lab</p>
+        <h2 id="lab-title">Forge, wrap, swap, replay.</h2>
+        <p class="lab-lead">Each attack starts from the last token of the issuer, alters it on the server, and submits it to the receiver configured above, with a replay memory of its own. No vulnerable code runs here: this is what 1.0.0 does with each forged token.</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="run-all"><svg aria-hidden="true"><use href="#i-play"/></svg>Run all attacks</button>
+    </header>
+    <div class="lab-grid" id="lab-grid"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p><code>ezxmldsig</code> — CeCILL-C. This demo runs locally with <code>bin/demo</code> and loads nothing from other servers.</p>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
