@@ -525,7 +525,7 @@ bin/demo          # http://127.0.0.1:8080/
 bin/demo 9000     # another port (or DEMO_PORT=9000)
 ```
 
-The script installs the dependencies when `vendor/` is missing (as `bin/test` does), runs the PHP built-in web server in the official `php:8.3-cli` image, publishes it on `127.0.0.1` only, and opens the page in the browser when it can (`DEMO_NO_BROWSER=1` skips it). Ctrl-C stops it.
+The script first brings `vendor/` in line with `composer.json` with `bin/deps` (as `bin/test` does, see [Tests](#tests)), runs the PHP built-in web server in the official `php:8.3-cli` image, publishes it on `127.0.0.1` only, and opens the page in the browser when it can (`DEMO_NO_BROWSER=1` skips it). Ctrl-C stops it.
 
 ![The demo: the issuer, the annotated token and the receiver's pipeline of checks](demo/screenshot.png)
 
@@ -553,7 +553,9 @@ bin/test 8.3                    # one PHP version
 bin/test 7.4 -- --filter Secure # arguments after -- go to PHPUnit
 ```
 
-The script uses the official `php:<version>-cli` images. On first run, it downloads the PHPUnit 9.6 PHAR into `tests/.cache/` (checked against a pinned SHA-256) and, when `vendor/` is missing, runs `composer install` in the `composer:2` image.
+The script uses the official `php:<version>-cli` images. On first run, it downloads the PHPUnit 9.6 PHAR into `tests/.cache/` (checked against a pinned SHA-256).
+
+Before running anything, it calls `bin/deps`, which brings `vendor/` in line with `composer.json` in the `composer:2` image. `composer.lock` is not versioned, so each copy of the repository has its own, which may predate `composer.json`. `bin/deps` checks it without network: when `composer.lock` is missing or `composer validate` reports that it no longer matches `composer.json`, it runs `composer update`; when `vendor/` is missing or holds other versions than `composer.lock`, it runs `composer install`; otherwise it runs nothing else. It says on the terminal what it runs and why. When Composer refuses a dependency because of a security advisory, `COMPOSER_NO_BLOCKING=1` in front of the command overrides the refusal, at your own risk.
 
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
 
