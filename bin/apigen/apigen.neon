@@ -1,0 +1,20 @@
+# Configuration of ApiGen for bin/gen-docs, merged into the configuration of
+# the image (/src/apigen.neon). The classes it names are loaded by
+# bin/apigen/autoload.php.
+#
+# It works around defects of the pinned image of bin/gen-docs: phpdoc-parser
+# trims each paragraph of a docblock
+# (/src/vendor/phpstan/phpdoc-parser/src/Parser/PhpDocParser.php:275), and
+# ApiGen drops the empty text nodes that stand for its blank lines
+# (/src/src/Analyzer/NodeVisitors/PhpDocResolver.php:286), then joins the
+# remaining ones with a space (/src/src/Renderer/Latte/LatteFunctions.php:264).
+# The indentation and the blank lines being lost, the lists, nested lists and
+# code blocks of the docblocks are not rendered (see PhpDocResolver.php). Do
+# not remove it while the image behaves so.
+
+services:
+	# Keeps the blank lines and the indentation of the docblocks, which
+	# separate and nest the paragraphs, lists and code blocks of their
+	# Markdown.
+	analyze.phpDocResolver:
+		factory: webcoder31\ezxmldsig\ApiGen\PhpDocResolver

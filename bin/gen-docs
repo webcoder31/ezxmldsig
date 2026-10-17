@@ -19,6 +19,10 @@
 # first with `composer install`, in the composer:2 image, as bin/test does.
 # Its cache stays in the container, and the paths it writes are relative to
 # the repository.
+#
+# ApiGen runs with the configuration of bin/apigen/: as is, it drops the
+# blank lines of the docblocks, and with them their Markdown lists and code
+# blocks (see bin/apigen/PhpDocResolver.php).
 
 set -eu
 
@@ -31,7 +35,7 @@ TITLE=EZXMLDSIG
 BUILD_DIR=tests/.cache/docs-build
 
 case "${1:-}" in
-    -h|--help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     '') ;;
     *) echo "Usage: $0" >&2; exit 2 ;;
 esac
@@ -61,8 +65,13 @@ trap 'rm -rf "${ROOT_DIR:?}/$BUILD_DIR"' EXIT
 
 # One worker: with several, the order of the lists of subclasses changes
 # from one run to the next.
+#
+# bin/apigen/autoload.php loads the classes that bin/apigen/apigen.neon
+# names: PHP runs it before the ApiGen command of the image.
 docker run --rm -u "$DOCKER_USER" \
-    -v "$ROOT_DIR:/data" -w /data "$APIGEN_IMAGE" \
+    -v "$ROOT_DIR:/data" -w /data --entrypoint php "$APIGEN_IMAGE" \
+    -d auto_prepend_file=/data/bin/apigen/autoload.php /src/bin/apigen \
+    --config bin/apigen/apigen.neon \
     --no-interaction \
     --workers 1 \
     --title "$TITLE" \

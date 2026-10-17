@@ -20,6 +20,11 @@ details follow.
   ApiGen in Docker. `docs/` is regenerated from the current code: its pages
   have new names (e.g. `webcoder31.ezxmldsig.XMLDSigToken.html` instead of
   `class-webcoder31.ezxmldsig.XMLDSigToken.html`).
+- `bin/gen-docs` runs ApiGen with the configuration of `bin/apigen/`, which
+  keeps the blank lines and the indentation of the docblocks: without it,
+  ApiGen dropped them, and the generated pages showed neither the lists nor
+  the code examples of the docblocks. The code examples of the docblocks are
+  now Markdown fenced code blocks instead of `<code>` tags.
 - Add `examples/certs/README.md`, and warnings in the README and the
   examples: the private keys of `examples/certs/` are public and must only
   serve the examples.

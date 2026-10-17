@@ -78,7 +78,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * **An XML token looks like this:**
  *
- * <code>
+ * ```xml
  * <?xml version="1.0"?>
  * <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
  *   <ds:SignedInfo>
@@ -114,7 +114,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *     </Token>
  *   </ds:Object>
  * </ds:Signature>
- * </code>
+ * ```
  *
  * **The signing process consists in the following actions:**
  *
@@ -136,13 +136,13 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * - Load the base DOM document representing an XML digital signature:
  *
- * <code>
+ * ```xml
  * <ds:Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
  *   <ds:SignedInfo>
  *     <ds:SignatureMethod />
  *   </ds:SignedInfo>
  * </ds:Signature>
- * </code>
+ * ```
  *
  * - Create a node `<ds:Object Id="Token" />` and append it to the node
  *   `<ds:Signature />`.
@@ -239,7 +239,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *
  * **A secure (crypted) XML token looks like this:**
  *
- * <code>
+ * ```xml
  * <?xml version="1.0"?>
  * <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
  *   <ds:SignedInfo>
@@ -276,7 +276,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *     </xenc:EncryptedData>
  *   </ds:Object>
  * </ds:Signature>
- * </code>
+ * ```
  *
  * **The encryption process is the following:**
  *
@@ -617,12 +617,12 @@ class XMLDSigToken
      *
      * Example:
      *
-     * <code>
+     * ```php
      * $options = [
      *   'base64Encode' => false,
      *   'xmldsigNsPrefix' => ''
      * ];
-     * </code>
+     * ```
      *
      * Each option applies to a context: token creation (`createXMLToken()`,
      * `createSecureXMLToken()`), token analysis (`analyzeXMLToken()`,
@@ -639,13 +639,13 @@ class XMLDSigToken
      * `checkCryptingAlgorithms` is FALSE. To analyze a token built with
      * RSA-SHA1 and SHA-1:
      *
-     * <code>
+     * ```php
      * $options = [
      *   'caCertPath' => ['intermediate.cert.pem', 'root.cert.pem'],
      *   'signatureAlgorithm' => XMLDSigToken::RSA_SHA1,
      *   'digestAlgorithm' => XMLDSigToken::SHA1
      * ];
-     * </code>
+     * ```
      *
      * Available options are the following:
      *
@@ -1442,11 +1442,11 @@ class XMLDSigToken
      * The options must hold a trust anchor, `caCertPath` and/or
      * `signerCertPath`; without it, `isSignatureValid()` returns FALSE.
      *
-     * <code>
+     * ```php
      * $token = XMLDSigToken::analyzeXMLToken($xml, [
      *     'caCertPath' => ['path/to/intermediate.cert.pem', 'path/to/root.cert.pem'],
      * ]);
-     * </code>
+     * ```
      *
      * @param string $xml An XML token.
      *
@@ -2926,7 +2926,7 @@ class XMLDSigToken
      * The expected issuer information must me passed as an array to the
      * function:
      *
-     * <code>
+     * ```php
      * $ExpectedIssuerInfo = [
      *     'C' => 'DK',
      *     'ST' => 'Jylland',
@@ -2935,7 +2935,7 @@ class XMLDSigToken
      *     'CN' => 'www.Lothbrok.dk',
      *     'emailAddress' => 'ragnar@Lothbrok.dk'
      * ];
-     * </code>
+     * ```
      *
      *  NOTE: Character case of data is significant.
      *

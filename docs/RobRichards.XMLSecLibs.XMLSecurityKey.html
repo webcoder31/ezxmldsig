@@ -98,16 +98,30 @@
 
 	</table>
 		<div class="classLikeDescription">
-	<div class="description"><p>xmlseclibs.php Copyright (c) 2007-2024, Robert Richards <a href="mailto:rrichards@cdatazone.org">rrichards@cdatazone.org</a>.
-All rights reserved. Redistribution and use in source and binary forms, with or without
+	<div class="description"><p>xmlseclibs.php</p>
+<p>Copyright (c) 2007-2024, Robert Richards <a href="mailto:rrichards@cdatazone.org">rrichards@cdatazone.org</a>.
+All rights reserved.</p>
+<p>Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
-are met: * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright
+are met:</p>
+<ul>
+<li>
+<p>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</p>
+</li>
+<li>
+<p>Redistributions in binary form must reproduce the above copyright
 notice, this list of conditions and the following disclaimer in
 the documentation and/or other materials provided with the
-distribution. * Neither the name of Robert Richards nor the names of his
+distribution.</p>
+</li>
+<li>
+<p>Neither the name of Robert Richards nor the names of his
 contributors may be used to endorse or promote products derived
-from this software without specific prior written permission. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+from this software without specific prior written permission.</p>
+</li>
+</ul>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -182,13 +196,13 @@ POSSIBILITY OF SUCH DAMAGE.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Retrieve the key size for the symmetric encryption algorithm.. If the key size is unknown, or this isn't a symmetric encryption algorithm,
-null is returned.</p>
+		<p>Retrieve the key size for the symmetric encryption algorithm..</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Retrieve the key size for the symmetric encryption algorithm.. If the key size is unknown, or this isn't a symmetric encryption algorithm,
+	<div class="description"><p>Retrieve the key size for the symmetric encryption algorithm..</p>
+<p>If the key size is unknown, or this isn't a symmetric encryption algorithm,
 null is returned.</p>
 </div>
 
@@ -427,20 +441,17 @@ In case of using DES3-CBC the key is checked for a proper parity bits set.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Verifies the data (string) against the given signature using the extension assigned to the type in the constructor. Returns in case of openSSL:
-1 on succesful signature verification,
-0 when signature verification failed,
--1 if an error occurred during processing. NOTE: be very careful when checking the return value, because in PHP,
--1 will be cast to True when in boolean context. So always check the
-return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
+		<p>Verifies the data (string) against the given signature using the extension assigned to the type in the constructor.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Verifies the data (string) against the given signature using the extension assigned to the type in the constructor. Returns in case of openSSL:
+	<div class="description"><p>Verifies the data (string) against the given signature using the extension assigned to the type in the constructor.</p>
+<p>Returns in case of openSSL:
 1 on succesful signature verification,
 0 when signature verification failed,
--1 if an error occurred during processing. NOTE: be very careful when checking the return value, because in PHP,
+-1 if an error occurred during processing.</p>
+<p>NOTE: be very careful when checking the return value, because in PHP,
 -1 will be cast to True when in boolean context. So always check the
 return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot;.</p>
 </div>
@@ -605,13 +616,13 @@ return value in a strictly typed way, e.g. &quot;$obj-&gt;verify(...) === 1&quot
 
 
 	<div class="expandable-collapsedView">
-		<p>Retrieve the X509 certificate this key represents. Will return the X509 certificate in PEM-format if this key represents
-an X509 certificate.</p>
+		<p>Retrieve the X509 certificate this key represents.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Retrieve the X509 certificate this key represents. Will return the X509 certificate in PEM-format if this key represents
+	<div class="description"><p>Retrieve the X509 certificate this key represents.</p>
+<p>Will return the X509 certificate in PEM-format if this key represents
 an X509 certificate.</p>
 </div>
 
@@ -642,14 +653,13 @@ an X509 certificate.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Get the thumbprint of this X509 certificate. Returns:
-The thumbprint as a lowercase 40-character hexadecimal number, or null
-if this isn't a X509 certificate.</p>
+		<p>Get the thumbprint of this X509 certificate.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Get the thumbprint of this X509 certificate. Returns:
+	<div class="description"><p>Get the thumbprint of this X509 certificate.</p>
+<p>Returns:
 The thumbprint as a lowercase 40-character hexadecimal number, or null
 if this isn't a X509 certificate.</p>
 </div>

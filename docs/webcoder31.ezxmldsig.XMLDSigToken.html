@@ -85,146 +85,308 @@
 
 	</table>
 		<div class="classLikeDescription">
-	<div class="description"><p>Build or analyze an XML token. An XML token is an enveloping XML Digital Signature (cf. RFC 3275)
+	<div class="description"><p>Build or analyze an XML token.</p>
+<p>An XML token is an enveloping XML Digital Signature (cf. RFC 3275)
 containing signed and timestamped user data. These data may also be
-encrypted. In this case we talk about Secure XML token. <strong>This class uses the following default algorithms to operate:</strong> - Algorithm used to canonalize data before signing is:
-<a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a>. - Algorithm used to generate the signature is:
-<a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</a>. - Algorithm used to compute the hash of token data is:
-<a href="http://www.w3.org/2001/04/xmlenc#sha256">http://www.w3.org/2001/04/xmlenc#sha256</a>. - Algorithm used to encode data's values is: Base64. The analysis expects these algorithms unless its options name others (see
+encrypted. In this case we talk about Secure XML token.</p>
+<p><strong>This class uses the following default algorithms to operate:</strong></p>
+<ul>
+<li>
+<p>Algorithm used to canonalize data before signing is:
+<a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a>.</p>
+</li>
+<li>
+<p>Algorithm used to generate the signature is:
+<a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</a>.</p>
+</li>
+<li>
+<p>Algorithm used to compute the hash of token data is:
+<a href="http://www.w3.org/2001/04/xmlenc#sha256">http://www.w3.org/2001/04/xmlenc#sha256</a>.</p>
+</li>
+<li>
+<p>Algorithm used to encode data's values is: Base64.</p>
+</li>
+</ul>
+<p>The analysis expects these algorithms unless its options name others (see
 <code>__construct()</code>), and it requires a trust anchor: the CA certificates
 and/or the pinned certificate the signing certificate is verified against.
-Without it, no token is valid. <strong>An XML token looks like this:</strong> <code></p>
-<?xml version="1.0"?>
-<p>&lt;ds:Signature xmlns:ds=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
-<a href="ds:SignedInfo">ds:SignedInfo</a>
-&lt;ds:CanonicalizationMethod Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
-&lt;ds:SignatureMethod Algorithm=&quot;http://www.w3.org/2001/04/xmldsig-more#rsa-sha256&quot;/&gt;
-&lt;ds:Reference URI=&quot;#Token&quot;&gt;
-<a href="ds:Transforms">ds:Transforms</a>
-&lt;ds:Transform Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
-&lt;/ds:Transforms&gt;
-&lt;ds:DigestMethod Algorithm=&quot;http://www.w3.org/2001/04/xmlenc#sha256&quot;/&gt;
-<a href="ds:DigestValue">ds:DigestValue</a>---- TOKEN HASH ----&lt;/ds:DigestValue&gt;
-&lt;/ds:Reference&gt;
-&lt;/ds:SignedInfo&gt;
-<a href="ds:SignatureValue">ds:SignatureValue</a>---- SIGNATURE VALUE ----&lt;/ds:SignatureValue&gt;
-<a href="ds:KeyInfo">ds:KeyInfo</a>
-<a href="ds:X509Data">ds:X509Data</a>
-<a href="ds:X509Certificate">ds:X509Certificate</a>---- X.509 CERTIFICATE ----&lt;/ds:X509Certificate&gt;
-&lt;/ds:X509Data&gt;
-&lt;/ds:KeyInfo&gt;
-&lt;ds:Object Id=&quot;Token&quot;&gt;
-&lt;Token&gt;
-&lt;TokenTimestamp&gt;2016-10-24T08:33:14Z&lt;/TokenTimestamp&gt;
-&lt;TokenId&gt;---- 128-BIT RANDOM IDENTIFIER (HEXADECIMAL) ----&lt;/TokenId&gt;
-&lt;TokenData&gt;
-&lt;data1 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----</data1>
-&lt;data2 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----</data2>
-<data3>
-&lt;data31 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----</data31>
-&lt;data32 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----</data32>
-</data3>
-&lt;data4 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----</data4>
-&lt;/TokenData&gt;
-&lt;/Token&gt;
-&lt;/ds:Object&gt;
+Without it, no token is valid.</p>
+<p><strong>An XML token looks like this:</strong></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;ds:Signature xmlns:ds=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:CanonicalizationMethod Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
+    &lt;ds:SignatureMethod Algorithm=&quot;http://www.w3.org/2001/04/xmldsig-more#rsa-sha256&quot;/&gt;
+    &lt;ds:Reference URI=&quot;#Token&quot;&gt;
+      &lt;ds:Transforms&gt;
+        &lt;ds:Transform Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
+      &lt;/ds:Transforms&gt;
+      &lt;ds:DigestMethod Algorithm=&quot;http://www.w3.org/2001/04/xmlenc#sha256&quot;/&gt;
+      &lt;ds:DigestValue&gt;---- TOKEN HASH ----&lt;/ds:DigestValue&gt;
+    &lt;/ds:Reference&gt;
+  &lt;/ds:SignedInfo&gt;
+  &lt;ds:SignatureValue&gt;---- SIGNATURE VALUE ----&lt;/ds:SignatureValue&gt;
+  &lt;ds:KeyInfo&gt;
+    &lt;ds:X509Data&gt;
+      &lt;ds:X509Certificate&gt;---- X.509 CERTIFICATE ----&lt;/ds:X509Certificate&gt;
+    &lt;/ds:X509Data&gt;
+  &lt;/ds:KeyInfo&gt;
+  &lt;ds:Object Id=&quot;Token&quot;&gt;
+    &lt;Token&gt;
+      &lt;TokenTimestamp&gt;2016-10-24T08:33:14Z&lt;/TokenTimestamp&gt;
+      &lt;TokenId&gt;---- 128-BIT RANDOM IDENTIFIER (HEXADECIMAL) ----&lt;/TokenId&gt;
+      &lt;TokenData&gt;
+        &lt;data1 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----&lt;/data1&gt;
+        &lt;data2 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----&lt;/data2&gt;
+        &lt;data3&gt;
+          &lt;data31 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----&lt;/data31&gt;
+          &lt;data32 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----&lt;/data32&gt;
+        &lt;/data3&gt;
+        &lt;data4 Algorithm=&quot;base64&quot;&gt;---- BASE64 ENCODED DATA ----&lt;/data4&gt;
+      &lt;/TokenData&gt;
+    &lt;/Token&gt;
+  &lt;/ds:Object&gt;
 &lt;/ds:Signature&gt;
-</code> <strong>The signing process consists in the following actions:</strong> - Load data from an associative array. - Encode data values using Base64. - Build a node from the encoded array of data (cf. node <code>&lt;TokenData /&gt;</code>). - Compute an UTC timestamp and store it in a node <code>&lt;TokenTimestamp /&gt;</code>. - Generate a random identifier of 128 bits (<code>random_bytes()</code>) and store
+</code></pre>
+<p><strong>The signing process consists in the following actions:</strong></p>
+<ul>
+<li>
+<p>Load data from an associative array.</p>
+</li>
+<li>
+<p>Encode data values using Base64.</p>
+</li>
+<li>
+<p>Build a node from the encoded array of data (cf. node <code>&lt;TokenData /&gt;</code>).</p>
+</li>
+<li>
+<p>Compute an UTC timestamp and store it in a node <code>&lt;TokenTimestamp /&gt;</code>.</p>
+</li>
+<li>
+<p>Generate a random identifier of 128 bits (<code>random_bytes()</code>) and store
 it, in hexadecimal, in a node <code>&lt;TokenId /&gt;</code>. Signed with the rest of the
 token, it lets the receiver refuse a token it has already accepted (see
-<code>getTokenId()</code>). - Aggregate the nodes <code>&lt;TokenTimestamp /&gt;</code>, <code>&lt;TokenId /&gt;</code> and
-<code>&lt;TokenData /&gt;</code> inside a node <code>&lt;Token /&gt;</code>. - Load the base DOM document representing an XML digital signature: <code>
-&lt;ds:Signature xmlns=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
-<a href="ds:SignedInfo">ds:SignedInfo</a>
-&lt;ds:SignatureMethod /&gt;
-&lt;/ds:SignedInfo&gt;
+<code>getTokenId()</code>).</p>
+</li>
+<li>
+<p>Aggregate the nodes <code>&lt;TokenTimestamp /&gt;</code>, <code>&lt;TokenId /&gt;</code> and
+<code>&lt;TokenData /&gt;</code> inside a node <code>&lt;Token /&gt;</code>.</p>
+</li>
+<li>
+<p>Load the base DOM document representing an XML digital signature:</p>
+</li>
+</ul>
+<pre><code class="language-xml">&lt;ds:Signature xmlns=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:SignatureMethod /&gt;
+  &lt;/ds:SignedInfo&gt;
 &lt;/ds:Signature&gt;
-</code> - Create a node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> and append it to the node
-<code>&lt;ds:Signature /&gt;</code>. - Add the node <code>&lt;Token /&gt;</code> to the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>. - NOTE : If data encryption is requested, this process will take place here
-(this will be described later). - Build a node <code>&lt;ds:Reference URI=&quot;#Token&quot; /&gt;</code> and append it to the node
-<code>&lt;ds:SignedInfo /&gt;</code>. This consists in: - Canonicalizing the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>. - Computing the hash (SHA-256 by default) of the canonicalized node and
-storing it in the node <code>&lt;ds:DigestValue /&gt;</code>. - Includes, in the the XML token, the X.509 certificate associated to the
+</code></pre>
+<ul>
+<li>
+<p>Create a node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> and append it to the node
+<code>&lt;ds:Signature /&gt;</code>.</p>
+</li>
+<li>
+<p>Add the node <code>&lt;Token /&gt;</code> to the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>.</p>
+</li>
+<li>
+<p>NOTE : If data encryption is requested, this process will take place here
+(this will be described later).</p>
+</li>
+<li>
+<p>Build a node <code>&lt;ds:Reference URI=&quot;#Token&quot; /&gt;</code> and append it to the node
+<code>&lt;ds:SignedInfo /&gt;</code>. This consists in:</p>
+<ul>
+<li>
+<p>Canonicalizing the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>.</p>
+</li>
+<li>
+<p>Computing the hash (SHA-256 by default) of the canonicalized node and
+storing it in the node <code>&lt;ds:DigestValue /&gt;</code>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Includes, in the the XML token, the X.509 certificate associated to the
 private key that will be used to perform the signing (see the next steps
 below). This cerficate will be used to perform the signature validation
 process, avoiding the need, for the receiver of the XML Digital Signature
-to own it on its side. - Canonicalize the content of the node <code>&lt;ds:SignedInfo /&gt;</code>. - Compute the signature of the canonicalized node using the private key
-dedicated to perform signing. - Store the result in the node <code>&lt;ds:SignatureValue /&gt;</code>. - Save the DOM document in XML format. <strong>The signature validation process consist in the following actions:</strong> - Load the XML Digital Singature in a DOM document. A document with a
+to own it on its side.</p>
+</li>
+<li>
+<p>Canonicalize the content of the node <code>&lt;ds:SignedInfo /&gt;</code>.</p>
+</li>
+<li>
+<p>Compute the signature of the canonicalized node using the private key
+dedicated to perform signing.</p>
+</li>
+<li>
+<p>Store the result in the node <code>&lt;ds:SignatureValue /&gt;</code>.</p>
+</li>
+<li>
+<p>Save the DOM document in XML format.</p>
+</li>
+</ul>
+<p><strong>The signature validation process consist in the following actions:</strong></p>
+<ul>
+<li>
+<p>Load the XML Digital Singature in a DOM document. A document with a
 document type declaration (DOCTYPE), or not encoded in UTF-8, is
 refused before it is parsed, and the parser never accesses the network
-(see <code>_loadXML()</code>). - Verify that the algorithms of the XML Digital Signature are the
-expected ones. - Compute the hash of the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>
-with the digest algorithm. - Compare the computed hash with the one stored in the node
+(see <code>_loadXML()</code>).</p>
+</li>
+<li>
+<p>Verify that the algorithms of the XML Digital Signature are the
+expected ones.</p>
+</li>
+<li>
+<p>Compute the hash of the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>
+with the digest algorithm.</p>
+</li>
+<li>
+<p>Compare the computed hash with the one stored in the node
 <code>&lt;ds:DigestValue /&gt;</code>. If the hash are different, this means that the
-content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> has been altered. - Canonicalize the content of the node <code>&lt;ds:SignedInfo /&gt;</code>. - Compute the signature of the node <code>&lt;ds:SignedInfo /&gt;</code> using the X.509
-certificate included in the XML token. - Compare the computed signature with the one stored in the node
+content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> has been altered.</p>
+</li>
+<li>
+<p>Canonicalize the content of the node <code>&lt;ds:SignedInfo /&gt;</code>.</p>
+</li>
+<li>
+<p>Compute the signature of the node <code>&lt;ds:SignedInfo /&gt;</code> using the X.509
+certificate included in the XML token.</p>
+</li>
+<li>
+<p>Compare the computed signature with the one stored in the node
 <code>&lt;ds:SignatureValue&gt;</code>. If the signatures are different, this means that
 content the node <code>&lt;ds:SignedInfo /&gt;</code> has not been signed using the private
 key associated to the X.509 certificate included in the XML Digital
-Signature. - Verify that the X.509 certificate included in the XML Digital Signature
+Signature.</p>
+</li>
+<li>
+<p>Verify that the X.509 certificate included in the XML Digital Signature
 is trusted, against the trust anchor given to the analysis: CA
 certificates up to which OpenSSL verifies the chain of the certificate,
 and/or the pinned certificate the token must be signed with. Without a
 trust anchor, no token is valid: anyone can sign a token with a
-certificate of their own. - NOTE: If data decryption is required, this process will take place here
-(this will be described later). - Extract the timestamp and the identifier stored in the content of the
+certificate of their own.</p>
+</li>
+<li>
+<p>NOTE: If data decryption is required, this process will take place here
+(this will be described later).</p>
+</li>
+<li>
+<p>Extract the timestamp and the identifier stored in the content of the
 node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> and memorise them. A token without
-identifier is rejected. - Extract the data stored in the content of the node
-<code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>. - Decode data values using Base64. - Buid an associative array containing the decoded data. <strong>Token data encryption / decryption:</strong> The token data may also be encrypted before signing. In this case the class
+identifier is rejected.</p>
+</li>
+<li>
+<p>Extract the data stored in the content of the node
+<code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>.</p>
+</li>
+<li>
+<p>Decode data values using Base64.</p>
+</li>
+<li>
+<p>Buid an associative array containing the decoded data.</p>
+</li>
+</ul>
+<p><strong>Token data encryption / decryption:</strong></p>
+<p>The token data may also be encrypted before signing. In this case the class
 will use the following default algorithms to perform encryption and
-decryption of data: - Algorithm used to encrypt / decrypt data is:
+decryption of data:</p>
+<ul>
+<li>
+<p>Algorithm used to encrypt / decrypt data is:
 <a href="http://www.w3.org/2009/xmlenc11#aes256-gcm">http://www.w3.org/2009/xmlenc11#aes256-gcm</a> (authenticated symetric
-ciphering). - Algorithm used to encrypt / decrypt the session key is:
-<a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a> (asymetric ciphering). <strong>A secure (crypted) XML token looks like this:</strong> <code></p>
-<?xml version="1.0"?>
-<p>&lt;ds:Signature xmlns:ds=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
-<a href="ds:SignedInfo">ds:SignedInfo</a>
-&lt;ds:CanonicalizationMethod Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
-&lt;ds:SignatureMethod Algorithm=&quot;http://www.w3.org/2001/04/xmldsig-more#rsa-sha256&quot;/&gt;
-&lt;ds:Reference URI=&quot;#Token&quot;&gt;
-<a href="ds:Transforms">ds:Transforms</a>
-&lt;ds:Transform Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
-&lt;/ds:Transforms&gt;
-&lt;ds:DigestMethod Algorithm=&quot;http://www.w3.org/2001/04/xmlenc#sha256&quot;/&gt;
-<a href="ds:DigestValue">ds:DigestValue</a>---- TOKEN HASH ----&lt;/ds:DigestValue&gt;
-&lt;/ds:Reference&gt;
-&lt;/ds:SignedInfo&gt;
-<a href="ds:SignatureValue">ds:SignatureValue</a>---- SIGNATURE VALUE ----&lt;/ds:SignatureValue&gt;
-<a href="ds:KeyInfo">ds:KeyInfo</a>
-<a href="ds:X509Data">ds:X509Data</a>
-<a href="ds:X509Certificate">ds:X509Certificate</a>---- X.509 CERTIFICATE ----&lt;/ds:X509Certificate&gt;
-&lt;/ds:X509Data&gt;
-&lt;/ds:KeyInfo&gt;
-&lt;ds:Object Id=&quot;Token&quot;&gt;
-&lt;xenc:EncryptedData xmlns:xenc=&quot;http://www.w3.org/2001/04/xmlenc#&quot; Type=&quot;http://www.w3.org/2001/04/xmlenc#Content&quot;&gt;
-&lt;xenc:EncryptionMethod Algorithm=&quot;http://www.w3.org/2009/xmlenc11#aes256-gcm&quot;/&gt;
-&lt;ds:KeyInfo xmlns:dsig=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
-<a href="xenc:EncryptedKey">xenc:EncryptedKey</a>
-&lt;xenc:EncryptionMethod Algorithm=&quot;http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p&quot;/&gt;
-<a href="xenc:CipherData">xenc:CipherData</a>
-<a href="xenc:CipherValue">xenc:CipherValue</a>---- CIPHERED SESSION KEY ----&lt;/xenc:CipherValue&gt;
-&lt;/xenc:CipherData&gt;
-&lt;/xenc:EncryptedKey&gt;
-&lt;/ds:KeyInfo&gt;
-<a href="xenc:CipherData">xenc:CipherData</a>
-<a href="xenc:CipherValue">xenc:CipherValue</a>---- ENCRYPTED DATA ----&lt;/xenc:CipherValue&gt;
-&lt;/xenc:CipherData&gt;
-&lt;/xenc:EncryptedData&gt;
-&lt;/ds:Object&gt;
+ciphering).</p>
+</li>
+<li>
+<p>Algorithm used to encrypt / decrypt the session key is:
+<a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a> (asymetric ciphering).</p>
+</li>
+</ul>
+<p><strong>A secure (crypted) XML token looks like this:</strong></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;ds:Signature xmlns:ds=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
+  &lt;ds:SignedInfo&gt;
+    &lt;ds:CanonicalizationMethod Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
+    &lt;ds:SignatureMethod Algorithm=&quot;http://www.w3.org/2001/04/xmldsig-more#rsa-sha256&quot;/&gt;
+    &lt;ds:Reference URI=&quot;#Token&quot;&gt;
+      &lt;ds:Transforms&gt;
+        &lt;ds:Transform Algorithm=&quot;http://www.w3.org/TR/2001/REC-xml-c14n-20010315&quot;/&gt;
+      &lt;/ds:Transforms&gt;
+      &lt;ds:DigestMethod Algorithm=&quot;http://www.w3.org/2001/04/xmlenc#sha256&quot;/&gt;
+      &lt;ds:DigestValue&gt;---- TOKEN HASH ----&lt;/ds:DigestValue&gt;
+    &lt;/ds:Reference&gt;
+  &lt;/ds:SignedInfo&gt;
+  &lt;ds:SignatureValue&gt;---- SIGNATURE VALUE ----&lt;/ds:SignatureValue&gt;
+  &lt;ds:KeyInfo&gt;
+    &lt;ds:X509Data&gt;
+      &lt;ds:X509Certificate&gt;---- X.509 CERTIFICATE ----&lt;/ds:X509Certificate&gt;
+    &lt;/ds:X509Data&gt;
+  &lt;/ds:KeyInfo&gt;
+  &lt;ds:Object Id=&quot;Token&quot;&gt;
+    &lt;xenc:EncryptedData xmlns:xenc=&quot;http://www.w3.org/2001/04/xmlenc#&quot; Type=&quot;http://www.w3.org/2001/04/xmlenc#Content&quot;&gt;
+      &lt;xenc:EncryptionMethod Algorithm=&quot;http://www.w3.org/2009/xmlenc11#aes256-gcm&quot;/&gt;
+      &lt;ds:KeyInfo xmlns:dsig=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
+        &lt;xenc:EncryptedKey&gt;
+          &lt;xenc:EncryptionMethod Algorithm=&quot;http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p&quot;/&gt;
+          &lt;xenc:CipherData&gt;
+            &lt;xenc:CipherValue&gt;---- CIPHERED SESSION KEY ----&lt;/xenc:CipherValue&gt;
+          &lt;/xenc:CipherData&gt;
+        &lt;/xenc:EncryptedKey&gt;
+      &lt;/ds:KeyInfo&gt;
+      &lt;xenc:CipherData&gt;
+        &lt;xenc:CipherValue&gt;---- ENCRYPTED DATA ----&lt;/xenc:CipherValue&gt;
+      &lt;/xenc:CipherData&gt;
+    &lt;/xenc:EncryptedData&gt;
+  &lt;/ds:Object&gt;
 &lt;/ds:Signature&gt;
-</code> <strong>The encryption process is the following:</strong> - Randomly generate a session key. - Cipher the session key using the X.509 certificate dedicated to the
+</code></pre>
+<p><strong>The encryption process is the following:</strong></p>
+<ul>
+<li>
+<p>Randomly generate a session key.</p>
+</li>
+<li>
+<p>Cipher the session key using the X.509 certificate dedicated to the
 encryption process, in order to transmit it safely in the XML Digital
-Signature. - Store the ciphered session key in the node <code>&lt;xenc:CipherValue /&gt;</code> which is
-located inside the node <code>&lt;xenc:EncryptedKey /&gt;</code>. - Encrypt the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> using the
+Signature.</p>
+</li>
+<li>
+<p>Store the ciphered session key in the node <code>&lt;xenc:CipherValue /&gt;</code> which is
+located inside the node <code>&lt;xenc:EncryptedKey /&gt;</code>.</p>
+</li>
+<li>
+<p>Encrypt the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> using the
 non-ciphered session key and store the result in the last node
-<code>&lt;xenc:CipherValue /&gt;</code>. <strong>The decryption process is the following:</strong> - Retrieve the node <code>&lt;xenc:EncryptedData /&gt;</code>. - Decipher the ciphered session key stored in the node <code>&lt;xenc:CipherValue /&gt;</code>
+<code>&lt;xenc:CipherValue /&gt;</code>.</p>
+</li>
+</ul>
+<p><strong>The decryption process is the following:</strong></p>
+<ul>
+<li>
+<p>Retrieve the node <code>&lt;xenc:EncryptedData /&gt;</code>.</p>
+</li>
+<li>
+<p>Decipher the ciphered session key stored in the node <code>&lt;xenc:CipherValue /&gt;</code>
 (the one which is located inside the node <code>&lt;xenc:EncryptedKey /&gt;</code>) using
 the private key associated to the X.509 certificate that has been used to
-perform the encryption. - Decrypt the content of the last node <code>&lt;xenc:CipherValue /&gt;</code> using the
-deciphered session key. The decryption only takes place once the digest, the signature, the trust
+perform the encryption.</p>
+</li>
+<li>
+<p>Decrypt the content of the last node <code>&lt;xenc:CipherValue /&gt;</code> using the
+deciphered session key.</p>
+</li>
+</ul>
+<p>The decryption only takes place once the digest, the signature, the trust
 in the signing certificate and the algorithms have been verified, and
 every failure that depends on the encrypted content gives the same error,
 <code>Token decryption failed!</code>. RSA 1.5 is refused, and a CBC algorithm is
-only accepted when the analysis declares it (see <code>__construct()</code>). <strong>Replay:</strong> A valid token can be submitted again for as long as <code>isOutOfDate()</code>
+only accepted when the analysis declares it (see <code>__construct()</code>).</p>
+<p><strong>Replay:</strong></p>
+<p>A valid token can be submitted again for as long as <code>isOutOfDate()</code>
 accepts it. The class keeps no list of the tokens it has analyzed: the
 caller must keep the identifiers it accepted (<code>getTokenId()</code>) and refuse a
 token whose identifier is among them.</p>
@@ -303,152 +465,34 @@ security reasons.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Instantiate an XMLDSigToken object. This constructor is <code>protected</code>. To get an instance of an XMLDSigToken
-object use one of the following <code>static</code> functions according to what the
-object is intended for: - <code>createXMLToken()</code> - <code>createSecureXMLToken()</code> - <code>analyzeXMLToken()</code> - <code>analyzeSecureXMLToken()</code> An XMLDSigToken object allows creating an XML token and also analyzing an
-existing XML token. The type of the <code>$xmlOrData</code> parameter determine how
-the object behave. <strong>XML token creation:</strong> If <code>$xmlOrData</code> is an array (a flat or multidimensional associative
-array), the object will create an enveloping XML digital signature
-containing an XML token that holds the provided data and a timestamp
-generated automatically, with a random identifier (see <code>getTokenId()</code>).
-In this case, the <code>$signKeyPath</code> and <code>$signCertPath</code> parameters are
-required. If the <code>$cryptCertPath</code> parameter is also provided, the XML
-token will be encrypted, and the <code>$cryptKeyPath</code> parameter must be
-provided too, in order to verify that the created XML Digital Signature
-is well formed. If the private key used for decryption (cf.
-<code>$cryptKeyPath</code> parameter) is protected by a password, this password may
-be passed using the <code>$cryptKeyPassword</code> parameter. <strong>XML token analysis:</strong> If <code>$xmlOrData</code> is a string, the object will treat it as an enveloping
-XML digital signature containing a token: - It will check that the signature is valid. - It will decrypt the token if this one is encrypted. - It will extract timestamp and data from the token. In this case, the <code>$xmlOrData</code> parameter and a trust anchor (the
-options <code>caCertPath</code> and/or <code>signerCertPath</code>, see below) are required:
-without a trust anchor, no token is valid. If the XML
-token is encrypted, the <code>$cryptKeyPath</code> parameter must also be provided.
-If the private key used for encryption (cf. <code>$cryptKeyPath</code> parameter) is
-protected by a password this password may be passed using the
-<code>$cryptKeyPassword</code> parameter. When the object creates a token, it analyzes it right away to check it,
-and trusts the certificate of its own signing key (<code>$signCertPath</code>) for
-that: the trust options do not apply to token creation. <strong>Configuring the object:</strong> The <code>$options</code> parameter of this function allows to override the default
-configuration of the object passing it the desired options via an
-associative array. Example: <code>
-$options = [
-'base64Encode' =&gt; false,
-'xmldsigNsPrefix' =&gt; ''
-];
-</code> Each option applies to a context: token creation (<code>createXMLToken()</code>,
-<code>createSecureXMLToken()</code>), token analysis (<code>analyzeXMLToken()</code>,
-<code>analyzeSecureXMLToken()</code>), or both. The encryption options only apply
-when an encryption certificate (creation) or a decryption key
-(analysis) is given. An unknown option, an option given out of its
-context, or an option whose value is NULL or invalid throws an
-exception. The algorithm options apply to both contexts: at creation, they are the
-algorithms the token is built with; at analysis, the algorithms the
-token must have been built with. A token built with other algorithms is
-rejected (<code>getError()</code> lists them), unless <code>checkSigningAlgorithms</code> or
-<code>checkCryptingAlgorithms</code> is FALSE. To analyze a token built with
-RSA-SHA1 and SHA-1: <code>
-$options = [
-'caCertPath' =&gt; ['intermediate.cert.pem', 'root.cert.pem'],
-'signatureAlgorithm' =&gt; XMLDSigToken::RSA_SHA1,
-'digestAlgorithm' =&gt; XMLDSigToken::SHA1
-];
-</code> Available options are the following: - <strong><code>caCertPath</code></strong> [string|array] Analysis only. The path, or the list
-of paths, of PEM files holding the trusted CA certificates. The
-signing certificate is only trusted if OpenSSL builds and verifies
-its chain, from these certificates only, up to a self-signed
-certificate of these files (see <code>X509Cert::isTrustedBy()</code>). To trust
-the certificates issued by an intermediate CA, give its certificate
-and the certificates up to its root, in one file or in several:
-<code>['intermediate.cert.pem', 'root.cert.pem']</code>. A chain that stops at
-an intermediate CA is rejected: with the intermediate CA alone,
-<code>isSignatureValid()</code> returns FALSE and <code>getError()</code> returns &quot;Signing
-certificate is not issued by a trusted CA: its chain could not be
-verified up to the CA certificates of the option 'caCertPath', which
-must hold the issuing CA and the certificates up to its root!&quot;.
-Only the signing certificate is taken from the token, so a
-certificate issued by another intermediate CA of the same root is
-rejected; a certificate issued directly by a CA of the files (the
-root included) is accepted.
-<br/>Default value: none. - <strong><code>signerCertPath</code></strong> [string] Analysis only. The path to the PEM
-certificate the token must be signed with (certificate pinning): the
-signing certificate must be this very certificate. Given alone, it is
-the trust anchor; given with <code>caCertPath</code>, both are required.
-<br/>Default value: none. - <strong><code>expectedSubject</code></strong> [string|array] Analysis only. The subject the
-signing certificate must have, either: - an array of the subject fields to check, as returned by
-<code>getCertSubject()</code>: <code>['O' =&gt; 'Lothbrok Ltd', 'OU' =&gt; 'Jarl Dept']</code>.
-Fields that are not given are not checked. - or a string, compared as is with the full Distinguished Name
-returned by <code>getCertDN()</code>. This is the OpenSSL &quot;oneline&quot; format
-(<code>openssl_x509_parse()</code>, key <code>name</code>): every field of the subject,
-in the order of the certificate, each written <code>/&lt;short name&gt;=&lt;value&gt;</code>
-with no space and no escaping, e.g.
-<code>'/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk'</code>.
-It is neither the RFC 2253 form (<code>CN=...,O=...</code>) nor the form
-printed by the <code>openssl</code> command line (<code>C=DK, ST=...</code>): copy it
-from <code>getCertDN()</code> or <code>X509Cert::getDN()</code>. Character case is significant. It does not replace a trust anchor.
-<br/>Default value: none. - <strong><code>base64Encode</code></strong> [boolean] Creation only. Whether to base64 encode
-token data or not.
-<br/>Default value: <strong><code>TRUE</code></strong>. - <strong><code>xmldsigNsPrefix</code></strong> [string] Creation only. The XML namespace
-(xmlns) prefix to use in the XML digital signature tags. Set it to
-empty string to avoid prefix usage.
-<br/>Default value: <strong><code>'ds'</code></strong>. - <strong><code>checkSigningAlgorithms</code></strong> [boolean] Analysis only. Whether to
-check that the algorithms used to sign the token are the expected
-ones or not. Even when FALSE, an algorithm that is not in the lists
-below is rejected.
-<br/>Default value: <strong><code>TRUE</code></strong>. - <strong><code>checkCryptingAlgorithms</code></strong> [boolean] Analysis with a decryption
-key only. Whether to check that the algorithms used to crypt the
-token are the expected ones or not. Even when FALSE, an algorithm
-that is not in the lists below is rejected.
-<br/>Default value: <strong><code>TRUE</code></strong>. - <strong><code>canonicalizationAlgorithm</code></strong> [string] Creation and analysis. The
-algorithm used to canonicalize the XMLdigital signature and to
-canonicalize token data before computing its hash.
-<br/>Possible values: - <strong><code>C14N</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a> - <code>C14N_COMMENTS</code>
-<br/>cf. <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments">http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments</a> - <code>EXC_C14N</code>
-<br/>cf. <a href="http://www.w3.org/2001/10/xml-exc-c14n#">http://www.w3.org/2001/10/xml-exc-c14n#</a> - <code>EXC_C14N_COMMENTS</code>
-<br/>cf. <a href="http://www.w3.org/2001/10/xml-exc-c14n#WithComments">http://www.w3.org/2001/10/xml-exc-c14n#WithComments</a> - <strong><code>signatureAlgorithm</code></strong> [string] Creation and analysis. The
-asymmetric algorithm used to sign the hash of token data. Key
-transport algorithms (see <code>cryptAlgorithm</code>) are rejected.
-<br/>Possible values: - <code>RSA_SHA1</code>
-<br/>cf. <a href="http://www.w3.org/2000/09/xmldsig#rsa-sha1">http://www.w3.org/2000/09/xmldsig#rsa-sha1</a> - <strong><code>RSA_SHA256</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</a> - <code>RSA_SHA384</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha384">http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</a> - <code>RSA_SHA512</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512">http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</a> - <strong><code>digestAlgorithm</code></strong> [string] Creation and analysis. The algorithm
-used to compute the hash of token data.
-<br/>Possible values: - <code>SHA1</code>
-<br/>cf. <a href="http://www.w3.org/2000/09/xmldsig#sha1">http://www.w3.org/2000/09/xmldsig#sha1</a> - <strong><code>SHA256</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#sha256">http://www.w3.org/2001/04/xmlenc#sha256</a> - <code>SHA384</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#sha384">http://www.w3.org/2001/04/xmldsig-more#sha384</a> - <code>SHA512</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#sha512">http://www.w3.org/2001/04/xmlenc#sha512</a> - <code>RIPEMD160</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#ripemd160">http://www.w3.org/2001/04/xmlenc#ripemd160</a> - <strong><code>sessionKeyCipheringAlgorithm</code></strong> [string] Encryption only
-(creation with an encryption certificate, analysis with a decryption
-key). The symmetric algorithm used to encrypt token data with a
-generated session key.
-<br/>Possible values: - <code>AES128_GCM</code>
-<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes128-gcm">http://www.w3.org/2009/xmlenc11#aes128-gcm</a> - <code>AES192_GCM</code>
-<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes192-gcm">http://www.w3.org/2009/xmlenc11#aes192-gcm</a> - <strong><code>AES256_GCM</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes256-gcm">http://www.w3.org/2009/xmlenc11#aes256-gcm</a> - <code>TRIPLEDES_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#tripledes-cbc">http://www.w3.org/2001/04/xmlenc#tripledes-cbc</a> - <code>AES128_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes128-cbc">http://www.w3.org/2001/04/xmlenc#aes128-cbc</a> - <code>AES192_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes192-cbc">http://www.w3.org/2001/04/xmlenc#aes192-cbc</a> - <code>AES256_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes256-cbc">http://www.w3.org/2001/04/xmlenc#aes256-cbc</a> The CBC algorithms do not protect the integrity of the data: only
-the signature does. An analysis only decrypts a token encrypted with
-one of them if this option names it, even when
-<code>checkCryptingAlgorithms</code> is FALSE. - <strong><code>cryptAlgorithm</code></strong> [string] Encryption only (creation with an
-encryption certificate, analysis with a decryption key). The
-asymmetric algorithm used to encrypt the session key with the
-encryption certificate (key transport). Signature algorithms (see
-<code>signatureAlgorithm</code>) are rejected, and so is RSA 1.5
-(<a href="http://www.w3.org/2001/04/xmlenc#rsa-1_5">http://www.w3.org/2001/04/xmlenc#rsa-1_5</a>), at creation as at
-analysis.
-<br/>Possible values: - <strong><code>RSA_OAEP_MGF1P</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a></p>
+		<p>Instantiate an XMLDSigToken object.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Instantiate an XMLDSigToken object. This constructor is <code>protected</code>. To get an instance of an XMLDSigToken
+	<div class="description"><p>Instantiate an XMLDSigToken object.</p>
+<p>This constructor is <code>protected</code>. To get an instance of an XMLDSigToken
 object use one of the following <code>static</code> functions according to what the
-object is intended for: - <code>createXMLToken()</code> - <code>createSecureXMLToken()</code> - <code>analyzeXMLToken()</code> - <code>analyzeSecureXMLToken()</code> An XMLDSigToken object allows creating an XML token and also analyzing an
+object is intended for:</p>
+<ul>
+<li>
+<p><code>createXMLToken()</code></p>
+</li>
+<li>
+<p><code>createSecureXMLToken()</code></p>
+</li>
+<li>
+<p><code>analyzeXMLToken()</code></p>
+</li>
+<li>
+<p><code>analyzeSecureXMLToken()</code></p>
+</li>
+</ul>
+<p>An XMLDSigToken object allows creating an XML token and also analyzing an
 existing XML token. The type of the <code>$xmlOrData</code> parameter determine how
-the object behave. <strong>XML token creation:</strong> If <code>$xmlOrData</code> is an array (a flat or multidimensional associative
+the object behave.</p>
+<p><strong>XML token creation:</strong></p>
+<p>If <code>$xmlOrData</code> is an array (a flat or multidimensional associative
 array), the object will create an enveloping XML digital signature
 containing an XML token that holds the provided data and a timestamp
 generated automatically, with a random identifier (see <code>getTokenId()</code>).
@@ -458,40 +502,64 @@ token will be encrypted, and the <code>$cryptKeyPath</code> parameter must be
 provided too, in order to verify that the created XML Digital Signature
 is well formed. If the private key used for decryption (cf.
 <code>$cryptKeyPath</code> parameter) is protected by a password, this password may
-be passed using the <code>$cryptKeyPassword</code> parameter. <strong>XML token analysis:</strong> If <code>$xmlOrData</code> is a string, the object will treat it as an enveloping
-XML digital signature containing a token: - It will check that the signature is valid. - It will decrypt the token if this one is encrypted. - It will extract timestamp and data from the token. In this case, the <code>$xmlOrData</code> parameter and a trust anchor (the
+be passed using the <code>$cryptKeyPassword</code> parameter.</p>
+<p><strong>XML token analysis:</strong></p>
+<p>If <code>$xmlOrData</code> is a string, the object will treat it as an enveloping
+XML digital signature containing a token:</p>
+<ul>
+<li>
+<p>It will check that the signature is valid.</p>
+</li>
+<li>
+<p>It will decrypt the token if this one is encrypted.</p>
+</li>
+<li>
+<p>It will extract timestamp and data from the token.</p>
+</li>
+</ul>
+<p>In this case, the <code>$xmlOrData</code> parameter and a trust anchor (the
 options <code>caCertPath</code> and/or <code>signerCertPath</code>, see below) are required:
 without a trust anchor, no token is valid. If the XML
 token is encrypted, the <code>$cryptKeyPath</code> parameter must also be provided.
 If the private key used for encryption (cf. <code>$cryptKeyPath</code> parameter) is
 protected by a password this password may be passed using the
-<code>$cryptKeyPassword</code> parameter. When the object creates a token, it analyzes it right away to check it,
+<code>$cryptKeyPassword</code> parameter.</p>
+<p>When the object creates a token, it analyzes it right away to check it,
 and trusts the certificate of its own signing key (<code>$signCertPath</code>) for
-that: the trust options do not apply to token creation. <strong>Configuring the object:</strong> The <code>$options</code> parameter of this function allows to override the default
+that: the trust options do not apply to token creation.</p>
+<p><strong>Configuring the object:</strong></p>
+<p>The <code>$options</code> parameter of this function allows to override the default
 configuration of the object passing it the desired options via an
-associative array. Example: <code>
-$options = [
-'base64Encode' =&gt; false,
-'xmldsigNsPrefix' =&gt; ''
+associative array.</p>
+<p>Example:</p>
+<pre><code class="language-php">$options = [
+  'base64Encode' =&gt; false,
+  'xmldsigNsPrefix' =&gt; ''
 ];
-</code> Each option applies to a context: token creation (<code>createXMLToken()</code>,
+</code></pre>
+<p>Each option applies to a context: token creation (<code>createXMLToken()</code>,
 <code>createSecureXMLToken()</code>), token analysis (<code>analyzeXMLToken()</code>,
 <code>analyzeSecureXMLToken()</code>), or both. The encryption options only apply
 when an encryption certificate (creation) or a decryption key
 (analysis) is given. An unknown option, an option given out of its
 context, or an option whose value is NULL or invalid throws an
-exception. The algorithm options apply to both contexts: at creation, they are the
+exception.</p>
+<p>The algorithm options apply to both contexts: at creation, they are the
 algorithms the token is built with; at analysis, the algorithms the
 token must have been built with. A token built with other algorithms is
 rejected (<code>getError()</code> lists them), unless <code>checkSigningAlgorithms</code> or
 <code>checkCryptingAlgorithms</code> is FALSE. To analyze a token built with
-RSA-SHA1 and SHA-1: <code>
-$options = [
-'caCertPath' =&gt; ['intermediate.cert.pem', 'root.cert.pem'],
-'signatureAlgorithm' =&gt; XMLDSigToken::RSA_SHA1,
-'digestAlgorithm' =&gt; XMLDSigToken::SHA1
+RSA-SHA1 and SHA-1:</p>
+<pre><code class="language-php">$options = [
+  'caCertPath' =&gt; ['intermediate.cert.pem', 'root.cert.pem'],
+  'signatureAlgorithm' =&gt; XMLDSigToken::RSA_SHA1,
+  'digestAlgorithm' =&gt; XMLDSigToken::SHA1
 ];
-</code> Available options are the following: - <strong><code>caCertPath</code></strong> [string|array] Analysis only. The path, or the list
+</code></pre>
+<p>Available options are the following:</p>
+<ul>
+<li>
+<p><strong><code>caCertPath</code></strong> [string|array] Analysis only. The path, or the list
 of paths, of PEM files holding the trusted CA certificates. The
 signing certificate is only trusted if OpenSSL builds and verifies
 its chain, from these certificates only, up to a self-signed
@@ -508,14 +576,26 @@ Only the signing certificate is taken from the token, so a
 certificate issued by another intermediate CA of the same root is
 rejected; a certificate issued directly by a CA of the files (the
 root included) is accepted.
-<br/>Default value: none. - <strong><code>signerCertPath</code></strong> [string] Analysis only. The path to the PEM
+<br/>Default value: none.</p>
+</li>
+<li>
+<p><strong><code>signerCertPath</code></strong> [string] Analysis only. The path to the PEM
 certificate the token must be signed with (certificate pinning): the
 signing certificate must be this very certificate. Given alone, it is
 the trust anchor; given with <code>caCertPath</code>, both are required.
-<br/>Default value: none. - <strong><code>expectedSubject</code></strong> [string|array] Analysis only. The subject the
-signing certificate must have, either: - an array of the subject fields to check, as returned by
+<br/>Default value: none.</p>
+</li>
+<li>
+<p><strong><code>expectedSubject</code></strong> [string|array] Analysis only. The subject the
+signing certificate must have, either:</p>
+<ul>
+<li>
+<p>an array of the subject fields to check, as returned by
 <code>getCertSubject()</code>: <code>['O' =&gt; 'Lothbrok Ltd', 'OU' =&gt; 'Jarl Dept']</code>.
-Fields that are not given are not checked. - or a string, compared as is with the full Distinguished Name
+Fields that are not given are not checked.</p>
+</li>
+<li>
+<p>or a string, compared as is with the full Distinguished Name
 returned by <code>getCertDN()</code>. This is the OpenSSL &quot;oneline&quot; format
 (<code>openssl_x509_parse()</code>, key <code>name</code>): every field of the subject,
 in the order of the certificate, each written <code>/&lt;short name&gt;=&lt;value&gt;</code>
@@ -523,64 +603,170 @@ with no space and no escaping, e.g.
 <code>'/C=DK/ST=Jylland/L=Kattegat/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk/emailAddress=ivar@lothbrok.dk'</code>.
 It is neither the RFC 2253 form (<code>CN=...,O=...</code>) nor the form
 printed by the <code>openssl</code> command line (<code>C=DK, ST=...</code>): copy it
-from <code>getCertDN()</code> or <code>X509Cert::getDN()</code>. Character case is significant. It does not replace a trust anchor.
-<br/>Default value: none. - <strong><code>base64Encode</code></strong> [boolean] Creation only. Whether to base64 encode
+from <code>getCertDN()</code> or <code>X509Cert::getDN()</code>.</p>
+</li>
+</ul>
+<p>Character case is significant. It does not replace a trust anchor.
+<br/>Default value: none.</p>
+</li>
+<li>
+<p><strong><code>base64Encode</code></strong> [boolean] Creation only. Whether to base64 encode
 token data or not.
-<br/>Default value: <strong><code>TRUE</code></strong>. - <strong><code>xmldsigNsPrefix</code></strong> [string] Creation only. The XML namespace
+<br/>Default value: <strong><code>TRUE</code></strong>.</p>
+</li>
+<li>
+<p><strong><code>xmldsigNsPrefix</code></strong> [string] Creation only. The XML namespace
 (xmlns) prefix to use in the XML digital signature tags. Set it to
 empty string to avoid prefix usage.
-<br/>Default value: <strong><code>'ds'</code></strong>. - <strong><code>checkSigningAlgorithms</code></strong> [boolean] Analysis only. Whether to
+<br/>Default value: <strong><code>'ds'</code></strong>.</p>
+</li>
+<li>
+<p><strong><code>checkSigningAlgorithms</code></strong> [boolean] Analysis only. Whether to
 check that the algorithms used to sign the token are the expected
 ones or not. Even when FALSE, an algorithm that is not in the lists
 below is rejected.
-<br/>Default value: <strong><code>TRUE</code></strong>. - <strong><code>checkCryptingAlgorithms</code></strong> [boolean] Analysis with a decryption
+<br/>Default value: <strong><code>TRUE</code></strong>.</p>
+</li>
+<li>
+<p><strong><code>checkCryptingAlgorithms</code></strong> [boolean] Analysis with a decryption
 key only. Whether to check that the algorithms used to crypt the
 token are the expected ones or not. Even when FALSE, an algorithm
 that is not in the lists below is rejected.
-<br/>Default value: <strong><code>TRUE</code></strong>. - <strong><code>canonicalizationAlgorithm</code></strong> [string] Creation and analysis. The
+<br/>Default value: <strong><code>TRUE</code></strong>.</p>
+</li>
+<li>
+<p><strong><code>canonicalizationAlgorithm</code></strong> [string] Creation and analysis. The
 algorithm used to canonicalize the XMLdigital signature and to
 canonicalize token data before computing its hash.
-<br/>Possible values: - <strong><code>C14N</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a> - <code>C14N_COMMENTS</code>
-<br/>cf. <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments">http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments</a> - <code>EXC_C14N</code>
-<br/>cf. <a href="http://www.w3.org/2001/10/xml-exc-c14n#">http://www.w3.org/2001/10/xml-exc-c14n#</a> - <code>EXC_C14N_COMMENTS</code>
-<br/>cf. <a href="http://www.w3.org/2001/10/xml-exc-c14n#WithComments">http://www.w3.org/2001/10/xml-exc-c14n#WithComments</a> - <strong><code>signatureAlgorithm</code></strong> [string] Creation and analysis. The
+<br/>Possible values:</p>
+<ul>
+<li>
+<p><strong><code>C14N</code></strong> (Default value)
+<br/>cf. <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a></p>
+</li>
+<li>
+<p><code>C14N_COMMENTS</code>
+<br/>cf. <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments">http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments</a></p>
+</li>
+<li>
+<p><code>EXC_C14N</code>
+<br/>cf. <a href="http://www.w3.org/2001/10/xml-exc-c14n#">http://www.w3.org/2001/10/xml-exc-c14n#</a></p>
+</li>
+<li>
+<p><code>EXC_C14N_COMMENTS</code>
+<br/>cf. <a href="http://www.w3.org/2001/10/xml-exc-c14n#WithComments">http://www.w3.org/2001/10/xml-exc-c14n#WithComments</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong><code>signatureAlgorithm</code></strong> [string] Creation and analysis. The
 asymmetric algorithm used to sign the hash of token data. Key
 transport algorithms (see <code>cryptAlgorithm</code>) are rejected.
-<br/>Possible values: - <code>RSA_SHA1</code>
-<br/>cf. <a href="http://www.w3.org/2000/09/xmldsig#rsa-sha1">http://www.w3.org/2000/09/xmldsig#rsa-sha1</a> - <strong><code>RSA_SHA256</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</a> - <code>RSA_SHA384</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha384">http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</a> - <code>RSA_SHA512</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512">http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</a> - <strong><code>digestAlgorithm</code></strong> [string] Creation and analysis. The algorithm
+<br/>Possible values:</p>
+<ul>
+<li>
+<p><code>RSA_SHA1</code>
+<br/>cf. <a href="http://www.w3.org/2000/09/xmldsig#rsa-sha1">http://www.w3.org/2000/09/xmldsig#rsa-sha1</a></p>
+</li>
+<li>
+<p><strong><code>RSA_SHA256</code></strong> (Default value)
+<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</a></p>
+</li>
+<li>
+<p><code>RSA_SHA384</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha384">http://www.w3.org/2001/04/xmldsig-more#rsa-sha384</a></p>
+</li>
+<li>
+<p><code>RSA_SHA512</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512">http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong><code>digestAlgorithm</code></strong> [string] Creation and analysis. The algorithm
 used to compute the hash of token data.
-<br/>Possible values: - <code>SHA1</code>
-<br/>cf. <a href="http://www.w3.org/2000/09/xmldsig#sha1">http://www.w3.org/2000/09/xmldsig#sha1</a> - <strong><code>SHA256</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#sha256">http://www.w3.org/2001/04/xmlenc#sha256</a> - <code>SHA384</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#sha384">http://www.w3.org/2001/04/xmldsig-more#sha384</a> - <code>SHA512</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#sha512">http://www.w3.org/2001/04/xmlenc#sha512</a> - <code>RIPEMD160</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#ripemd160">http://www.w3.org/2001/04/xmlenc#ripemd160</a> - <strong><code>sessionKeyCipheringAlgorithm</code></strong> [string] Encryption only
+<br/>Possible values:</p>
+<ul>
+<li>
+<p><code>SHA1</code>
+<br/>cf. <a href="http://www.w3.org/2000/09/xmldsig#sha1">http://www.w3.org/2000/09/xmldsig#sha1</a></p>
+</li>
+<li>
+<p><strong><code>SHA256</code></strong> (Default value)
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#sha256">http://www.w3.org/2001/04/xmlenc#sha256</a></p>
+</li>
+<li>
+<p><code>SHA384</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmldsig-more#sha384">http://www.w3.org/2001/04/xmldsig-more#sha384</a></p>
+</li>
+<li>
+<p><code>SHA512</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#sha512">http://www.w3.org/2001/04/xmlenc#sha512</a></p>
+</li>
+<li>
+<p><code>RIPEMD160</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#ripemd160">http://www.w3.org/2001/04/xmlenc#ripemd160</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong><code>sessionKeyCipheringAlgorithm</code></strong> [string] Encryption only
 (creation with an encryption certificate, analysis with a decryption
 key). The symmetric algorithm used to encrypt token data with a
 generated session key.
-<br/>Possible values: - <code>AES128_GCM</code>
-<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes128-gcm">http://www.w3.org/2009/xmlenc11#aes128-gcm</a> - <code>AES192_GCM</code>
-<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes192-gcm">http://www.w3.org/2009/xmlenc11#aes192-gcm</a> - <strong><code>AES256_GCM</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes256-gcm">http://www.w3.org/2009/xmlenc11#aes256-gcm</a> - <code>TRIPLEDES_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#tripledes-cbc">http://www.w3.org/2001/04/xmlenc#tripledes-cbc</a> - <code>AES128_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes128-cbc">http://www.w3.org/2001/04/xmlenc#aes128-cbc</a> - <code>AES192_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes192-cbc">http://www.w3.org/2001/04/xmlenc#aes192-cbc</a> - <code>AES256_CBC</code>
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes256-cbc">http://www.w3.org/2001/04/xmlenc#aes256-cbc</a> The CBC algorithms do not protect the integrity of the data: only
+<br/>Possible values:</p>
+<ul>
+<li>
+<p><code>AES128_GCM</code>
+<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes128-gcm">http://www.w3.org/2009/xmlenc11#aes128-gcm</a></p>
+</li>
+<li>
+<p><code>AES192_GCM</code>
+<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes192-gcm">http://www.w3.org/2009/xmlenc11#aes192-gcm</a></p>
+</li>
+<li>
+<p><strong><code>AES256_GCM</code></strong> (Default value)
+<br/>cf. <a href="http://www.w3.org/2009/xmlenc11#aes256-gcm">http://www.w3.org/2009/xmlenc11#aes256-gcm</a></p>
+</li>
+<li>
+<p><code>TRIPLEDES_CBC</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#tripledes-cbc">http://www.w3.org/2001/04/xmlenc#tripledes-cbc</a></p>
+</li>
+<li>
+<p><code>AES128_CBC</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes128-cbc">http://www.w3.org/2001/04/xmlenc#aes128-cbc</a></p>
+</li>
+<li>
+<p><code>AES192_CBC</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes192-cbc">http://www.w3.org/2001/04/xmlenc#aes192-cbc</a></p>
+</li>
+<li>
+<p><code>AES256_CBC</code>
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#aes256-cbc">http://www.w3.org/2001/04/xmlenc#aes256-cbc</a></p>
+</li>
+</ul>
+<p>The CBC algorithms do not protect the integrity of the data: only
 the signature does. An analysis only decrypts a token encrypted with
 one of them if this option names it, even when
-<code>checkCryptingAlgorithms</code> is FALSE. - <strong><code>cryptAlgorithm</code></strong> [string] Encryption only (creation with an
+<code>checkCryptingAlgorithms</code> is FALSE.</p>
+</li>
+<li>
+<p><strong><code>cryptAlgorithm</code></strong> [string] Encryption only (creation with an
 encryption certificate, analysis with a decryption key). The
 asymmetric algorithm used to encrypt the session key with the
 encryption certificate (key transport). Signature algorithms (see
 <code>signatureAlgorithm</code>) are rejected, and so is RSA 1.5
 (<a href="http://www.w3.org/2001/04/xmlenc#rsa-1_5">http://www.w3.org/2001/04/xmlenc#rsa-1_5</a>), at creation as at
 analysis.
-<br/>Possible values: - <strong><code>RSA_OAEP_MGF1P</code></strong> (Default value)
-<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a></p>
+<br/>Possible values:</p>
+<ul>
+<li>
+<strong><code>RSA_OAEP_MGF1P</code></strong> (Default value)
+<br/>cf. <a href="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</a>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 
 							<h4>Parameters</h4>
@@ -675,12 +861,13 @@ encrypt the token.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Creates an XML token for the given user data. The created XML token can be retrieved using the fucnction <code>getXML()</code>.</p>
+		<p>Creates an XML token for the given user data.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Creates an XML token for the given user data. The created XML token can be retrieved using the fucnction <code>getXML()</code>.</p>
+	<div class="description"><p>Creates an XML token for the given user data.</p>
+<p>The created XML token can be retrieved using the fucnction <code>getXML()</code>.</p>
 </div>
 
 							<h4>Parameters</h4>
@@ -761,12 +948,13 @@ created, <code>getError()</code> tells why.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Creates a secure (crypted) XML token for the given user data. The created XML token can be retrieved using the function <code>getXML()</code>.</p>
+		<p>Creates a secure (crypted) XML token for the given user data.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Creates a secure (crypted) XML token for the given user data. The created XML token can be retrieved using the function <code>getXML()</code>.</p>
+	<div class="description"><p>Creates a secure (crypted) XML token for the given user data.</p>
+<p>The created XML token can be retrieved using the function <code>getXML()</code>.</p>
 </div>
 
 							<h4>Parameters</h4>
@@ -859,22 +1047,18 @@ created, <code>getError()</code> tells why.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Parse an XML token. The options must hold a trust anchor, <code>caCertPath</code> and/or
-<code>signerCertPath</code>; without it, <code>isSignatureValid()</code> returns FALSE. <code>
-$token = XMLDSigToken::analyzeXMLToken($xml, [
-'caCertPath' =&gt; ['path/to/intermediate.cert.pem', 'path/to/root.cert.pem'],
-]);
-</code></p>
+		<p>Parse an XML token.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Parse an XML token. The options must hold a trust anchor, <code>caCertPath</code> and/or
-<code>signerCertPath</code>; without it, <code>isSignatureValid()</code> returns FALSE. <code>
-$token = XMLDSigToken::analyzeXMLToken($xml, [
-'caCertPath' =&gt; ['path/to/intermediate.cert.pem', 'path/to/root.cert.pem'],
+	<div class="description"><p>Parse an XML token.</p>
+<p>The options must hold a trust anchor, <code>caCertPath</code> and/or
+<code>signerCertPath</code>; without it, <code>isSignatureValid()</code> returns FALSE.</p>
+<pre><code class="language-php">$token = XMLDSigToken::analyzeXMLToken($xml, [
+    'caCertPath' =&gt; ['path/to/intermediate.cert.pem', 'path/to/root.cert.pem'],
 ]);
-</code></p>
+</code></pre>
 </div>
 
 							<h4>Parameters</h4>
@@ -932,13 +1116,14 @@ why.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Parse an XML token whose data are crypted. NOTE: Uncrypted token can also be parsed using this function. The options must hold a trust anchor, <code>caCertPath</code> and/or
-<code>signerCertPath</code>; without it, <code>isSignatureValid()</code> returns FALSE.</p>
+		<p>Parse an XML token whose data are crypted.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Parse an XML token whose data are crypted. NOTE: Uncrypted token can also be parsed using this function. The options must hold a trust anchor, <code>caCertPath</code> and/or
+	<div class="description"><p>Parse an XML token whose data are crypted.</p>
+<p>NOTE: Uncrypted token can also be parsed using this function.</p>
+<p>The options must hold a trust anchor, <code>caCertPath</code> and/or
 <code>signerCertPath</code>; without it, <code>isSignatureValid()</code> returns FALSE.</p>
 </div>
 
@@ -1006,18 +1191,35 @@ why.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Indicates whether XML token signature is valid or not. This means that: - No error occured during the analysis of the XML digital signature. - No anomaly detected during the analysis of the XML digital signature. - The token hash has been verified and is valid. - The token hash signature has been verified and is valid. - The X.509 certificate included in the XML token is trusted: it is
-valid at the current date, it is the pinned certificate and/or its
-chain has been verified up to the trusted CA certificates, and its
-subject is the expected one, if any (see <code>isCertTrusted()</code>). Without a trust anchor given to the analysis, it returns FALSE. The token timestamp is not checked: use <code>isOutOfDate()</code>.</p>
+		<p>Indicates whether XML token signature is valid or not.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Indicates whether XML token signature is valid or not. This means that: - No error occured during the analysis of the XML digital signature. - No anomaly detected during the analysis of the XML digital signature. - The token hash has been verified and is valid. - The token hash signature has been verified and is valid. - The X.509 certificate included in the XML token is trusted: it is
+	<div class="description"><p>Indicates whether XML token signature is valid or not.</p>
+<p>This means that:</p>
+<ul>
+<li>
+<p>No error occured during the analysis of the XML digital signature.</p>
+</li>
+<li>
+<p>No anomaly detected during the analysis of the XML digital signature.</p>
+</li>
+<li>
+<p>The token hash has been verified and is valid.</p>
+</li>
+<li>
+<p>The token hash signature has been verified and is valid.</p>
+</li>
+<li>
+<p>The X.509 certificate included in the XML token is trusted: it is
 valid at the current date, it is the pinned certificate and/or its
 chain has been verified up to the trusted CA certificates, and its
-subject is the expected one, if any (see <code>isCertTrusted()</code>). Without a trust anchor given to the analysis, it returns FALSE. The token timestamp is not checked: use <code>isOutOfDate()</code>.</p>
+subject is the expected one, if any (see <code>isCertTrusted()</code>).</p>
+</li>
+</ul>
+<p>Without a trust anchor given to the analysis, it returns FALSE.</p>
+<p>The token timestamp is not checked: use <code>isOutOfDate()</code>.</p>
 </div>
 
 
@@ -1049,15 +1251,15 @@ subject is the expected one, if any (see <code>isCertTrusted()</code>). Without 
 	<div class="expandable-collapsedView">
 		<p>Indicates whether the X.509 certificate included in the XML token is
 trusted or not, according to the trust anchor given to the analysis
-(options <code>caCertPath</code>, <code>signerCertPath</code> and <code>expectedSubject</code>). NOTE: If not evaluated (because an error occured before), this function
-return NULL. When it returns FALSE, <code>getError()</code> gives the reason.</p>
+(options <code>caCertPath</code>, <code>signerCertPath</code> and <code>expectedSubject</code>).</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether the X.509 certificate included in the XML token is
 trusted or not, according to the trust anchor given to the analysis
-(options <code>caCertPath</code>, <code>signerCertPath</code> and <code>expectedSubject</code>). NOTE: If not evaluated (because an error occured before), this function
+(options <code>caCertPath</code>, <code>signerCertPath</code> and <code>expectedSubject</code>).</p>
+<p>NOTE: If not evaluated (because an error occured before), this function
 return NULL. When it returns FALSE, <code>getError()</code> gives the reason.</p>
 </div>
 
@@ -1089,19 +1291,17 @@ otherwise, NULL if cannot be evaluated.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Indicates whether the XML token is out of date or not. The token is out of date if its timestamp is more than <code>$ttl</code> seconds
-in the past, or more than <code>DESYNC_TOLERANCE</code> seconds in the future
-(clocks of sender and receiver out of sync), or if it has no valid
-timestamp. NOTE: A token that is not out of date can still be a replayed one: see
-<code>getTokenId()</code>.</p>
+		<p>Indicates whether the XML token is out of date or not.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Indicates whether the XML token is out of date or not. The token is out of date if its timestamp is more than <code>$ttl</code> seconds
+	<div class="description"><p>Indicates whether the XML token is out of date or not.</p>
+<p>The token is out of date if its timestamp is more than <code>$ttl</code> seconds
 in the past, or more than <code>DESYNC_TOLERANCE</code> seconds in the future
 (clocks of sender and receiver out of sync), or if it has no valid
-timestamp. NOTE: A token that is not out of date can still be a replayed one: see
+timestamp.</p>
+<p>NOTE: A token that is not out of date can still be a replayed one: see
 <code>getTokenId()</code>.</p>
 </div>
 
@@ -1140,13 +1340,13 @@ timestamp. NOTE: A token that is not out of date can still be a replayed one: se
 
 
 	<div class="expandable-collapsedView">
-		<p>Indicates whether token data is encrypted or not. NOTE: If not evaluated (because an error occured before), this function
-return NULL.</p>
+		<p>Indicates whether token data is encrypted or not.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Indicates whether token data is encrypted or not. NOTE: If not evaluated (because an error occured before), this function
+	<div class="description"><p>Indicates whether token data is encrypted or not.</p>
+<p>NOTE: If not evaluated (because an error occured before), this function
 return NULL.</p>
 </div>
 
@@ -1179,14 +1379,14 @@ NULL if cannot be evaluated.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Indicates whether the digest of token data (a hash) has been verified and
-is valid or not. NOTE: If not evaluated (because an error occured before), this function
-return NULL.</p>
+is valid or not.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether the digest of token data (a hash) has been verified and
-is valid or not. NOTE: If not evaluated (because an error occured before), this function
+is valid or not.</p>
+<p>NOTE: If not evaluated (because an error occured before), this function
 return NULL.</p>
 </div>
 
@@ -1219,14 +1419,14 @@ FALSE otherwise, NULL if cannot be evaluated.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Indicates whether signature of the digest of the token data has been
-verified and is valid or not. NOTE: If not evaluated (because an error occured before), this function
-return NULL.</p>
+verified and is valid or not.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Indicates whether signature of the digest of the token data has been
-verified and is valid or not. NOTE: If not evaluated (because an error occured before), this function
+verified and is valid or not.</p>
+<p>NOTE: If not evaluated (because an error occured before), this function
 return NULL.</p>
 </div>
 
@@ -1293,15 +1493,13 @@ is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Get the user data contained in the XML token. The data can only be trusted if <code>isSignatureValid()</code> returns TRUE (and
-the token is neither out of date nor replayed). They are only read
-once the digest, the signature and the signing certificate have been
-verified.</p>
+		<p>Get the user data contained in the XML token.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Get the user data contained in the XML token. The data can only be trusted if <code>isSignatureValid()</code> returns TRUE (and
+	<div class="description"><p>Get the user data contained in the XML token.</p>
+<p>The data can only be trusted if <code>isSignatureValid()</code> returns TRUE (and
 the token is neither out of date nor replayed). They are only read
 once the digest, the signature and the signing certificate have been
 verified.</p>
@@ -1370,21 +1568,13 @@ not available.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Get the identifier of the XML token. Each token created by this class holds a random identifier of 128 bits
-(32 hexadecimal characters), generated with <code>random_bytes()</code> and
-covered by the signature. A valid token can be submitted again for as
-long as <code>isOutOfDate()</code> accepts it: the class keeps no list of the
-tokens it has analyzed, so the caller must refuse a token whose
-identifier it has already accepted. A token is accepted from
-<code>DESYNC_TOLERANCE</code> seconds before its timestamp to <code>$ttl</code> seconds after
-it (see <code>isOutOfDate()</code>): keep each accepted identifier for at least
-<code>$ttl + XMLDSigToken::DESYNC_TOLERANCE</code> seconds after accepting it. A token without identifier (as created by the 0.x versions) is not
-valid.</p>
+		<p>Get the identifier of the XML token.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Get the identifier of the XML token. Each token created by this class holds a random identifier of 128 bits
+	<div class="description"><p>Get the identifier of the XML token.</p>
+<p>Each token created by this class holds a random identifier of 128 bits
 (32 hexadecimal characters), generated with <code>random_bytes()</code> and
 covered by the signature. A valid token can be submitted again for as
 long as <code>isOutOfDate()</code> accepts it: the class keeps no list of the
@@ -1392,7 +1582,8 @@ tokens it has analyzed, so the caller must refuse a token whose
 identifier it has already accepted. A token is accepted from
 <code>DESYNC_TOLERANCE</code> seconds before its timestamp to <code>$ttl</code> seconds after
 it (see <code>isOutOfDate()</code>): keep each accepted identifier for at least
-<code>$ttl + XMLDSigToken::DESYNC_TOLERANCE</code> seconds after accepting it. A token without identifier (as created by the 0.x versions) is not
+<code>$ttl + XMLDSigToken::DESYNC_TOLERANCE</code> seconds after accepting it.</p>
+<p>A token without identifier (as created by the 0.x versions) is not
 valid.</p>
 </div>
 
@@ -1778,35 +1969,26 @@ otherwise.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Check that the issuer information of the X.509 certificate that is
-included in the XML token matches the expected one. The expected issuer information must me passed as an array to the
-function: <code>
-$ExpectedIssuerInfo = [
-'C' =&gt; 'DK',
-'ST' =&gt; 'Jylland',
-'O' =&gt; 'Lothbrok Ltd',
-'OU' =&gt; 'Jarl Dept',
-'CN' =&gt; 'www.Lothbrok.dk',
-'emailAddress' =&gt; '<a href="mailto:ragnar@Lothbrok.dk">ragnar@Lothbrok.dk</a>'
-];
-</code> NOTE: Character case of data is significant. NOTE: This only compares names, which any certificate can copy: it
-tells nothing about who issued the certificate. <code>isSignatureValid()</code>
-verifies the certificate against the trust anchor of the analysis.</p>
+included in the XML token matches the expected one.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Check that the issuer information of the X.509 certificate that is
-included in the XML token matches the expected one. The expected issuer information must me passed as an array to the
-function: <code>
-$ExpectedIssuerInfo = [
-'C' =&gt; 'DK',
-'ST' =&gt; 'Jylland',
-'O' =&gt; 'Lothbrok Ltd',
-'OU' =&gt; 'Jarl Dept',
-'CN' =&gt; 'www.Lothbrok.dk',
-'emailAddress' =&gt; '<a href="mailto:ragnar@Lothbrok.dk">ragnar@Lothbrok.dk</a>'
+included in the XML token matches the expected one.</p>
+<p>The expected issuer information must me passed as an array to the
+function:</p>
+<pre><code class="language-php">$ExpectedIssuerInfo = [
+    'C' =&gt; 'DK',
+    'ST' =&gt; 'Jylland',
+    'O' =&gt; 'Lothbrok Ltd',
+    'OU' =&gt; 'Jarl Dept',
+    'CN' =&gt; 'www.Lothbrok.dk',
+    'emailAddress' =&gt; 'ragnar@Lothbrok.dk'
 ];
-</code> NOTE: Character case of data is significant. NOTE: This only compares names, which any certificate can copy: it
+</code></pre>
+<p>NOTE: Character case of data is significant.</p>
+<p>NOTE: This only compares names, which any certificate can copy: it
 tells nothing about who issued the certificate. <code>isSignatureValid()</code>
 verifies the certificate against the trust anchor of the analysis.</p>
 </div>
@@ -1856,23 +2038,20 @@ expected information, FALSE otherwise.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Check that the X.509 certificate included in the XML token comes from the
-expected CA. Note that more than one CA certificate can give a positive result, some
-certificates re-issue signing certificates after having only changed the
-expiration dates. Note that it also works with self-signed certificates. In this case,
-passes the X.509 certificate that is supposed been included in the XML
-token to the function. Only the link between the certificate and the given CA certificate is
-checked (see <code>X509Cert::isValidCA()</code>). <code>isSignatureValid()</code> verifies the
-whole chain against the trust anchor of the analysis.</p>
+expected CA.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Check that the X.509 certificate included in the XML token comes from the
-expected CA. Note that more than one CA certificate can give a positive result, some
+expected CA.</p>
+<p>Note that more than one CA certificate can give a positive result, some
 certificates re-issue signing certificates after having only changed the
-expiration dates. Note that it also works with self-signed certificates. In this case,
+expiration dates.</p>
+<p>Note that it also works with self-signed certificates. In this case,
 passes the X.509 certificate that is supposed been included in the XML
-token to the function. Only the link between the certificate and the given CA certificate is
+token to the function.</p>
+<p>Only the link between the certificate and the given CA certificate is
 checked (see <code>X509Cert::isValidCA()</code>). <code>isSignatureValid()</code> verifies the
 whole chain against the trust anchor of the analysis.</p>
 </div>
@@ -1923,16 +2102,13 @@ from the token).</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Utility function for modifying a node of an XML content. The XML content is loaded as an XML token is: a document with a
-document type declaration (DOCTYPE), or not encoded in UTF-8, is
-refused before it is parsed, and the parser never accesses the network
-(see <code>_loadXML()</code>). A refused or invalid document is left unchanged and
-the function returns FALSE.</p>
+		<p>Utility function for modifying a node of an XML content.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Utility function for modifying a node of an XML content. The XML content is loaded as an XML token is: a document with a
+	<div class="description"><p>Utility function for modifying a node of an XML content.</p>
+<p>The XML content is loaded as an XML token is: a document with a
 document type declaration (DOCTYPE), or not encoded in UTF-8, is
 refused before it is parsed, and the parser never accesses the network
 (see <code>_loadXML()</code>). A refused or invalid document is left unchanged and
@@ -2000,13 +2176,13 @@ modification or deletion, FALSE otherwise.</p>
 
 
 	<div class="expandable-collapsedView">
-		<p>Return the XML token in a pretty readable format. This function is intented for display purpose only. Use the <code>getXML()</code>
-function to obtain the raw XML token you want to work with.</p>
+		<p>Return the XML token in a pretty readable format.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
-	<div class="description"><p>Return the XML token in a pretty readable format. This function is intented for display purpose only. Use the <code>getXML()</code>
+	<div class="description"><p>Return the XML token in a pretty readable format.</p>
+<p>This function is intented for display purpose only. Use the <code>getXML()</code>
 function to obtain the raw XML token you want to work with.</p>
 </div>
 
@@ -2038,18 +2214,14 @@ function to obtain the raw XML token you want to work with.</p>
 
 	<div class="expandable-collapsedView">
 		<p>Utility function that returns information on the XML token in HTML
-format. The output shows what the token carries, valid or not: data,
-certificate fields and error messages come from whoever sent the token.
-Every value is therefore escaped with <code>htmlspecialchars()</code>
-(<code>ENT_QUOTES | ENT_SUBSTITUTE</code>, UTF-8), the outputs of <code>var_dump()</code>
-included, so that it can be displayed as is in an HTML page. The output
-loads no external resource (script, style sheet, image).</p>
+format.</p>
 
 	</div>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Utility function that returns information on the XML token in HTML
-format. The output shows what the token carries, valid or not: data,
+format.</p>
+<p>The output shows what the token carries, valid or not: data,
 certificate fields and error messages come from whoever sent the token.
 Every value is therefore escaped with <code>htmlspecialchars()</code>
 (<code>ENT_QUOTES | ENT_SUBSTITUTE</code>, UTF-8), the outputs of <code>var_dump()</code>

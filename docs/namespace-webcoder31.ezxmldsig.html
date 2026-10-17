@@ -82,25 +82,12 @@
 
 			<tr>
 				<td class="table-cell" colspan="1"><a href="webcoder31.ezxmldsig.X509Cert.html">X509Cert</a></td>
-				<td class="table-cell"><p>Analyze an X.509 certificate. The <code>X509Cert</code> class provides a set of convenient methods for extracting
-essential information contained in an X.509 certificate and for performing
-some useful checkings. Every cryptographic check (signature of the
-certificate, chain of trust, validity dates) is performed by OpenSSL. This
-class is used internaly by the <code>XMLDSigToken</code> class.</p>
+				<td class="table-cell"><p>Analyze an X.509 certificate.</p>
 </td>
 			</tr>
 			<tr>
 				<td class="table-cell" colspan="1"><a href="webcoder31.ezxmldsig.XMLDSigToken.html">XMLDSigToken</a></td>
-				<td class="table-cell"><p>Build or analyze an XML token. An XML token is an enveloping XML Digital Signature (cf. RFC 3275)
-containing signed and timestamped user data. These data may also be
-encrypted. In this case we talk about Secure XML token. <strong>This class uses the following default algorithms to operate:</strong> - Algorithm used to canonalize data before signing is:
-<a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">http://www.w3.org/TR/2001/REC-xml-c14n-20010315</a>. - Algorithm used to generate the signature is:
-<a href="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256">http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</a>. - Algorithm used to compute the hash of token data is:
-<a href="http://www.w3.org/2001/04/xmlenc#sha256">http://www.w3.org/2001/04/xmlenc#sha256</a>. - Algorithm used to encode data's values is: Base64. The analysis expects these algorithms unless its options name others (see
-<code>__construct()</code>), and it requires a trust anchor: the CA certificates
-and/or the pinned certificate the signing certificate is verified against.
-Without it, no token is valid. <strong>An XML token looks like this:</strong> <code></p>
-<?xml version="1.0"?>
+				<td class="table-cell"><p>Build or analyze an XML token.</p>
 </td>
 			</tr>
 
