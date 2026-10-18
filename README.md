@@ -405,6 +405,8 @@ A token without identifier, as created by the 0.x versions, is rejected (``Token
 
 ### Audience and expiry
 
+Available since version 1.1.
+
 A token signed by a trusted issuer is valid for **every** receiver that trusts this issuer: a token issued for one application is accepted by another one, unless the token says who it is addressed to. Two creation options, both covered by the signature, address this, with the matching checks at analysis.
 
 **Audience.** The option ``audience`` (a string, or a list of strings) names the receivers the token is addressed to: application names, URLs, any value the issuer and each receiver agree on. Each receiver gives its own with ``expectedAudience``, and ``isSignatureValid()`` checks it:

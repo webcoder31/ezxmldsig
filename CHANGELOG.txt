@@ -1,5 +1,12 @@
-Unreleased
-----------
+1.1.0 (2026-10-18)
+-------------------
+In short: a token can name the receivers it is addressed to and the date
+after which it is out of date, and the demo replaces examples/. The new
+options are optional, and tokens without them are analyzed as before. Two
+changes only concern tokens that are not valid: their data are no longer
+read when their content is malformed, and getTimestamp() returns NULL for
+them. A receiver still in 1.0 ignores the audience and the expiry.
+
 - Add the audience and the expiry of a token, both written in the token and
   covered by the signature (README, section "Audience and expiry"):
   - creation option `audience` (a string or a list of strings): the
