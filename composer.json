@@ -1,14 +1,15 @@
 {
   "name": "webcoder31/ezxmldsig",
   "type": "library",
-  "description": "An easy-to-use set of PHP classes for common use cases of XML Digital Signatures",
+  "description": "Signed and encrypted XML tokens (XML Digital Signature, XML Encryption) for PHP",
   "license": "CeCILL-C",
   "keywords": [
     "xml digital signature",
+    "xml encryption",
     "single sign on",
     "sso",
     "token based authentication",
-    "document electronic signature",
+    "signed token",
     "xmldsig",
     "xmlseclibs"
   ],

@@ -1,8 +1,35 @@
-# EZXMLDSIG: An easy-to-use set of PHP classes for common use cases of XML Digital Signatures
+# EZXMLDSIG: Signed and encrypted XML tokens for PHP
 
-Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** is designed to make it easy to use XML digital signatures for various purposes such as Single Sign On login, token based authentication, document electronic signature, data integrity guarantee, and so on.
+Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** creates and verifies XML tokens: enveloping XML digital signatures that carry timestamped user data (a PHP associative array), optionally encrypted. Use them for token based authentication, Single Sign On, or to transmit data whose integrity and origin, and confidentiality when they are encrypted, are protected by the token itself.
+
+The library signs its own tokens only. It does not sign existing XML documents in place, parts of them, or external files: for these, use **xmlseclibs** directly, or a format designed for document signatures such as XAdES or PAdES.
 
 The author of the **ezxmldsig** library is Thierry Thiers.
+
+
+## Contents
+
+* [Requirements](#requirements)
+* [How to Install?](#how-to-install)
+* [What's in the box?](#whats-in-the-box)
+    * [XMLDSigToken class](#xmldsigtoken-class)
+    * [X509Cert class](#x509cert-class)
+* [How to use?](#how-to-use)
+    * [Creating a signed XML token](#xmldsigtoken-creating-a-signed-xml-token)
+    * [Creating a signed XML token with encrypted user data](#xmldsigtoken-creating-a-signed-xml-token-with-encrypted-user-data)
+    * [Checking an XML token](#xmldsigtoken-checking-an-xml-token)
+    * [Replay](#replay)
+    * [XML parsing](#xml-parsing)
+    * [Trust anchor](#trust-anchor)
+    * [Encryption](#encryption)
+    * [Certificates and keys](#certificates-and-keys)
+    * [Options](#options)
+    * [Upgrading from 0.x](#upgrading-from-0x)
+* [Demo](#demo)
+* [Tests](#tests)
+* [Documentation](#documentation)
+* [Security](#security)
+* [How to Contribute?](#how-to-contribute)
 
 
 ## Requirements
@@ -440,6 +467,100 @@ The token data are encrypted with a session key generated for each token, and th
   ];
   $token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword, $options);
   ```
+
+
+### Certificates and keys
+
+A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signature algorithms are RSA ones and the session key is encrypted with RSA-OAEP, so EC and DSA keys are not supported.
+
+| Certificate | Who holds the private key | Who needs the certificate | Required |
+|---|---|---|---|
+| Signing certificate | The sender, to sign | The sender (it is copied into each token); the recipient when it pins it (``signerCertPath``) | Always |
+| CA certificates | The CA that issues the signing certificate | The recipient (``caCertPath``) | Unless the signing certificate is pinned |
+| Encryption certificate | The recipient, to decrypt | The sender, to encrypt | For encrypted tokens only |
+
+**What the library checks.** The signing certificate must be valid at the current date and, if it has a ``keyUsage`` extension, allow ``digitalSignature`` or ``nonRepudiation``. With ``caCertPath``, OpenSSL also checks every certificate of the chain: validity dates, signature, and, for each issuer, ``basicConstraints`` with ``CA:TRUE`` and a ``keyUsage`` that allows ``keyCertSign`` (see [Trust anchor](#trust-anchor)). The encryption certificate is not checked: give it a ``keyUsage`` that allows ``keyEncipherment`` all the same. Use keys of 2048 bits at least; the library does not enforce a size.
+
+**The subject fields.** The subject of a certificate is a Distinguished Name made of fields. The library requires none of them, but the recipient can only tell the expected sender from the other holders of certificates of the same CA by these fields, with ``expectedSubject``:
+
+| Field | Name | Usual content |
+|---|---|---|
+| ``C`` | Country | Two-letter country code (``DK``) |
+| ``ST`` | State or province | Region (``Jylland``) |
+| ``L`` | Locality | City (``Kattegat``) |
+| ``O`` | Organization | Legal name of the organization (``Lothbrok Ltd``) |
+| ``OU`` | Organizational unit | Department or service within the organization (``Signature Dept``) |
+| ``CN`` | Common name | Name of the certificate holder: a person, a service or a host name (``www.lothbrok.dk``) |
+| ``emailAddress`` | Email address | Contact address (``ivar@lothbrok.dk``) |
+
+``O`` and ``OU`` are the fields the recipient usually checks: ``['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']`` accepts the certificates of this department of this organization, and those only. Give each sender a subject that sets it apart from the other holders of certificates of the same CA (a distinct ``OU`` or ``CN``), and use the same values, character case included, in the certificate and in ``expectedSubject``. A field repeated in the subject (two ``OU``, for instance) is an array of its values in ``getCertSubject()``.
+
+**Creating them with OpenSSL.** The commands below create a root CA, an intermediate CA issued by the root, a signing certificate and an encryption certificate issued by the intermediate CA, valid for 2 years. Adapt the subjects and the durations, and keep the private keys out of any repository. The extensions go into a file, here ``ext.cnf``:
+
+```ini
+[root]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+
+[intermediate]
+basicConstraints = critical, CA:TRUE, pathlen:0
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+
+[sign]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, nonRepudiation
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+
+[crypt]
+basicConstraints = CA:FALSE
+keyUsage = critical, keyEncipherment, dataEncipherment
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+```
+
+```sh
+# Root CA: a self-signed certificate.
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out root.key.pem
+openssl req -new -x509 -sha256 -days 730 -key root.key.pem \
+    -subj "/C=DK/O=Lothbrok Ltd/CN=Lothbrok Root CA" \
+    -config ext.cnf -extensions root -out root.cert.pem
+
+# Intermediate CA, issued by the root.
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out intermediate.key.pem
+openssl req -new -key intermediate.key.pem \
+    -subj "/C=DK/O=Lothbrok Ltd/CN=Lothbrok Intermediate CA" -out intermediate.csr
+openssl x509 -req -in intermediate.csr -sha256 -days 730 \
+    -CA root.cert.pem -CAkey root.key.pem -CAcreateserial \
+    -extfile ext.cnf -extensions intermediate -out intermediate.cert.pem
+
+# Signing certificate of the sender, with a key protected by a password
+# (the $signKeyPassword argument of the library).
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 \
+    -aes-256-cbc -pass pass:signKeyPassword -out sign.key.pem
+openssl req -new -key sign.key.pem -passin pass:signKeyPassword \
+    -subj "/C=DK/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk" -out sign.csr
+openssl x509 -req -in sign.csr -sha256 -days 730 \
+    -CA intermediate.cert.pem -CAkey intermediate.key.pem -CAcreateserial \
+    -extfile ext.cnf -extensions sign -out sign.cert.pem
+
+# Encryption certificate of the recipient.
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 \
+    -aes-256-cbc -pass pass:cryptKeyPassword -out crypt.key.pem
+openssl req -new -key crypt.key.pem -passin pass:cryptKeyPassword \
+    -subj "/C=DK/O=Lothbrok Ltd/OU=Cryptography Dept/CN=www.lothbrok.dk" -out crypt.csr
+openssl x509 -req -in crypt.csr -sha256 -days 730 \
+    -CA intermediate.cert.pem -CAkey intermediate.key.pem -CAcreateserial \
+    -extfile ext.cnf -extensions crypt -out crypt.cert.pem
+
+# Check the chains.
+openssl verify -CAfile root.cert.pem -untrusted intermediate.cert.pem sign.cert.pem crypt.cert.pem
+```
+
+The recipient then trusts the sender with ``'caCertPath' => ['intermediate.cert.pem', 'root.cert.pem']`` and ``'expectedSubject' => ['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']``. Without a CA, a self-signed signing certificate pinned by the recipient (``signerCertPath``) is enough: create it like the root above, with the extensions of ``[sign]``. ``bin/gen-test-certs`` creates the certificates of the tests and of the demo the same way.
 
 
 ### Options

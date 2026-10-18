@@ -26,6 +26,13 @@ Unreleased
   outdated vendor/ as it was.
 - Add `.gitattributes`: the archives Composer installs leave out `demo/`,
   `tests/`, `docs/`, `bin/` and the development configuration files.
+- The README and the description of the Composer package state what the
+  library does: it signs, and optionally encrypts, its own XML tokens, not
+  existing XML documents or files (the keyword "document electronic
+  signature" is removed). The README gains a table of contents and a section
+  "Certificates and keys": the certificates a token involves, what the
+  library checks, the fields of a subject and the OpenSSL commands to create
+  the certificates.
 
 1.0.0 (2026-10-17)
 -------------------
