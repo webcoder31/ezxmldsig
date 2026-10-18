@@ -62,6 +62,8 @@ final class Receiver
             'subjectO' => Certs::EXPECTED_SUBJECT['O'],
             'subjectOU' => Certs::EXPECTED_SUBJECT['OU'],
             'decrypt' => true,
+            'audience' => true,
+            'expectedAudience' => Issuer::DEFAULT_AUDIENCE,
             'ttl' => 120,
             'replay' => true,
             'algorithms' => $algorithms,
@@ -79,6 +81,8 @@ final class Receiver
      *       subject fields (`expectedSubject`);
      *     - decrypt (bool): give the decryption key
      *       (`analyzeSecureXMLToken()`);
+     *     - audience (bool), expectedAudience (string): the audience of this
+     *       receiver (`expectedAudience`);
      *     - ttl (int): time to live of `isOutOfDate()`, in seconds;
      *     - replay (bool): refuse a token identifier already accepted;
      *     - algorithms (array): expected algorithms, option => constant name.
@@ -96,7 +100,7 @@ final class Receiver
             throw new \InvalidArgumentException('Unknown receiver setting: ' . implode(', ', $unknown) . '.');
         }
         $config += $defaults;
-        foreach (['ca', 'pin', 'subject', 'decrypt', 'replay'] as $name)
+        foreach (['ca', 'pin', 'subject', 'decrypt', 'audience', 'replay'] as $name)
         {
             if (!is_bool($config[$name]))
             {
@@ -109,6 +113,14 @@ final class Receiver
             {
                 throw new \InvalidArgumentException('Receiver setting "' . $name . '" must be a string.');
             }
+        }
+        if (!is_string($config['expectedAudience']) || strlen($config['expectedAudience']) > Issuer::MAX_AUDIENCE_LENGTH || !preg_match('//u', $config['expectedAudience']))
+        {
+            throw new \InvalidArgumentException('Receiver setting "expectedAudience" must be a string of at most ' . Issuer::MAX_AUDIENCE_LENGTH . ' bytes.');
+        }
+        if ($config['audience'] && (trim($config['expectedAudience']) !== $config['expectedAudience'] || '' === $config['expectedAudience'] || preg_match('/[\x00-\x1F\x7F]/', $config['expectedAudience'])))
+        {
+            throw new \InvalidArgumentException('The expected audience must be a non-empty name, without surrounding spaces or control characters.');
         }
         if (!is_int($config['ttl']) || $config['ttl'] < self::MIN_TTL || $config['ttl'] > self::MAX_TTL)
         {
@@ -175,6 +187,10 @@ final class Receiver
         {
             $options['expectedSubject'] = $this->expectedSubject();
         }
+        if ($this->config['audience'])
+        {
+            $options['expectedAudience'] = $this->config['expectedAudience'];
+        }
 
         return $options + Algorithms::toOptions($this->config['algorithms'], $this->config['decrypt']);
     }
@@ -188,12 +204,20 @@ final class Receiver
      */
     public function analyze($xml)
     {
-        if ($this->config['decrypt'])
+        try
         {
-            return XMLDSigToken::analyzeSecureXMLToken($xml, Certs::path('crypt.key.pem'), Certs::CRYPT_KEY_PASSWORD, $this->options());
-        }
+            if ($this->config['decrypt'])
+            {
+                return XMLDSigToken::analyzeSecureXMLToken($xml, Certs::path('crypt.key.pem'), Certs::CRYPT_KEY_PASSWORD, $this->options());
+            }
 
-        return XMLDSigToken::analyzeXMLToken($xml, $this->options());
+            return XMLDSigToken::analyzeXMLToken($xml, $this->options());
+        }
+        catch (\Exception $e)
+        {
+            // An option the library refuses: the request is invalid.
+            throw new \InvalidArgumentException($e->getMessage());
+        }
     }
 
     /**
@@ -233,7 +257,7 @@ final class Receiver
             !$signatureValid ? 'skip' : ($fresh ? 'pass' : 'fail'),
             'isOutOfDate(' . $ttl . ') — ' . (!$signatureValid || is_null($age)
                 ? 'checked once the library has accepted the token.'
-                : self::describeAge($age, $ttl)),
+                : self::describeAge($age, $ttl) . self::describeExpiry($token->getExpiry())),
             $signatureValid && !$fresh ? self::OUT_OF_DATE : null
         );
 
@@ -272,6 +296,8 @@ final class Receiver
                 'encrypted' => $token->isDataEncrypted(),
                 'timestamp' => $token->getTimestamp(),
                 'tokenId' => $token->getTokenId(),
+                'audience' => $token->getAudience(),
+                'expiry' => $token->getExpiry(),
                 'certSubject' => $token->getCertDN(),
                 'certIssuer' => self::formatName($token->getCertIssuer()),
                 'certValidTo' => $token->getCertValidTo() ?: null,
@@ -307,8 +333,9 @@ final class Receiver
             return 0 === strpos($anomaly, 'Unauthorized ');
         }));
         $contentAnomalies = array_values(array_filter($anomalies, function ($anomaly) {
-            return 1 === preg_match('/\AToken (timestamp|identifier|data) /', $anomaly);
+            return 1 === preg_match('/\AToken (timestamp|identifier|expiry|audience|data) /', $anomaly);
         }));
+        $audienceError = !is_null($error) && 1 === preg_match('/\AToken is (not )?addressed to /', $error);
 
         // The analysis stops at the first error (an exception); anomalies
         // are collected and reported together. Before the digest is computed,
@@ -385,10 +412,52 @@ final class Receiver
         $contentFailed = !empty($contentAnomalies) || 'Malformed token!' === $error;
         $steps[] = self::step('content', 'Token content', 'library',
             !$reached ? 'skip' : ($contentFailed ? 'fail' : 'pass'),
-            'TokenTimestamp, TokenId (32 hexadecimal characters) and TokenData are well formed.',
+            'TokenTimestamp, TokenId (32 hexadecimal characters), TokenExpiry and TokenAudience if any, and TokenData are well formed.',
             $reached && $contentFailed ? ('Malformed token!' === $error ? $error : implode(' ', $contentAnomalies)) : null);
 
+        // The audience is checked once the content is read, before the data.
+        $reached = $reached && !$contentFailed;
+        if (!$reached)
+        {
+            $status = 'skip';
+        }
+        elseif ($audienceError)
+        {
+            $status = 'fail';
+        }
+        elseif (!$this->config['audience'] && is_null($token->getAudience()))
+        {
+            $status = 'off';
+        }
+        else
+        {
+            $status = 'pass';
+        }
+        $steps[] = self::step('audience', 'Audience', 'library', $status,
+            'off' === $status
+                ? 'Not checked: no expectedAudience, and the token names no audience (as tokens of 1.0). Such a token is accepted by every receiver that trusts the issuer.'
+                : ($this->config['audience']
+                    ? 'The token must be addressed to "' . $this->config['expectedAudience'] . '" (expectedAudience).'
+                    : 'No expectedAudience: a token that names an audience is refused.'),
+            'fail' === $status ? $error : null);
+
         return $steps;
+    }
+
+    /**
+     * Describes the expiry of a token, if it has one.
+     */
+    private static function describeExpiry($expiry)
+    {
+        if (is_null($expiry))
+        {
+            return ' No expiry set by the issuer.';
+        }
+        $left = \DateTime::createFromFormat(XMLDSigToken::TOKEN_TIMESTAMP_FORMAT, $expiry, new \DateTimeZone('UTC'))->getTimestamp() - time();
+
+        return $left < 0
+            ? ' Expiry set by the issuer passed ' . self::describeSeconds(-$left) . ' ago.'
+            : ' Expiry set by the issuer in ' . self::describeSeconds($left) . '.';
     }
 
     /**
@@ -515,6 +584,10 @@ final class Receiver
             }
             $options[] = "    'expectedSubject' => [" . implode(', ', $fields) . "],";
         }
+        if ($this->config['audience'])
+        {
+            $options[] = "    'expectedAudience' => " . var_export($this->config['expectedAudience'], true) . ",";
+        }
         foreach (Algorithms::toOptions($this->config['algorithms'], $this->config['decrypt']) as $option => $uri)
         {
             $options[] = "    '" . $option . "' => XMLDSigToken::" . Algorithms::nameOf($uri) . ",";
@@ -542,12 +615,13 @@ final class Receiver
             $lines[] = '$token = XMLDSigToken::analyzeXMLToken($xml, $options);';
         }
         $lines[] = '';
-        $lines[] = '// 1. Structure, algorithms, digest, signature, trust (and decryption).';
+        $lines[] = '// 1. Structure, algorithms, digest, signature, trust (and decryption),';
+        $lines[] = '//    and audience.';
         $lines[] = 'if (!$token->isSignatureValid()) {';
         $lines[] = '    reject($token->getError());';
         $lines[] = '}';
         $lines[] = '';
-        $lines[] = '// 2. Freshness: up to you.';
+        $lines[] = '// 2. Freshness: up to you. Also checks the expiry the issuer set, if any.';
         $lines[] = 'if ($token->isOutOfDate(' . $this->config['ttl'] . ')) {';
         $lines[] = "    reject('" . self::OUT_OF_DATE . "');";
         $lines[] = '}';

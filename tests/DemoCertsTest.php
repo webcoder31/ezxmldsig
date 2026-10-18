@@ -33,7 +33,9 @@ class DemoCertsTest extends TestCase
             $data,
             Certs::path('sign.key.pem'),
             Certs::path('sign.cert.pem'),
-            Certs::SIGN_KEY_PASSWORD
+            Certs::SIGN_KEY_PASSWORD,
+            // Addressed to the receiver of the demo, as its issuer does.
+            ['audience' => Issuer::DEFAULT_AUDIENCE]
         )->getXML();
 
         $token = XMLDSigToken::analyzeXMLToken($sig, Receiver::fromArray([])->options());

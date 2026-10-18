@@ -67,6 +67,20 @@ final class AttackLab
             'ghsa' => null,
             'history' => null,
         ],
+        'other-audience' => [
+            'title' => 'Token for another receiver',
+            'summary' => 'Submit to this receiver a token the issuer addressed to another one, "mail": same issuer, same key, same data.',
+            'base' => 'plain',
+            'ghsa' => null,
+            'history' => 'In 1.0, a token named no audience: a token issued for one receiver was accepted by every receiver that trusted the issuer.',
+        ],
+        'past-expiry' => [
+            'title' => 'Past its expiry',
+            'summary' => 'Submit a token whose expiry, set by the issuer, has passed, although the time to live of the receiver would still accept it.',
+            'base' => 'plain',
+            'ghsa' => null,
+            'history' => 'In 1.0, only the receiver set the time to live: the issuer could not shorten it.',
+        ],
         'doctype' => [
             'title' => 'DOCTYPE and entities',
             'summary' => 'Add a document type declaration with nested entities (billion laughs) and an external entity that reads a local file.',
@@ -100,6 +114,9 @@ final class AttackLab
     /** The value the data-forging attacks write. */
     const FORGED_ROLE = 'King';
 
+    /** The audience the "other-audience" attack addresses its token to. */
+    const OTHER_AUDIENCE = 'mail';
+
     /** The value the "script" attack adds to the data. */
     const SCRIPT_VALUE = '<img src=x onerror="alert(document.domain)"><script>alert(1)</script>';
 
@@ -112,16 +129,23 @@ final class AttackLab
     /** @var array Algorithms of a token created for the lab. */
     private $algorithms;
 
+    /** @var array|null Audiences and validity of a token created for the
+    lab (see Issuer::create()). */
+    private $claims;
+
     /**
      * @param Receiver $receiver The receiver that analyzes the tokens.
      * @param array $data The user data of the tokens the lab creates.
      * @param array $algorithms Their algorithms (see Issuer::create()).
+     * @param array|null $claims Their audiences and validity, NULL for the
+     *     default ones (see Issuer::create()).
      */
-    public function __construct(Receiver $receiver, array $data = Issuer::DEFAULT_DATA, array $algorithms = [])
+    public function __construct(Receiver $receiver, array $data = Issuer::DEFAULT_DATA, array $algorithms = [], array $claims = null)
     {
         $this->receiver = $receiver;
         $this->data = $data;
         $this->algorithms = $algorithms;
+        $this->claims = $claims;
     }
 
     /**
@@ -233,7 +257,7 @@ final class AttackLab
             }
         }
 
-        $token = Issuer::create($this->data, 'encrypted' === $kind, $this->algorithms);
+        $token = Issuer::create($this->data, 'encrypted' === $kind, $this->algorithms, $this->claims);
         if (!is_null($token->getError()))
         {
             throw new \InvalidArgumentException('The issuer could not create a token: ' . $token->getError());
@@ -353,6 +377,43 @@ final class AttackLab
         ]];
     }
 
+    private function attackOtherAudience($xml)
+    {
+        // The data of the legitimate token, read back by the receiver.
+        $data = $this->receiver->analyze($xml)->getData();
+        $data = is_array($data) ? $data : $this->data;
+        $claims = (is_null($this->claims) ? Issuer::defaultClaims() : $this->claims);
+        $claims['audience'] = [self::OTHER_AUDIENCE];
+        $token = Issuer::create($data, false, $this->algorithms, $claims);
+
+        return [$token->getXML(), [
+            'The issuer creates a token with the same data, addressed to "' . self::OTHER_AUDIENCE . '": TokenAudience is "' . self::OTHER_AUDIENCE . '".',
+            'Its digest and its signature are those of the trusted issuer: only the audience tells that this receiver is not the one the token is for.',
+        ]];
+    }
+
+    private function attackPastExpiry($xml)
+    {
+        $issuedAt = new \DateTime('-30 seconds', new \DateTimeZone('UTC'));
+        $expiresAt = new \DateTime('-10 seconds', new \DateTimeZone('UTC'));
+
+        $forge = new Forge($xml);
+        $token = $forge->node('/ds:Signature/ds:Object/Token');
+        $timestamp = $forge->node('/ds:Signature/ds:Object/Token/TokenTimestamp');
+        $timestamp->nodeValue = $issuedAt->format(XMLDSigToken::TOKEN_TIMESTAMP_FORMAT);
+        $expiries = $forge->xpath->query('TokenExpiry', $token);
+        $expiry = $expiries->length > 0 ? $expiries->item(0) : $token->insertBefore($forge->doc->createElement('TokenExpiry'), $timestamp->nextSibling);
+        $old = $expiry->textContent;
+        $expiry->nodeValue = $expiresAt->format(XMLDSigToken::TOKEN_TIMESTAMP_FORMAT);
+        $forge->redigest();
+        $forge->resign(Certs::path('sign.key.pem'), Certs::SIGN_KEY_PASSWORD, Certs::path('sign.cert.pem'));
+
+        return [$forge->xml(), [
+            'TokenTimestamp: 30 seconds ago. TokenExpiry: ' . ('' === $old ? 'added, ' : $old . ' becomes ') . $expiry->textContent . ', 10 seconds ago.',
+            'Digest and signature computed again with the issuer\'s own key: this is the token the issuer created 30 seconds ago, valid for 20 seconds, as an attacker who captured it would submit it now.',
+        ]];
+    }
+
     private function attackDoctype($xml)
     {
         $doctype = "<!DOCTYPE ds:Signature [\n"
@@ -407,7 +468,7 @@ final class AttackLab
         $data = $this->receiver->analyze($xml)->getData();
         $data = is_array($data) ? $data : $this->data;
         $data['note'] = self::SCRIPT_VALUE;
-        $token = Issuer::create($data, false, $this->algorithms);
+        $token = Issuer::create($data, false, $this->algorithms, $this->claims);
 
         return [$token->getXML(), [
             'The issuer signs the same data with one more value, note: ' . self::SCRIPT_VALUE,

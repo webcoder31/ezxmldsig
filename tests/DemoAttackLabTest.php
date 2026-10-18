@@ -26,6 +26,8 @@ class DemoAttackLabTest extends TestCase
         'ec-key' => ['signature', 'library', '1 anomaly detected: Token hash signature verification failed!'],
         'replay' => ['replay', 'caller', 'Token already used!'],
         'expired' => ['freshness', 'caller', 'Token is out of date!'],
+        'other-audience' => ['audience', 'library', "Token is not addressed to the expected audience! Expected: 'receiver'. Token audience: 'mail'."],
+        'past-expiry' => ['freshness', 'caller', 'Token is out of date!'],
         'doctype' => ['structure', 'library', 'XML Digital Signature must not have a document type declaration (DOCTYPE)!'],
         'ciphertext' => ['decryption', 'library', 'Token decryption failed!'],
         'untrusted-ca' => ['trust', 'library', self::UNTRUSTED_CA],

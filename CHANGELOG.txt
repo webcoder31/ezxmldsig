@@ -1,5 +1,35 @@
 Unreleased
 ----------
+- Add the audience and the expiry of a token, both written in the token and
+  covered by the signature (README, section "Audience and expiry"):
+  - creation option `audience` (a string or a list of strings): the
+    receivers the token is addressed to, in nodes `Token/TokenAudience`;
+  - analysis option `expectedAudience`: the audience of the receiver.
+    `isSignatureValid()` rejects a token that names audiences when this
+    option is not given or is not one of them, and a token that names none
+    when it is given. Tokens without audience are analyzed as before when
+    the option is not given;
+  - creation option `validity` (seconds): the expiry of the token, in the
+    node `Token/TokenExpiry`. `isOutOfDate($ttl)` rejects a token whose
+    expiry is passed, whatever `$ttl`. A malformed expiry, or one that is
+    not after the timestamp, makes the token invalid;
+  - new methods `getAudience()` and `getExpiry()`.
+  Version 1.0 ignores these nodes: a receiver still in 1.0 accepts a token
+  addressed to another receiver, or whose expiry is passed. Upgrade the
+  receivers before relying on these options.
+- The demo sets the audience and the validity of its tokens (by default,
+  `receiver` and 300 seconds), its receiver checks its own audience
+  (`expectedAudience`, a new step of the pipeline) and the expiry, and its
+  attack lab gains two attacks: a token addressed to another receiver, and
+  a token past the expiry its issuer set.
+- A token whose timestamp, identifier or expiry is malformed is rejected
+  before its data are read: `getData()` returns NULL for it. Until now, the
+  token was invalid but its data were read.
+- `getTimestamp()` returns NULL for a token that is not valid (see
+  `isSignatureValid()`), as `getTokenId()`, `getAudience()` and
+  `getExpiry()` do. Until now, it returned the timestamp of a token
+  rejected after its timestamp was read (by its trust anchor or its
+  audience, for instance). `isOutOfDate()` is unchanged.
 - Replace `examples/` with an interactive demo, run with `bin/demo` (PHP
   built-in web server in the php:8.3-cli Docker image, on 127.0.0.1 only).
   It creates tokens, explains each block of their XML, shows the checks of

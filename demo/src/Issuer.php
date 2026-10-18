@@ -19,6 +19,23 @@ final class Issuer
     /** Maximum length of a value, in bytes. */
     const MAX_VALUE_LENGTH = 4096;
 
+    /** The audience the issuer addresses its tokens to by default: the
+    receiver of the demo. */
+    const DEFAULT_AUDIENCE = 'receiver';
+
+    /** The validity of a token, in seconds, by default. */
+    const DEFAULT_VALIDITY = 300;
+
+    /** Maximum number of audiences of a token. */
+    const MAX_AUDIENCES = 8;
+
+    /** Maximum length of an audience, in bytes. */
+    const MAX_AUDIENCE_LENGTH = 256;
+
+    /** Bounds of the validity, in seconds. */
+    const MIN_VALIDITY = 1;
+    const MAX_VALIDITY = 86400;
+
     /** The user data the demo starts with. */
     const DEFAULT_DATA = [
         'name' => 'Ragnar Lothbrok',
@@ -40,37 +57,112 @@ final class Issuer
      * @param array $data User data (an associative array, possibly nested).
      * @param bool $encrypt Whether to encrypt the data.
      * @param array $algorithms Option => constant name (see Algorithms).
+     * @param array|null $claims The audiences and the validity (see
+     *     claimOptions()); NULL for the default ones (defaultClaims()).
      *
      * @return XMLDSigToken
      *
-     * @throws \InvalidArgumentException For invalid data or algorithms.
+     * @throws \InvalidArgumentException For invalid data, algorithms or
+     *     claims.
      */
-    public static function create(array $data, $encrypt, array $algorithms = [])
+    public static function create(array $data, $encrypt, array $algorithms = [], array $claims = null)
     {
         self::checkData($data);
-        $options = Algorithms::toOptions($algorithms, $encrypt);
+        $options = Algorithms::toOptions($algorithms, $encrypt) + self::claimOptions(is_null($claims) ? self::defaultClaims() : $claims);
 
-        if ($encrypt)
+        try
         {
-            return XMLDSigToken::createSecureXMLToken(
+            if ($encrypt)
+            {
+                return XMLDSigToken::createSecureXMLToken(
+                    $data,
+                    Certs::path('sign.key.pem'),
+                    Certs::path('sign.cert.pem'),
+                    null,
+                    Certs::path('crypt.cert.pem'),
+                    Certs::SIGN_KEY_PASSWORD,
+                    null,
+                    $options
+                );
+            }
+
+            return XMLDSigToken::createXMLToken(
                 $data,
                 Certs::path('sign.key.pem'),
                 Certs::path('sign.cert.pem'),
-                null,
-                Certs::path('crypt.cert.pem'),
                 Certs::SIGN_KEY_PASSWORD,
-                null,
                 $options
             );
         }
+        catch (\Exception $e)
+        {
+            // An option the library refuses: the request is invalid.
+            throw new \InvalidArgumentException($e->getMessage());
+        }
+    }
 
-        return XMLDSigToken::createXMLToken(
-            $data,
-            Certs::path('sign.key.pem'),
-            Certs::path('sign.cert.pem'),
-            Certs::SIGN_KEY_PASSWORD,
-            $options
-        );
+    /**
+     * Returns the default claims: the token is addressed to the receiver of
+     * the demo and valid for DEFAULT_VALIDITY seconds.
+     *
+     * @return array
+     */
+    public static function defaultClaims()
+    {
+        return ['audience' => [self::DEFAULT_AUDIENCE], 'validity' => self::DEFAULT_VALIDITY];
+    }
+
+    /**
+     * Checks the claims of a token and returns them as options of the
+     * library.
+     *
+     * @param array $claims
+     *     - audience (string[]|null): the audiences the token is addressed
+     *       to (option `audience`), none if NULL or missing;
+     *     - validity (int|null): its validity in seconds (option
+     *       `validity`), none if NULL or missing.
+     *
+     * @return array
+     *
+     * @throws \InvalidArgumentException
+     */
+    public static function claimOptions(array $claims)
+    {
+        $unknown = array_diff(array_keys($claims), ['audience', 'validity']);
+        if (!empty($unknown))
+        {
+            throw new \InvalidArgumentException('Unknown claim: ' . implode(', ', $unknown) . '.');
+        }
+
+        $options = [];
+        $audience = isset($claims['audience']) ? $claims['audience'] : null;
+        if (!is_null($audience))
+        {
+            if (!is_array($audience) || empty($audience) || count($audience) > self::MAX_AUDIENCES || $audience !== array_values($audience))
+            {
+                throw new \InvalidArgumentException('The audience must be a list of 1 to ' . self::MAX_AUDIENCES . ' names.');
+            }
+            foreach ($audience as $name)
+            {
+                if (!is_string($name) || strlen($name) > self::MAX_AUDIENCE_LENGTH)
+                {
+                    throw new \InvalidArgumentException('Each audience must be a string of at most ' . self::MAX_AUDIENCE_LENGTH . ' bytes.');
+                }
+            }
+            $options['audience'] = $audience;
+        }
+
+        $validity = isset($claims['validity']) ? $claims['validity'] : null;
+        if (!is_null($validity))
+        {
+            if (!is_int($validity) || $validity < self::MIN_VALIDITY || $validity > self::MAX_VALIDITY)
+            {
+                throw new \InvalidArgumentException('The validity must be an integer from ' . self::MIN_VALIDITY . ' to ' . self::MAX_VALIDITY . ' seconds.');
+            }
+            $options['validity'] = $validity;
+        }
+
+        return $options;
     }
 
     /**
@@ -128,15 +220,28 @@ final class Issuer
      * @param array $data
      * @param bool $encrypt
      * @param array $algorithms
+     * @param array|null $claims NULL for the default ones.
      *
      * @return string
      */
-    public static function phpCode(array $data, $encrypt, array $algorithms = [])
+    public static function phpCode(array $data, $encrypt, array $algorithms = [], array $claims = null)
     {
         $options = [];
         foreach (Algorithms::toOptions($algorithms, $encrypt) as $option => $uri)
         {
             $options[] = "    '" . $option . "' => XMLDSigToken::" . Algorithms::nameOf($uri) . ",";
+        }
+        $claimOptions = self::claimOptions(is_null($claims) ? self::defaultClaims() : $claims);
+        if (isset($claimOptions['audience']))
+        {
+            $audience = $claimOptions['audience'];
+            $options[] = "    'audience' => " . (1 === count($audience)
+                ? var_export($audience[0], true)
+                : '[' . implode(', ', array_map(function ($name) { return var_export($name, true); }, $audience)) . ']') . ",";
+        }
+        if (isset($claimOptions['validity']))
+        {
+            $options[] = "    'validity' => " . $claimOptions['validity'] . ", // seconds";
         }
 
         $lines = [

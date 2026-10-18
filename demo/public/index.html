@@ -94,6 +94,18 @@
         </div>
 
         <fieldset class="field-group">
+          <legend>Audience and expiry</legend>
+          <label class="check"><input type="checkbox" id="issuer-audience-on"><span>Addressed to <span class="muted"><code>audience</code>, names separated by commas</span></span></label>
+          <div class="subject-grid single" id="issuer-audience-fields">
+            <label class="field"><span class="field-label">Audience</span><input type="text" id="issuer-audience" autocomplete="off" spellcheck="false"></label>
+          </div>
+          <label class="check"><input type="checkbox" id="issuer-validity-on"><span>Expires <span class="muted"><code>validity</code>, in seconds</span></span></label>
+          <div class="subject-grid single" id="issuer-validity-fields">
+            <label class="field"><span class="field-label">Validity</span><input type="number" id="issuer-validity" min="1" max="86400" step="1" inputmode="numeric"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field-group">
           <legend>Algorithms</legend>
           <div class="algo-grid">
             <label class="field"><span class="field-label">Signature</span><select id="issuer-signatureAlgorithm" data-option="signatureAlgorithm"></select></label>
@@ -170,6 +182,14 @@
           <div class="subject-grid" id="rc-subject-fields">
             <label class="field"><span class="field-label">O</span><input type="text" id="rc-subjectO" autocomplete="off" spellcheck="false"></label>
             <label class="field"><span class="field-label">OU</span><input type="text" id="rc-subjectOU" autocomplete="off" spellcheck="false"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Audience</legend>
+          <label class="check"><input type="checkbox" id="rc-audience"><span>Expected audience <span class="muted"><code>expectedAudience</code>: who this receiver is</span></span></label>
+          <div class="subject-grid single" id="rc-audience-fields">
+            <label class="field"><span class="field-label">Name</span><input type="text" id="rc-expectedAudience" autocomplete="off" spellcheck="false"></label>
           </div>
         </fieldset>
 

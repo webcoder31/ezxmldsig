@@ -19,6 +19,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
     * [Creating a signed XML token with encrypted user data](#xmldsigtoken-creating-a-signed-xml-token-with-encrypted-user-data)
     * [Checking an XML token](#xmldsigtoken-checking-an-xml-token)
     * [Replay](#replay)
+    * [Audience and expiry](#audience-and-expiry)
     * [XML parsing](#xml-parsing)
     * [Trust anchor](#trust-anchor)
     * [Encryption](#encryption)
@@ -197,9 +198,9 @@ The example below shows how to use the ``XMLDSigToken`` class for creating a sig
 
 To do so, the ``XMLDSigToken`` class requires the encryption certificate of the recipient: an X.509 certificate whose public key will be used by the class to encrypt a session key that will be used to encrypt user data. Only the private key related to this certificate, which the recipient keeps, can decrypt the user data.
 
-The sender does not need this private key: pass ``null`` in its place (the fourth parameter of ``createSecureXMLToken()``), as below. The created token is then checked right away up to its decryption: its structure, its algorithms, its digest, its signature and the trust in the signing certificate. ``isSignatureValid()`` and ``isDataEncrypted()`` return ``TRUE``, while ``getData()``, ``getTimestamp()`` and ``getTokenId()`` return ``NULL``: they are inside the encrypted content, which is not decrypted.
+The sender does not need this private key: pass ``null`` in its place (the fourth parameter of ``createSecureXMLToken()``), as below. The created token is then checked right away up to its decryption: its structure, its algorithms, its digest, its signature and the trust in the signing certificate. ``isSignatureValid()`` and ``isDataEncrypted()`` return ``TRUE``, while ``getData()``, ``getTimestamp()``, ``getTokenId()``, ``getAudience()`` and ``getExpiry()`` return ``NULL``: they are inside the encrypted content, which is not decrypted.
 
-When the sender does hold this private key (for instance, when it encrypts tokens for itself), it can pass it, with its password (or ``null``) as seventh parameter: the created token is then also decrypted and its content checked, and ``getData()``, ``getTimestamp()`` and ``getTokenId()`` return what it holds.
+When the sender does hold this private key (for instance, when it encrypts tokens for itself), it can pass it, with its password (or ``null``) as seventh parameter: the created token is then also decrypted and its content checked, and ``getData()``, ``getTimestamp()``, ``getTokenId()``, ``getAudience()`` and ``getExpiry()`` return what it holds.
 
 
 #### Source code
@@ -295,8 +296,8 @@ The analysis requires a trust anchor, described below: without it, no token is v
 
 **``isSignatureValid()`` checks neither the freshness of the token nor whether it is replayed.** A token that was valid once stays valid for it, however old it is and however many times it is submitted. Before trusting the data of a received token, the receiver must make three checks, as the example below does:
 
-1. ``isSignatureValid()`` returns ``TRUE``: structure, algorithms, digest, signature, trust in the signing certificate;
-2. ``isOutOfDate($ttl)`` returns ``FALSE``, for the time to live the application accepts (freshness);
+1. ``isSignatureValid()`` returns ``TRUE``: structure, algorithms, digest, signature, trust in the signing certificate, and audience when the token names one (see [Audience and expiry](#audience-and-expiry));
+2. ``isOutOfDate($ttl)`` returns ``FALSE``, for the time to live the application accepts, and the expiry of the token if it has one (freshness);
 3. the identifier returned by ``getTokenId()`` has not been accepted before: store it atomically, and refuse the token if it already is (replay, see [Replay](#replay)).
 
 **Restrict the trust anchor to the sender.** ``caCertPath`` accepts any certificate its CA issues. As soon as this CA also issues certificates to others than the expected sender (a public CA, or a company CA that issues one per server or per partner), any of them can sign a token that ``isSignatureValid()`` accepts: add ``expectedSubject`` (the subject of the certificate of the sender), or pin the certificate of the sender with ``signerCertPath`` (see [Trust anchor](#trust-anchor)).
@@ -402,6 +403,40 @@ Each token holds an identifier of 128 random bits (``random_bytes()``), written 
 A token without identifier, as created by the 0.x versions, is rejected (``Token identifier is missing!``): the receiver could not tell it from a replayed one. So is a token whose identifier is not 32 lowercase hexadecimal characters (``Token identifier is malformed!``).
 
 
+### Audience and expiry
+
+A token signed by a trusted issuer is valid for **every** receiver that trusts this issuer: a token issued for one application is accepted by another one, unless the token says who it is addressed to. Two creation options, both covered by the signature, address this, with the matching checks at analysis.
+
+**Audience.** The option ``audience`` (a string, or a list of strings) names the receivers the token is addressed to: application names, URLs, any value the issuer and each receiver agree on. Each receiver gives its own with ``expectedAudience``, and ``isSignatureValid()`` checks it:
+
+| Token | ``expectedAudience`` given | ``expectedAudience`` not given |
+|---|---|---|
+| Names audiences | Valid only if one of them is ``expectedAudience`` (compared as is, case included) | **Rejected**: a receiver that does not say who it is cannot accept a token addressed to someone |
+| Names no audience | **Rejected**: the receiver asked for a token addressed to it | Valid, as in 1.0 |
+
+```php
+// The issuer addresses the token to the application "crm"...
+$token = XMLDSigToken::createXMLToken($data, $signKey, $signCert, $signKeyPassword, [
+    'audience' => 'crm',
+    'validity' => 60,
+]);
+
+// ...which accepts it, while the application "mail" rejects it.
+$token = XMLDSigToken::analyzeXMLToken($sig, [
+    'caCertPath' => ['path/to/ca/intermediate/certificate', 'path/to/ca/root/certificate'],
+    'expectedAudience' => 'crm',
+]);
+```
+
+A rejected token gives the reason in ``getError()``, e.g. ``Token is not addressed to the expected audience! Expected: 'mail'. Token audience: 'crm'.``, and its data are not read. ``getAudience()`` returns the audiences of a valid token, ``NULL`` otherwise. An audience is a non-empty string, without surrounding white space or control characters: an option that breaks these rules throws an exception.
+
+**Expiry.** The option ``validity`` (a number of seconds) writes in the token the date after which it is out of date. ``isOutOfDate($ttl)`` then rejects the token once this date is passed, whatever ``$ttl``: the shorter of the validity set by the issuer and the time to live set by the receiver applies. Like the time to live, the expiry is a check left to the caller: ``isSignatureValid()`` does not make it. ``getExpiry()`` returns the expiry of a valid token (format ``YYYY-MM-DDThh:mm:ssZ``, UTC), ``NULL`` otherwise. A token whose expiry is malformed, repeated or not after its timestamp is not valid.
+
+Keep the identifiers stored against replay (see [Replay](#replay)) as long as the time to live of the receiver requires: the expiry can only shorten it.
+
+**Compatibility with 1.0.** The audiences are in the nodes ``Token/TokenAudience`` and the expiry in ``Token/TokenExpiry``. Version 1.0 ignores these nodes: **a receiver still in 1.0 accepts a token addressed to another receiver, and a token whose expiry is passed**, applying only its own time to live. Upgrade every receiver before relying on these options. Tokens without audience nor expiry, those of 1.0 included, are analyzed as before.
+
+
 ### XML parsing
 
 A document type declaration (``<!DOCTYPE ...>``) declares entities, which the XML parser expands where the document references them: nested entities make a small document grow to gigabytes, and external entities read local files or URLs. A token never has one: the analysis, like ``XMLDSigToken::alterXML()``, refuses any document holding ``<!DOCTYPE`` before parsing it (``XML Digital Signature must not have a document type declaration (DOCTYPE)!``).
@@ -452,7 +487,7 @@ When a token is created, it is analyzed right away to check it, with the certifi
 
 The token data are encrypted with a session key generated for each token, and the session key is encrypted for the recipient with the encryption certificate (key transport). The encryption takes place before the signature, which therefore covers the encrypted data.
 
-* **The sender needs no private key of the recipient.** ``createSecureXMLToken()`` takes the private key of the recipient (``$cryptKeyPath``) only to decrypt the created token and check its content: pass ``null`` instead, and the created token is checked up to its decryption (structure, algorithms, digest, signature, trust in the signing certificate), its content left unread (``getData()``, ``getTimestamp()`` and ``getTokenId()`` return ``NULL``). A password (``$cryptKeyPassword``) given without this key throws an exception.
+* **The sender needs no private key of the recipient.** ``createSecureXMLToken()`` takes the private key of the recipient (``$cryptKeyPath``) only to decrypt the created token and check its content: pass ``null`` instead, and the created token is checked up to its decryption (structure, algorithms, digest, signature, trust in the signing certificate), its content left unread (``getData()``, ``getTimestamp()``, ``getTokenId()``, ``getAudience()`` and ``getExpiry()`` return ``NULL``). A password (``$cryptKeyPassword``) given without this key throws an exception.
 
 * **Default algorithms.** The data are encrypted with AES-256-GCM (``AES256_GCM``) and the session key with RSA-OAEP (``RSA_OAEP_MGF1P``, http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p). AES-GCM checks an authentication tag before returning any data: altered data are rejected as a whole. A 256-bit key costs no more than a 128-bit one for data of this size.
 * **Decryption after verification.** A token is only decrypted once its digest, its signature, the trust in its certificate (see [Trust anchor](#trust-anchor)) and its algorithms have been verified. A token that fails one of these checks is never decrypted.
@@ -576,6 +611,9 @@ Each factory takes an associative array ``$options`` as its last parameter. Each
 | ``digestAlgorithm`` | creation and analysis | string | ``SHA256`` |
 | ``checkSigningAlgorithms`` | analysis | boolean | ``TRUE`` |
 | ``caCertPath``, ``signerCertPath``, ``expectedSubject`` | analysis | see [Trust anchor](#trust-anchor) | none |
+| ``audience`` | creation | string or list of strings, see [Audience and expiry](#audience-and-expiry) | none |
+| ``validity`` | creation | integer (seconds), see [Audience and expiry](#audience-and-expiry) | none |
+| ``expectedAudience`` | analysis | string, see [Audience and expiry](#audience-and-expiry) | none |
 | ``sessionKeyCipheringAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``AES256_GCM`` |
 | ``cryptAlgorithm`` | encryption: creation with an encryption certificate, analysis with a decryption key | string | ``RSA_OAEP_MGF1P`` |
 | ``checkCryptingAlgorithms`` | analysis with a decryption key | boolean | ``TRUE`` |
@@ -656,10 +694,10 @@ The script first brings `vendor/` in line with `composer.json` with `bin/deps` (
 
 Every token of the demo is created and analyzed by the library, in PHP; the page only displays them:
 
-* **Issuer**: user data (nested values allowed), encryption on or off, and the signature, digest and encryption algorithms.
+* **Issuer**: user data (nested values allowed), encryption on or off, the audiences the token is addressed to and its validity (by default, the receiver of the demo, `receiver`, and 300 seconds), and the signature, digest and encryption algorithms.
 * **Token**: the XML token, highlighted, each block explained when you point at it or select it with the arrow keys: what it does, and whether the signature covers it. It can be copied, or edited by hand before it is verified. Below it, a collapsed section shows the PHP code of the issuer that created this token; it changes only when a token is created.
-* **Receiver**: the trust anchor (`caCertPath`, `signerCertPath`, `expectedSubject`), the decryption key, the expected algorithms, the time to live and the replay protection. The verification is shown as a pipeline of checks: those of `isSignatureValid()` (structure, algorithms, digest, signature, trust in the certificate, decryption, content), then the two checks left to the caller, freshness (`isOutOfDate()`) and replay (`getTokenId()`, stored in a file of `demo/var/`, under a lock). The PHP code of this receiver is shown.
-* **Attack lab**: each attack alters the last token of the issuer (or a new one, when the last one does not suit the attack) on the server and submits it to the receiver, with a replay memory of its own: data tampering, signature wrapping, look-alike certificate, EC key substitution, replay, expired token, DOCTYPE with entities, altered ciphertext signed again by a trusted signer, certificate of an untrusted CA, and a script in the data. Each one shows what was changed (as a diff), the check that stops it, the exact message, and the security advisory of the 0.x versions it relates to. No vulnerable code runs: the lab shows what the current version does.
+* **Receiver**: the trust anchor (`caCertPath`, `signerCertPath`, `expectedSubject`), its own audience (`expectedAudience`), the decryption key, the expected algorithms, the time to live and the replay protection. The verification is shown as a pipeline of checks: those of `isSignatureValid()` (structure, algorithms, digest, signature, trust in the certificate, decryption, content, audience), then the two checks left to the caller, freshness (`isOutOfDate()`, expiry included) and replay (`getTokenId()`, stored in a file of `demo/var/`, under a lock). The PHP code of this receiver is shown.
+* **Attack lab**: each attack alters the last token of the issuer (or a new one, when the last one does not suit the attack) on the server and submits it to the receiver, with a replay memory of its own: data tampering, signature wrapping, look-alike certificate, EC key substitution, replay, expired token, token addressed to another receiver, token past the expiry its issuer set, DOCTYPE with entities, altered ciphertext signed again by a trusted signer, certificate of an untrusted CA, and a script in the data. Each one shows what was changed (as a diff), the check that stops it, the exact message, and the security advisory of the 0.x versions it relates to. No vulnerable code runs: the lab shows what the current version does.
 
 > **WARNING: the private keys of `demo/certs/` are public.** They are published with the source code of this library, with their passwords: anyone can sign tokens that the demo trusts, and decrypt the tokens it encrypts. Use them for the demo only, never in an application or on a server reachable by others, and never trust their CA certificates: generate your own keys and certificates (see `demo/certs/README.md`). The same goes for the keys of `tests/fixtures/certs/`, which only serve the tests.
 

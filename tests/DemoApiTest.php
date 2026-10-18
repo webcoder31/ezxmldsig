@@ -102,7 +102,52 @@ class DemoApiTest extends TestCase
             'unknown attack' => ['POST', '/api/attack', ['id' => 'nope'], 400],
             'empty value' => ['POST', '/api/issue', ['data' => ['a' => '']], 400],
             'too deep' => ['POST', '/api/issue', ['data' => ['a' => ['b' => ['c' => ['d' => ['e' => 'f']]]]]], 400],
+            'audience not a list' => ['POST', '/api/issue', ['audience' => 'receiver'], 400],
+            'audience with spaces' => ['POST', '/api/issue', ['audience' => [' receiver']], 400],
+            'audience given twice' => ['POST', '/api/issue', ['audience' => ['mail', 'mail']], 400],
+            'validity out of bounds' => ['POST', '/api/issue', ['validity' => 0], 400],
+            'validity not an integer' => ['POST', '/api/issue', ['validity' => '60'], 400],
+            'expected audience empty' => ['POST', '/api/verify', ['xml' => 'x', 'receiver' => ['expectedAudience' => '']], 400],
+            'attack with invalid audience' => ['POST', '/api/attack', ['id' => 'tamper', 'audience' => []], 400],
         ];
+    }
+
+    public function testTheIssuerAddressesItsTokensToTheReceiverByDefault()
+    {
+        $api = $this->api();
+        list(, , $issued) = $this->request($api, 'POST', '/api/issue', []);
+
+        $this->assertStringContainsString('<TokenAudience>receiver</TokenAudience>', $issued['xml']);
+        $this->assertStringContainsString('<TokenExpiry>', $issued['xml']);
+        $this->assertStringContainsString("'audience' => 'receiver',", $issued['code']);
+        $this->assertStringContainsString("'validity' => 300,", $issued['code']);
+
+        list(, , $verified) = $this->request($api, 'POST', '/api/verify', ['xml' => $issued['xml']]);
+        $this->assertTrue($verified['accepted']);
+        $this->assertSame(['receiver'], $verified['token']['audience']);
+        $this->assertNotNull($verified['token']['expiry']);
+        $audienceStep = array_values(array_filter($verified['steps'], function ($step) { return 'audience' === $step['id']; }))[0];
+        $this->assertSame('pass', $audienceStep['status']);
+    }
+
+    public function testATokenWithoutAudienceIsRefusedByTheDefaultReceiver()
+    {
+        $api = $this->api();
+        list(, , $issued) = $this->request($api, 'POST', '/api/issue', ['audience' => null, 'validity' => null]);
+        $this->assertStringNotContainsString('TokenAudience', $issued['xml']);
+        $this->assertStringNotContainsString('TokenExpiry', $issued['xml']);
+        $this->assertStringNotContainsString("'audience'", $issued['code']);
+
+        list(, , $refused) = $this->request($api, 'POST', '/api/verify', ['xml' => $issued['xml']]);
+        $this->assertFalse($refused['accepted']);
+        $this->assertSame("Token is not addressed to any audience, but the audience 'receiver' is expected!", $refused['error']);
+
+        // Without an expected audience, the check is off and the token is
+        // accepted, as in 1.0.
+        list(, , $accepted) = $this->request($api, 'POST', '/api/verify', ['xml' => $issued['xml'], 'receiver' => ['audience' => false]]);
+        $this->assertTrue($accepted['accepted']);
+        $audienceStep = array_values(array_filter($accepted['steps'], function ($step) { return 'audience' === $step['id']; }))[0];
+        $this->assertSame('off', $audienceStep['status']);
     }
 
     /**
@@ -154,6 +199,10 @@ class DemoApiTest extends TestCase
         $this->assertStringContainsString('XMLDSigToken::analyzeXMLToken($xml, $options)', $code);
         $this->assertStringContainsString('isOutOfDate(45)', $code);
         $this->assertStringContainsString('Replay: NOT checked', $code);
+        $this->assertStringContainsString("'expectedAudience' => 'receiver',", $code);
+
+        $code = Receiver::fromArray(['audience' => false])->phpCode();
+        $this->assertStringNotContainsString('expectedAudience', $code);
     }
 
     /**

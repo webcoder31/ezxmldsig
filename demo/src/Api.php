@@ -112,6 +112,7 @@ final class Api
         $valid = [
             'array' => is_array($value),
             'bool' => is_bool($value),
+            'int' => is_int($value),
             'string' => is_string($value),
         ][$type];
         if (!$valid)
@@ -131,6 +132,25 @@ final class Api
     }
 
     /**
+     * Returns the claims of the token a request asks for: its audiences and
+     * its validity (see Issuer::claimOptions()). A missing entry takes its
+     * default value (Issuer::defaultClaims()); NULL asks for none.
+     */
+    private static function claims(array $input)
+    {
+        $claims = Issuer::defaultClaims();
+        foreach (['audience' => 'array', 'validity' => 'int'] as $name => $type)
+        {
+            if (array_key_exists($name, $input))
+            {
+                $claims[$name] = self::field($input, $name, $type);
+            }
+        }
+
+        return $claims;
+    }
+
+    /**
      * GET /api/config: what the interface needs to start.
      */
     private function config()
@@ -145,6 +165,8 @@ final class Api
             'algorithms' => Algorithms::CHOICES,
             'uris' => Algorithms::uris(),
             'data' => Issuer::DEFAULT_DATA,
+            'claims' => Issuer::defaultClaims(),
+            'validityBounds' => [Issuer::MIN_VALIDITY, Issuer::MAX_VALIDITY],
             'receiver' => Receiver::defaults(),
             'ttlBounds' => [Receiver::MIN_TTL, Receiver::MAX_TTL],
             'desyncTolerance' => XMLDSigToken::DESYNC_TOLERANCE,
@@ -159,21 +181,23 @@ final class Api
     }
 
     /**
-     * POST /api/issue {data, encrypt, algorithms}: creates a token.
+     * POST /api/issue {data, encrypt, algorithms, audience, validity}:
+     * creates a token.
      */
     private function issue(array $input)
     {
         $data = self::field($input, 'data', 'array', Issuer::DEFAULT_DATA);
         $encrypt = self::field($input, 'encrypt', 'bool', false);
         $algorithms = self::field($input, 'algorithms', 'array', []);
+        $claims = self::claims($input);
 
-        $token = Issuer::create($data, $encrypt, $algorithms);
+        $token = Issuer::create($data, $encrypt, $algorithms, $claims);
 
         return [
             'xml' => $token->getXML(),
             'error' => $token->getError(),
             'encrypted' => $encrypt,
-            'code' => Issuer::phpCode($data, $encrypt, $algorithms),
+            'code' => Issuer::phpCode($data, $encrypt, $algorithms, $claims),
         ];
     }
 
@@ -210,17 +234,20 @@ final class Api
     }
 
     /**
-     * POST /api/attack {id, lastXml, data, algorithms, receiver}: runs an
-     * attack of the lab.
+     * POST /api/attack {id, lastXml, data, algorithms, audience, validity,
+     * receiver}: runs an attack of the lab.
      */
     private function attack(array $input)
     {
         $data = self::field($input, 'data', 'array', Issuer::DEFAULT_DATA);
         Issuer::checkData($data);
+        $claims = self::claims($input);
+        Issuer::claimOptions($claims);
         $lab = new AttackLab(
             self::receiver($input),
             $data,
-            self::field($input, 'algorithms', 'array', [])
+            self::field($input, 'algorithms', 'array', []),
+            $claims
         );
 
         return $lab->run(self::field($input, 'id', 'string', ''), self::field($input, 'lastXml', 'string'));

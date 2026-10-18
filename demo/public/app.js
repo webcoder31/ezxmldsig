@@ -158,7 +158,7 @@
 
   const state = {
     config: null,
-    token: null,          // { xml, encrypted, algorithms, data, edited }
+    token: null,          // { xml, encrypted, algorithms, data, claims, edited }
     verified: null,       // { xml, result }
     fullValues: false,
     editing: false,
@@ -326,11 +326,41 @@
   /* ---------- Issuer ---------- */
 
   function issuerInput() {
-    return {
+    return Object.assign({
       data: entriesToData(entries),
       encrypt: $('encrypt').checked,
       algorithms: readAlgorithms('issuer-')
+    }, readClaims());
+  }
+
+  /** The audiences and the validity of the token to create, NULL for none. */
+  function readClaims() {
+    const validity = parseInt($('issuer-validity').value, 10);
+    return {
+      audience: $('issuer-audience-on').checked
+        ? $('issuer-audience').value.split(',').map(function (name) { return name.trim(); }).filter(function (name) { return name !== ''; })
+        : null,
+      validity: $('issuer-validity-on').checked ? (isNaN(validity) ? 0 : validity) : null
     };
+  }
+
+  function applyIssuerDefaults() {
+    const claims = state.config.claims;
+    $('issuer-audience-on').checked = claims.audience !== null;
+    $('issuer-audience').value = (claims.audience || []).join(', ');
+    $('issuer-validity-on').checked = claims.validity !== null;
+    $('issuer-validity').value = claims.validity !== null ? claims.validity : 300;
+    $('issuer-validity').min = state.config.validityBounds[0];
+    $('issuer-validity').max = state.config.validityBounds[1];
+  }
+
+  function syncIssuerFields() {
+    const audienceOn = $('issuer-audience-on').checked;
+    $('issuer-audience').disabled = !audienceOn;
+    $('issuer-audience-fields').dataset.disabled = String(!audienceOn);
+    const validityOn = $('issuer-validity-on').checked;
+    $('issuer-validity').disabled = !validityOn;
+    $('issuer-validity-fields').dataset.disabled = String(!validityOn);
   }
 
   function showIssuerError(message) {
@@ -352,7 +382,7 @@
       if (result.error) throw new Error(result.error);
       showIssuerError(null);
       renderPhp($('issuer-code'), result.code);
-      setToken({ xml: result.xml, encrypted: result.encrypted, algorithms: input.algorithms, data: input.data, edited: false });
+      setToken({ xml: result.xml, encrypted: result.encrypted, algorithms: input.algorithms, data: input.data, claims: { audience: input.audience, validity: input.validity }, edited: false });
       resetVerification('New token: verify it with the receiver.');
       return true;
     } catch (e) {
@@ -537,9 +567,11 @@
     'X509Data': 'Container of the X.509 certificate.',
     'X509Certificate': 'The issuer\'s certificate (DER, base64). The signature is verified with its public key; then the certificate itself must be trusted: valid now, allowed to sign, its chain verified by OpenSSL up to caCertPath, equal to the pinned signerCertPath, and matching expectedSubject, as configured.',
     'Object': 'The signed content of this enveloping signature, Id="Token". DigestValue covers everything inside it.',
-    'Token': 'The token: its timestamp, its identifier and the user data.',
+    'Token': 'The token: its timestamp, its identifier, its expiry and audiences if the issuer set them, and the user data.',
     'TokenTimestamp': 'Creation time, in UTC. It is signed, so it cannot be moved. The library does not check it in isSignatureValid(): the receiver calls isOutOfDate($ttl).',
     'TokenId': '128 random bits in hexadecimal, signed. getTokenId() returns it for a valid token; the receiver stores it to refuse a token it has already accepted (replay).',
+    'TokenExpiry': 'Date after which the token is out of date, in UTC, written by the issuer (option validity) and signed. isOutOfDate($ttl) rejects the token once it is passed, whatever $ttl: the shorter of the issuer\'s validity and the receiver\'s time to live applies. Version 1.0 ignores it.',
+    'TokenAudience': 'A receiver the token is addressed to (option audience), signed; a token may name several. isSignatureValid() only accepts it if the receiver gives one of them as expectedAudience, and a token that names an audience is refused by a receiver that gives none. Version 1.0 ignores it: upgrade every receiver before relying on it.',
     'TokenData': 'The user data, as nested elements. With base64Encode (the default), each value is base64 encoded and marked Algorithm="base64".',
     'data-leaf': 'A user data value. getData() returns it decoded, as a string.',
     'data-group': 'A group of user data values: getData() returns it as a nested array.',
@@ -608,6 +640,9 @@
       if (age) facts.push(['Issued', age]);
     } else if (node.local === 'TokenId' && text) {
       facts.push(['Bits', String(text.length * 4)]);
+    } else if (node.local === 'TokenExpiry' && text) {
+      const left = describeAge(text);
+      if (left) facts.push(['Expires', /ago$/.test(left) ? 'passed, ' + left : left.replace(' (in the future)', '')]);
     } else if (/^(DigestValue|SignatureValue|CipherValue|X509Certificate)$/.test(node.local) && text) {
       facts.push(['Size', formatNumber(base64Length(text)) + ' bytes']);
       if (node.local === 'X509Certificate' && state.verified && state.verified.xml === state.token.xml && state.verified.result.token.certSubject) {
@@ -618,7 +653,7 @@
     return facts;
   }
 
-  const LEGEND = ['SignedInfo', 'DigestValue', 'SignatureValue', 'X509Certificate', 'Object', 'TokenTimestamp', 'TokenId', 'TokenData', 'EncryptedData', 'EncryptedKey'];
+  const LEGEND = ['SignedInfo', 'DigestValue', 'SignatureValue', 'X509Certificate', 'Object', 'TokenTimestamp', 'TokenId', 'TokenExpiry', 'TokenAudience', 'TokenData', 'EncryptedData', 'EncryptedKey'];
 
   function renderAnnotation() {
     const box = $('annotation');
@@ -823,7 +858,7 @@
     $('edit-apply').addEventListener('click', function () {
       const xml = $('xml-edit').value;
       if (state.token && xml !== state.token.xml) {
-        setToken({ xml: xml, encrypted: /EncryptedData/.test(xml), algorithms: state.token.algorithms, data: state.token.data, edited: true });
+        setToken({ xml: xml, encrypted: /EncryptedData/.test(xml), algorithms: state.token.algorithms, data: state.token.data, claims: state.token.claims, edited: true });
         resetVerification('Token edited: verify it to see what the receiver says.');
       }
       setEditing(false);
@@ -877,8 +912,9 @@
     ['signature', 'Signature', 'library', 'ds:SignatureValue verifies with the key of the certificate the token carries.'],
     ['trust', 'Certificate trust', 'library', 'The certificate is trusted by the configured anchor.'],
     ['decryption', 'Decryption', 'library', 'Only for an encrypted token, once the checks above have passed.'],
-    ['content', 'Token content', 'library', 'TokenTimestamp, TokenId and TokenData are well formed.'],
-    ['freshness', 'Freshness', 'caller', 'isOutOfDate($ttl): the token is recent enough.'],
+    ['content', 'Token content', 'library', 'TokenTimestamp, TokenId, TokenExpiry and TokenAudience if any, and TokenData are well formed.'],
+    ['audience', 'Audience', 'library', 'The token is addressed to this receiver (expectedAudience).'],
+    ['freshness', 'Freshness', 'caller', 'isOutOfDate($ttl): the token is recent enough, and its expiry, if any, is not passed.'],
     ['replay', 'Replay', 'caller', 'getTokenId() was never accepted before.']
   ];
 
@@ -891,6 +927,8 @@
       subjectO: $('rc-subjectO').value,
       subjectOU: $('rc-subjectOU').value,
       decrypt: $('rc-decrypt').checked,
+      audience: $('rc-audience').checked,
+      expectedAudience: $('rc-expectedAudience').value,
       ttl: isNaN(ttl) ? state.config.receiver.ttl : ttl,
       replay: $('rc-replay').checked,
       algorithms: readAlgorithms('rc-')
@@ -905,6 +943,8 @@
     $('rc-subjectO').value = d.subjectO;
     $('rc-subjectOU').value = d.subjectOU;
     $('rc-decrypt').checked = d.decrypt;
+    $('rc-audience').checked = d.audience;
+    $('rc-expectedAudience').value = d.expectedAudience;
     $('rc-ttl').value = d.ttl;
     $('rc-ttl-range').value = d.ttl;
     $('rc-replay').checked = d.replay;
@@ -915,6 +955,9 @@
     const subjectOn = $('rc-subject').checked;
     $('rc-subjectO').disabled = $('rc-subjectOU').disabled = !subjectOn;
     $('rc-subject-fields').dataset.disabled = String(!subjectOn);
+    const audienceOn = $('rc-audience').checked;
+    $('rc-expectedAudience').disabled = !audienceOn;
+    $('rc-audience-fields').dataset.disabled = String(!audienceOn);
     $('rc-sessionKeyCipheringAlgorithm').disabled = !$('rc-decrypt').checked;
     $('replay-clear').disabled = !$('rc-replay').checked;
   }
@@ -1012,8 +1055,11 @@
     const failure = firstFailure(result);
     if (result.accepted) {
       const replayOff = result.steps.some(function (s) { return s.id === 'replay' && s.status === 'off'; });
+      const audienceOff = result.steps.some(function (s) { return s.id === 'audience' && s.status === 'off'; });
       if (replayOff) {
         renderVerdictMessage('warn', 'Accepted, without replay protection', 'Every check ran but replay: the same token would be accepted again until it is out of date.');
+      } else if (audienceOff) {
+        renderVerdictMessage('warn', 'Accepted, without audience', 'The token names no audience and this receiver expects none: any other receiver that trusts the issuer would accept it as well.');
       } else {
         renderVerdictMessage('ok', 'Accepted: the data can be trusted', 'isSignatureValid() returned TRUE, the token is fresh, and its identifier was never seen.');
       }
@@ -1108,7 +1154,7 @@
       $('rc-ttl').value = this.value;
       refreshReceiverCode();
     });
-    ['rc-subjectO', 'rc-subjectOU'].forEach(function (id) {
+    ['rc-subjectO', 'rc-subjectOU', 'rc-expectedAudience'].forEach(function (id) {
       $(id).addEventListener('input', refreshReceiverCode);
     });
     $('replay-clear').addEventListener('click', async function () {
@@ -1273,13 +1319,17 @@
 
   function labInput(id) {
     let data = state.token ? state.token.data : state.config.data;
-    return {
+    const input = {
       id: id,
       lastXml: state.token ? state.token.xml : null,
       data: data,
       algorithms: state.token ? state.token.algorithms : readAlgorithms('issuer-'),
       receiver: readReceiver()
     };
+    const claims = state.token && state.token.claims ? state.token.claims : readClaims();
+    input.audience = claims.audience;
+    input.validity = claims.validity;
+    return input;
   }
 
   async function runAttack(id) {
@@ -1429,6 +1479,8 @@
     });
     entries = toEntries(state.config.data);
     renderDataEditor();
+    applyIssuerDefaults();
+    syncIssuerFields();
     applyReceiverDefaults();
     syncReceiverFields();
     syncEncryptionSelect();
@@ -1442,6 +1494,7 @@
     });
     $('issuer-form').addEventListener('change', function (event) {
       if (event.target.id === 'encrypt') syncEncryptionSelect();
+      if (event.target.id === 'issuer-audience-on' || event.target.id === 'issuer-validity-on') syncIssuerFields();
       if (event.target.dataset && event.target.dataset.option) {
         $('rc-' + event.target.dataset.option).value = event.target.value;
         refreshReceiverCode();

@@ -342,6 +342,17 @@ class XMLDSigToken
     in hexadecimal (see getTokenId()). */
     const TOKEN_ID_BYTES = 16;
 
+    /** @const string The name of the node that holds one audience of the
+    token (see getAudience()). A token holds one such node per audience. */
+    const TOKEN_AUDIENCE_NAME = 'TokenAudience';
+
+    /** @const string The name of the token expiry node (see getExpiry()). */
+    const TOKEN_EXPIRY_NAME = 'TokenExpiry';
+
+    /** @const int The latest expiry the format of the timestamp can write
+    (9999-12-31T23:59:59Z), as a UNIX timestamp. */
+    private const MAX_EXPIRY_TIME = 253402300799;
+
     /** @const string The format of the token timestamp (YYYY-MM-DDThh:mm:ssZ).
     NOTE: The timestamp should always be expressed in UTC. */
     const TOKEN_TIMESTAMP_FORMAT = 'Y-m-d\TH:i:s\Z';
@@ -386,6 +397,9 @@ class XMLDSigToken
     private const OPTION_CONTEXTS = [
         'base64Encode'                 => 'creation',
         'xmldsigNsPrefix'              => 'creation',
+        'audience'                     => 'creation',
+        'validity'                     => 'creation',
+        'expectedAudience'             => 'analysis',
         'canonicalizationAlgorithm'    => 'any',
         'signatureAlgorithm'           => 'any',
         'digestAlgorithm'              => 'any',
@@ -490,6 +504,30 @@ class XMLDSigToken
     /** @var string The token identifier (see getTokenId()). */
     private $tokenId = null;
 
+    /** @var array|null The audiences of the token to create (option
+    "audience"). */
+    private $audienceToWrite = null;
+
+    /** @var array|null The audiences read from the token (see
+    getAudience()). */
+    private $audience = null;
+
+    /** @var int|null The validity of the token to create, in seconds (option
+    "validity"). */
+    private $validity = null;
+
+    /** @var string|null The token expiry (format: 'yyyy-MM-ddThh:mm:ssZ', see
+    getExpiry()). */
+    private $expiry = null;
+
+    /** @var boolean Whether the analyzed token has a node "TokenExpiry",
+    well formed or not (see isOutOfDate()). */
+    private $hasExpiryNode = false;
+
+    /** @var string|null The audience the analyzed token must be addressed to
+    (option "expectedAudience"). */
+    private $expectedAudience = null;
+
     /** @var X509Cert The X.509 certificate included in the XML Digital
     Signature. */
     private $x509Certificate = null;
@@ -546,6 +584,8 @@ class XMLDSigToken
             'isDataEncrypted'        => $this->isDataEncrypted,
             'timestamp'              => $this->timestamp,
             'tokenId'                => $this->getTokenId(),
+            'audience'               => $this->getAudience(),
+            'expiry'                 => $this->getExpiry(),
             'data'                   => $this->data,
             'error'                  => $this->error,
             'anomalies'              => $this->anomalies
@@ -696,6 +736,29 @@ class XMLDSigToken
      *
      *   Character case is significant. It does not replace a trust anchor.
      *   <br/>Default value: none.
+     *
+     * - **`expectedAudience`** [string] Analysis only. The audience of this
+     *   receiver, which the token must be addressed to (see `audience`):
+     *   `isSignatureValid()` returns FALSE if the token names no audience or
+     *   does not name this one. A token that names audiences is rejected
+     *   when this option is not given, so that a receiver of the issuer
+     *   cannot accept a token addressed to another one. Compared as is
+     *   (character case included).
+     *   <br/>Default value: none.
+     *
+     * - **`audience`** [string|array] Creation only. The audience, or the
+     *   list of audiences, the token is addressed to: names of the receivers
+     *   (an application name, a URL...), agreed between the issuer and each
+     *   receiver. Each one is a non-empty string, with no surrounding white
+     *   space and no control character. They are written in the token,
+     *   covered by the signature (see `getAudience()`).
+     *   <br/>Default value: none (the token names no audience).
+     *
+     * - **`validity`** [int] Creation only. The number of seconds after which
+     *   the token is out of date, whatever the time to live the receiver
+     *   gives to `isOutOfDate()`. The expiry date is written in the token,
+     *   covered by the signature (see `getExpiry()`).
+     *   <br/>Default value: none (only the receiver sets the time to live).
      *
      * - **`base64Encode`** [boolean] Creation only. Whether to base64 encode
      *   token data or not.
@@ -955,6 +1018,17 @@ class XMLDSigToken
                 $this->base64EncodeData = false;
             }
 
+            // If provided, store the audiences and the validity of the token
+            // (checked by _checkOptions()).
+            if (isset($options['audience']))
+            {
+                $this->audienceToWrite = (array) $options['audience'];
+            }
+            if (isset($options['validity']))
+            {
+                $this->validity = $options['validity'];
+            }
+
             // Check that required private key and X.509 certificate
             // are provided, in order to sign the token.
             if (is_null($signKeyPath))
@@ -1113,6 +1187,13 @@ class XMLDSigToken
             // _verifyCertTrust()).
             $this->_loadTrustOptions($options);
 
+            // If provided, store the audience the token must be addressed to
+            // (checked by _checkOptions(), see _verifyAudience()).
+            if (isset($options['expectedAudience']))
+            {
+                $this->expectedAudience = $options['expectedAudience'];
+            }
+
             // If provided, get and store the private key that will be used
             // to decrypt the session key which was used to encrypt the token.
             if (!is_null($cryptKeyPath))
@@ -1262,7 +1343,62 @@ class XMLDSigToken
             {
                 throw new Exception("Invalid option '" . $name . "'! It must be a string.");
             }
+
+            if ('audience' === $name)
+            {
+                $audiences = is_array($value) ? $value : [$value];
+                if (empty($audiences) || $audiences !== array_values($audiences) || $audiences !== array_filter($audiences, [self::class, '_isValidAudience']))
+                {
+                    throw new Exception("Invalid option 'audience'! It must be a non-empty string, or a non-empty list of them, without control characters.");
+                }
+                if (count(array_unique($audiences)) !== count($audiences))
+                {
+                    throw new Exception("Invalid option 'audience'! An audience is given twice.");
+                }
+            }
+
+            if ('expectedAudience' === $name && !self::_isValidAudience($value))
+            {
+                throw new Exception("Invalid option 'expectedAudience'! It must be a non-empty string without control characters.");
+            }
+
+            if ('validity' === $name && !(is_int($value) && $value > 0))
+            {
+                throw new Exception("Invalid option 'validity'! It must be a number of seconds greater than 0.");
+            }
+
+            // The expiry is written with a four-digit year: a validity that
+            // takes it past the year 9999 (or past the range of an integer)
+            // could not be written, and would be computed wrong.
+            if ('validity' === $name && $value > self::MAX_EXPIRY_TIME - time())
+            {
+                throw new Exception("Invalid option 'validity'! The expiry would be after 9999-12-31T23:59:59Z.");
+            }
         }
+    }
+
+
+    /**
+     * Indicates whether a value can be an audience of a token (options
+     * "audience" and "expectedAudience"): a non-empty UTF-8 string, without
+     * surrounding white space, made of characters XML 1.0 can hold as text.
+     *
+     * Control characters are refused: XML 1.0 cannot hold most of them, and
+     * the others (tab, line feed, carriage return) are normalized by XML
+     * parsers, so that the audience read back would differ from the one
+     * written. So are U+FFFE and U+FFFF, which XML 1.0 cannot hold either.
+     *
+     * @param mixed $audience The value to check.
+     *
+     * @return boolean TRUE if the value can be an audience, FALSE otherwise.
+     */
+    static private function _isValidAudience($audience)
+    {
+        return is_string($audience)
+            && '' !== $audience
+            && trim($audience) === $audience
+            && 1 === preg_match('//u', $audience)
+            && 0 === preg_match('/[\x00-\x1F\x7F]|[^\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', $audience);
     }
 
 
@@ -1609,6 +1745,27 @@ class XMLDSigToken
         // already accepted (see getTokenId()).
         $tokenIdElement = $xmlDoc->createElement(self::TOKEN_ID_NAME, bin2hex(random_bytes(self::TOKEN_ID_BYTES)));
         $tokenNode->appendChild($tokenIdElement);
+
+        // If a validity is given, create a node "TokenExpiry" that holds the
+        // date after which the token is out of date (see isOutOfDate()), in
+        // the format of the timestamp, and append it to the node "Token".
+        if (!is_null($this->validity))
+        {
+            $expiry = clone $dt;
+            $expiry->modify('+' . $this->validity . ' seconds');
+            $tokenNode->appendChild($xmlDoc->createElement(self::TOKEN_EXPIRY_NAME, $expiry->format(self::TOKEN_TIMESTAMP_FORMAT)));
+        }
+
+        // Create a node "TokenAudience" per audience the token is addressed to
+        // (see getAudience()), and append them to the node "Token". The value
+        // is added as a text node: the second argument of createElement()
+        // would read "&" as the start of an entity reference.
+        foreach ((array) $this->audienceToWrite as $audience)
+        {
+            $audienceElement = $xmlDoc->createElement(self::TOKEN_AUDIENCE_NAME);
+            $audienceElement->appendChild($xmlDoc->createTextNode($audience));
+            $tokenNode->appendChild($audienceElement);
+        }
 
         /**
          * Inline function to build a node tree, whose root node will be named
@@ -2219,6 +2376,70 @@ class XMLDSigToken
             $this->anomalies[] = "Token identifier is malformed!";
         }
 
+        // Get the node "ds:Signature/ds:Object/Token/TokenExpiry", if any: a
+        // token created without the option "validity" has none.
+        $query = self::TOKEN_NAME . "/" . self::TOKEN_EXPIRY_NAME;
+        $nodeTokenExpiries = $this->xpath->query($query, $nodeObject);
+        $this->hasExpiryNode = 0 < $nodeTokenExpiries->length;
+        if ($this->hasExpiryNode)
+        {
+            $timezone = new DateTimeZone('UTC');
+            $expiryDate = (1 === $nodeTokenExpiries->length && 1 === $nodeTokenExpiries->item(0)->childNodes->length && XML_TEXT_NODE === $nodeTokenExpiries->item(0)->firstChild->nodeType)
+                ? DateTime::createFromFormat(self::TOKEN_TIMESTAMP_FORMAT, $nodeTokenExpiries->item(0)->nodeValue, $timezone)
+                : false;
+            $timestampDate = is_null($this->timestamp) ? false : DateTime::createFromFormat(self::TOKEN_TIMESTAMP_FORMAT, $this->timestamp, $timezone);
+            if (false === $expiryDate || $expiryDate->format(self::TOKEN_TIMESTAMP_FORMAT) !== $nodeTokenExpiries->item(0)->nodeValue)
+            {
+                // ANOMALY: Malformed token expiry.
+                $this->anomalies[] = "Token expiry is malformed!";
+            }
+            elseif (false !== $timestampDate && $expiryDate <= $timestampDate)
+            {
+                // ANOMALY: Token expiring before it was issued.
+                $this->anomalies[] = "Token expiry is not after its timestamp!";
+            }
+            else
+            {
+                // Store token expiry.
+                $this->expiry = $nodeTokenExpiries->item(0)->nodeValue;
+            }
+        }
+
+        // Get the nodes "ds:Signature/ds:Object/Token/TokenAudience", if any,
+        // and check them against the expected audience (see
+        // _verifyAudience()) before the token data are read.
+        $query = self::TOKEN_NAME . "/" . self::TOKEN_AUDIENCE_NAME;
+        $nodeTokenAudiences = $this->xpath->query($query, $nodeObject);
+        if (0 < $nodeTokenAudiences->length)
+        {
+            $audiences = [];
+            foreach ($nodeTokenAudiences as $nodeTokenAudience)
+            {
+                if (1 !== $nodeTokenAudience->childNodes->length
+                    || XML_TEXT_NODE !== $nodeTokenAudience->firstChild->nodeType
+                    || !self::_isValidAudience($nodeTokenAudience->nodeValue))
+                {
+                    // ANOMALY: Malformed token audience. The token is
+                    // rejected before its data are read: a malformed
+                    // audience is not one the receiver can be sure of.
+                    $this->anomalies[] = "Token audience is malformed!";
+                    $this->_throwAnomalies();
+                }
+                $audiences[] = $nodeTokenAudience->nodeValue;
+            }
+            $this->audience = $audiences;
+        }
+
+        // A token whose timestamp, identifier or expiry is malformed is
+        // rejected here, before its data are read and before its audience is
+        // checked, so that the error lists these anomalies.
+        if (!empty($this->anomalies))
+        {
+            $this->_throwAnomalies();
+        }
+
+        $this->_verifyAudience($isCreation);
+
         // Get the node "ds:Signature/ds:Object/Token/TokenData".
         $query = self::TOKEN_NAME . "/" . self::TOKEN_DATA_NAME;
         $nodeTokenData = $this->xpath->query($query, $nodeObject)->item(0);
@@ -2564,6 +2785,70 @@ class XMLDSigToken
 
 
     /**
+     * Verify that the token is addressed to the expected audience.
+     *
+     * A token signed by a trusted issuer is valid for every receiver that
+     * trusts this issuer: without an audience, a token issued for one
+     * receiver is accepted by another. A token may therefore name the
+     * receivers it is addressed to (option "audience" of its creation), and
+     * the analysis then requires the receiver to say who it is (option
+     * "expectedAudience"):
+     *
+     * - A token that names audiences is rejected unless `expectedAudience`
+     *   is given and is one of them. Accepting it without this option would
+     *   let any receiver of the issuer accept a token that is not addressed
+     *   to it.
+     *
+     * - A token that names no audience is rejected when `expectedAudience` is
+     *   given: the receiver asked for a token addressed to it.
+     *
+     * - A token that names no audience is accepted when `expectedAudience` is
+     *   not given, as are the tokens of version 1.0, which have none.
+     *
+     * When the object has just created the token, the audiences read must be
+     * those it wrote.
+     *
+     * @param boolean $isCreation TRUE if the object has just created the
+     *     token, FALSE if it analyzes a given one.
+     *
+     * @throws Exception If the token is not addressed to the expected
+     *     audience, with the reason.
+     */
+    private function _verifyAudience($isCreation)
+    {
+        $audiences = is_null($this->audience) ? [] : $this->audience;
+
+        if ($isCreation)
+        {
+            if ($audiences !== (is_null($this->audienceToWrite) ? [] : $this->audienceToWrite))
+            {
+                throw new Exception("Token audience is not the one written!");
+            }
+            return;
+        }
+
+        if (is_null($this->expectedAudience))
+        {
+            if (!empty($audiences))
+            {
+                throw new Exception("Token is addressed to an audience ('" . implode("', '", $audiences) . "'), but the option 'expectedAudience' is not given: pass the audience of this receiver to accept it!");
+            }
+            return;
+        }
+
+        if (empty($audiences))
+        {
+            throw new Exception("Token is not addressed to any audience, but the audience '" . $this->expectedAudience . "' is expected!");
+        }
+
+        if (!in_array($this->expectedAudience, $audiences, true))
+        {
+            throw new Exception("Token is not addressed to the expected audience! Expected: '" . $this->expectedAudience . "'. Token audience: '" . implode("', '", $audiences) . "'.");
+        }
+    }
+
+
+    /**
      * Indicates whether a name (the subject or the issuer of a certificate,
      * as returned by `openssl_x509_parse()`) holds the expected fields.
      *
@@ -2622,6 +2907,10 @@ class XMLDSigToken
      *   chain has been verified up to the trusted CA certificates, and its
      *   subject is the expected one, if any (see `isCertTrusted()`).
      *
+     * - The token is addressed to the audience given by the option
+     *   `expectedAudience`, if it names audiences or if this option is given
+     *   (see `getAudience()`).
+     *
      * Without a trust anchor given to the analysis, it returns FALSE.
      *
      * **It checks neither the freshness of the token nor whether it is
@@ -2632,7 +2921,8 @@ class XMLDSigToken
      * - `isSignatureValid()` returns TRUE;
      *
      * - `isOutOfDate($ttl)` returns FALSE, for the time to live the
-     *   application accepts;
+     *   application accepts (it also checks the expiry of the token, if
+     *   any);
      *
      * - the identifier returned by `getTokenId()` has not been accepted
      *   before: store it atomically, and refuse the token if it already is.
@@ -2681,7 +2971,16 @@ class XMLDSigToken
      * The token is out of date if its timestamp is more than `$ttl` seconds
      * in the past, or more than `DESYNC_TOLERANCE` seconds in the future
      * (clocks of sender and receiver out of sync), or if it has no valid
-     * timestamp.
+     * timestamp. A token created with the option `validity` is also out of
+     * date once its expiry is passed (see `getExpiry()`): the shorter of the
+     * validity set by the issuer and the `$ttl` set by the receiver applies.
+     *
+     * The expiry is only checked here, with the timestamp: like the time to
+     * live, it is a check left to the caller, and `isSignatureValid()` does
+     * not make it. `DESYNC_TOLERANCE` does not apply to the expiry: a
+     * receiver whose clock is ahead rejects the token a little earlier.
+     * Version 1.0 of this class ignores the expiry: a receiver that has not
+     * upgraded only applies its own `$ttl`.
      *
      * NOTE: A token that is not out of date can still be a replayed one: see
      * `getTokenId()`.
@@ -2714,6 +3013,23 @@ class XMLDSigToken
         // Compute the UTC UNIX timestamp for the current date/time.
         $curUTCDate = new DateTime('now', $timezone);
         $curUTCTimestamp = $curUTCDate->getTimestamp();
+
+        // A token whose expiry is passed is out of date, whatever $ttl. So
+        // is a token whose expiry could not be read: it is not valid either
+        // (see isSignatureValid()), but a caller that only calls this
+        // function must not take it for a token without expiry.
+        if ($this->hasExpiryNode && is_null($this->expiry))
+        {
+            return true;
+        }
+        if (!is_null($this->expiry))
+        {
+            $tokenUTCExpiry = DateTime::createFromFormat(self::TOKEN_TIMESTAMP_FORMAT, $this->expiry, $timezone);
+            if (false === $tokenUTCExpiry || $tokenUTCExpiry->getTimestamp() < $curUTCTimestamp)
+            {
+                return true;
+            }
+        }
 
         // Return timestamps comparison result.
         return $tokenUTCTimestamp > ($curUTCTimestamp + self::DESYNC_TOLERANCE) || ($tokenUTCTimestamp + $ttl) < $curUTCTimestamp;
@@ -2805,15 +3121,18 @@ class XMLDSigToken
     /**
      * Get the timestamp of the XML token.
      *
-     * A token created encrypted without the private key of the recipient is
-     * not decrypted: its timestamp is not available (see
-     * `createSecureXMLToken()`).
+     * The timestamp of a token that is not valid is not given: nothing read
+     * from such a token can be trusted. `isOutOfDate()` still reads it, and
+     * rejects such a token anyway when its timestamp could not be read.
      *
-     * @return string|null The token timestamp, NULL if not available.
+     * @return string|null The token timestamp, NULL if the token is not
+     *     valid (see `isSignatureValid()`), or if it was created encrypted
+     *     without the private key of the recipient, which leaves its content
+     *     unread (see `createSecureXMLToken()`).
      */
     public function getTimestamp()
     {
-        return $this->timestamp;
+        return $this->isSignatureValid() ? $this->timestamp : null;
     }
 
 
@@ -2841,6 +3160,44 @@ class XMLDSigToken
     public function getTokenId()
     {
         return $this->isSignatureValid() ? $this->tokenId : null;
+    }
+
+
+    /**
+     * Get the audiences the XML token is addressed to.
+     *
+     * A token created with the option `audience` names the receivers it is
+     * addressed to, and `isSignatureValid()` only accepts it if the analysis
+     * gives one of them with the option `expectedAudience` (see
+     * `__construct()`).
+     *
+     * @return array|null The list of the audiences of the token, NULL if the
+     *     token is not valid (see `isSignatureValid()`), if it names no
+     *     audience, or if it was created encrypted without the private key of
+     *     the recipient, which leaves its content unread (see
+     *     `createSecureXMLToken()`).
+     */
+    public function getAudience()
+    {
+        return $this->isSignatureValid() ? $this->audience : null;
+    }
+
+
+    /**
+     * Get the expiry of the XML token.
+     *
+     * A token created with the option `validity` holds the date after which
+     * it is out of date (see `isOutOfDate()`), in the format of the timestamp
+     * (`TOKEN_TIMESTAMP_FORMAT`, UTC).
+     *
+     * @return string|null The token expiry, NULL if the token is not valid
+     *     (see `isSignatureValid()`), if it has no expiry, or if it was
+     *     created encrypted without the private key of the recipient, which
+     *     leaves its content unread (see `createSecureXMLToken()`).
+     */
+    public function getExpiry()
+    {
+        return $this->isSignatureValid() ? $this->expiry : null;
     }
 
 
@@ -3574,6 +3931,8 @@ class XMLDSigToken
         $results['isDataEncrypted()'] = $this->isDataEncrypted() ? 'TRUE' : 'FALSE';
         $results['getTimestamp()'] = $this->getTimestamp();
         $results['getTokenId()'] = is_null($this->getTokenId()) ? 'NULL' : $this->getTokenId();
+        $results['getAudience()'] = $dumpToString($this->getAudience());
+        $results['getExpiry()'] = is_null($this->getExpiry()) ? 'NULL' : $this->getExpiry();
         $results['getData()'] = $dumpToString($this->getData());
         $results['getError()'] = is_null($this->getError()) ? 'NULL' : $this->getError();
         $results['getAnomalies()'] = $dumpToString($this->getAnomalies());
