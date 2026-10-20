@@ -31,12 +31,39 @@ final class Receiver
     /** @var array The configuration (see fromArray()). */
     private $config;
 
+    /** @var string The private key that decrypts the tokens (see
+    withCryptKey()). */
+    private $cryptKeyPath;
+
+    /** @var string|null Its password. */
+    private $cryptKeyPassword = Certs::CRYPT_KEY_PASSWORD;
+
     /**
      * @param array $config See fromArray().
      */
     private function __construct(array $config)
     {
         $this->config = $config;
+        $this->cryptKeyPath = Certs::path('crypt.key.pem');
+    }
+
+    /**
+     * Returns this receiver with another decryption key than
+     * demo/certs/crypt.key.pem. Not a setting of fromArray(): a request
+     * cannot name a file to read.
+     *
+     * @param string $path The private key.
+     * @param string|null $password Its password.
+     *
+     * @return Receiver
+     */
+    public function withCryptKey($path, $password)
+    {
+        $receiver = clone $this;
+        $receiver->cryptKeyPath = $path;
+        $receiver->cryptKeyPassword = $password;
+
+        return $receiver;
     }
 
     /**
@@ -65,6 +92,7 @@ final class Receiver
             'audience' => true,
             'expectedAudience' => Issuer::DEFAULT_AUDIENCE,
             'ttl' => 120,
+            'freshness' => true,
             'replay' => true,
             'algorithms' => $algorithms,
         ];
@@ -84,6 +112,7 @@ final class Receiver
      *     - audience (bool), expectedAudience (string): the audience of this
      *       receiver (`expectedAudience`);
      *     - ttl (int): time to live of `isOutOfDate()`, in seconds;
+     *     - freshness (bool): refuse a token that is out of date;
      *     - replay (bool): refuse a token identifier already accepted;
      *     - algorithms (array): expected algorithms, option => constant name.
      *
@@ -100,7 +129,7 @@ final class Receiver
             throw new \InvalidArgumentException('Unknown receiver setting: ' . implode(', ', $unknown) . '.');
         }
         $config += $defaults;
-        foreach (['ca', 'pin', 'subject', 'decrypt', 'audience', 'replay'] as $name)
+        foreach (['ca', 'pin', 'subject', 'decrypt', 'audience', 'freshness', 'replay'] as $name)
         {
             if (!is_bool($config[$name]))
             {
@@ -208,7 +237,7 @@ final class Receiver
         {
             if ($this->config['decrypt'])
             {
-                return XMLDSigToken::analyzeSecureXMLToken($xml, Certs::path('crypt.key.pem'), Certs::CRYPT_KEY_PASSWORD, $this->options());
+                return XMLDSigToken::analyzeSecureXMLToken($xml, $this->cryptKeyPath, $this->cryptKeyPassword, $this->options());
             }
 
             return XMLDSigToken::analyzeXMLToken($xml, $this->options());
@@ -249,17 +278,26 @@ final class Receiver
         $ttl = $this->config['ttl'];
         $age = is_null($token->getTimestamp()) ? null
             : time() - \DateTime::createFromFormat(XMLDSigToken::TOKEN_TIMESTAMP_FORMAT, $token->getTimestamp(), new \DateTimeZone('UTC'))->getTimestamp();
-        $fresh = $signatureValid && !$token->isOutOfDate($ttl);
-        $steps[] = self::step(
-            'freshness',
-            'Freshness',
-            'caller',
-            !$signatureValid ? 'skip' : ($fresh ? 'pass' : 'fail'),
-            'isOutOfDate(' . $ttl . ') — ' . (!$signatureValid || is_null($age)
-                ? 'checked once the library has accepted the token.'
-                : self::describeAge($age, $ttl) . self::describeExpiry($token->getExpiry())),
-            $signatureValid && !$fresh ? self::OUT_OF_DATE : null
-        );
+        if (!$this->config['freshness'])
+        {
+            $fresh = $signatureValid;
+            $steps[] = self::step('freshness', 'Freshness', 'caller', $signatureValid ? 'off' : 'skip',
+                'Not checked: a token is accepted however old it is, and whatever its expiry.', null);
+        }
+        else
+        {
+            $fresh = $signatureValid && !$token->isOutOfDate($ttl);
+            $steps[] = self::step(
+                'freshness',
+                'Freshness',
+                'caller',
+                !$signatureValid ? 'skip' : ($fresh ? 'pass' : 'fail'),
+                'isOutOfDate(' . $ttl . ') — ' . (!$signatureValid || is_null($age)
+                    ? 'checked once the library has accepted the token.'
+                    : self::describeAge($age, $ttl) . self::describeExpiry($token->getExpiry())),
+                $signatureValid && !$fresh ? self::OUT_OF_DATE : null
+            );
+        }
 
         $replayOk = true;
         if (!$this->config['replay'])
@@ -608,7 +646,7 @@ final class Receiver
         $lines[] = '';
         if ($this->config['decrypt'])
         {
-            $lines[] = "\$token = XMLDSigToken::analyzeSecureXMLToken(\$xml, 'certs/crypt.key.pem', 'cryptKeyPassword', \$options);";
+            $lines[] = "\$token = XMLDSigToken::analyzeSecureXMLToken(\$xml, " . var_export('certs/' . basename($this->cryptKeyPath), true) . ', ' . var_export($this->cryptKeyPassword, true) . ', $options);';
         }
         else
         {
@@ -621,10 +659,17 @@ final class Receiver
         $lines[] = '    reject($token->getError());';
         $lines[] = '}';
         $lines[] = '';
-        $lines[] = '// 2. Freshness: up to you. Also checks the expiry the issuer set, if any.';
-        $lines[] = 'if ($token->isOutOfDate(' . $this->config['ttl'] . ')) {';
-        $lines[] = "    reject('" . self::OUT_OF_DATE . "');";
-        $lines[] = '}';
+        if ($this->config['freshness'])
+        {
+            $lines[] = '// 2. Freshness: up to you. Also checks the expiry the issuer set, if any.';
+            $lines[] = 'if ($token->isOutOfDate(' . $this->config['ttl'] . ')) {';
+            $lines[] = "    reject('" . self::OUT_OF_DATE . "');";
+            $lines[] = '}';
+        }
+        else
+        {
+            $lines[] = '// 2. Freshness: NOT checked. A token is accepted however old it is.';
+        }
         $lines[] = '';
         if ($this->config['replay'])
         {

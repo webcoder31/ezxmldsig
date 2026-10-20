@@ -19,6 +19,7 @@
   --faint: #5d6a7c;
   --accent: #38d6c4;
   --accent-strong: #5ff0de;
+  --accent-hover: #a6faf0;
   --accent-ink: #04211e;
   --accent-soft: rgba(56, 214, 196, 0.12);
   --ok: #3fd98b;
@@ -63,6 +64,7 @@
     --faint: #8a96a6;
     --accent: #0d9488;
     --accent-strong: #0f766e;
+    --accent-hover: #0a524c;
     --accent-ink: #ffffff;
     --accent-soft: rgba(13, 148, 136, 0.1);
     --ok: #15803d;
@@ -102,6 +104,7 @@
   --faint: #8a96a6;
   --accent: #0d9488;
   --accent-strong: #0f766e;
+  --accent-hover: #0a524c;
   --accent-ink: #ffffff;
   --accent-soft: rgba(13, 148, 136, 0.1);
   --ok: #15803d;
@@ -147,6 +150,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Scrollbars: a thin rounded thumb on no track. Chrome and Safari draw
+   ::-webkit-scrollbar; Chrome ignores it once scrollbar-color is set, so
+   the standard properties are left to Firefox only. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent; border-radius: 999px;
+  background: var(--border-strong) padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--muted); }
+@supports (-moz-appearance: none) {
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+}
+
 code, pre, kbd, samp { font-family: var(--mono); font-size: 0.92em; }
 
 :not(pre) > code {
@@ -184,13 +201,13 @@ svg { width: 16px; height: 16px; flex: none; }
 
 .topbar {
   position: sticky; top: 0; z-index: 20;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   -webkit-backdrop-filter: saturate(140%) blur(12px);
   backdrop-filter: saturate(140%) blur(12px);
 }
 @supports not (background: color-mix(in srgb, red 50%, transparent)) {
-  .topbar { background: var(--bg); }
+  .topbar { background: var(--bg); border-bottom: 1px solid var(--border); }
 }
 
 .topbar-inner {
@@ -246,13 +263,30 @@ svg { width: 16px; height: 16px; flex: none; }
 .btn:hover { border-color: var(--faint); background: var(--surface-3); }
 .btn:active { transform: translateY(1px); }
 .btn[disabled] { opacity: 0.55; cursor: progress; }
+/* The gradient of the hover state is a layer over the one at rest, faded in
+   by its opacity. A gradient cannot be transitioned: replacing it on hover
+   left the background colour to transition from transparent, which showed
+   the page through the button for a moment. The background of the button
+   itself never changes. --accent-hover is far enough from --accent to be
+   seen. */
 .btn-primary {
+  position: relative; isolation: isolate;
   border-color: transparent;
   background: linear-gradient(180deg, var(--accent-strong), var(--accent));
   color: var(--accent-ink);
   box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--accent) 70%, transparent);
 }
-.btn-primary:hover { border-color: transparent; background: var(--accent-strong); }
+.btn-primary::before {
+  content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit;
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent-strong));
+  opacity: 0; transition: opacity 0.15s;
+}
+.btn-primary:hover {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--accent) 95%, transparent);
+}
+.btn-primary:hover::before { opacity: 1; }
 .btn-ghost { background: transparent; border-color: var(--border); color: var(--text); }
 .btn-ghost:hover { background: var(--surface-2); }
 .btn-ghost[aria-pressed="true"] { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); color: var(--accent); background: var(--accent-soft); }
@@ -415,6 +449,10 @@ main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; 
   margin-left: 10px; padding-left: 12px; border-left: 1px dashed var(--border-strong);
 }
 .data-key input, .data-value input { min-height: 32px; padding: 5px 8px; }
+/* Keys and values in the colours they take in the token: a key becomes the
+   name of an element, a value its text. */
+.data-key input { color: var(--x-tag); }
+.data-value input { color: var(--x-text); }
 .data-actions { display: flex; gap: 2px; }
 .data-actions .icon-btn { width: 28px; height: 28px; border-color: transparent; background: transparent; }
 .data-actions .icon-btn:hover { border-color: var(--border); background: var(--surface-2); }
@@ -426,7 +464,7 @@ main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; 
 .token-body { padding-top: 12px; }
 .token-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; min-height: 24px; }
 
-.token-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 14px; align-items: start; }
+.token-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; align-items: start; }
 
 .xml-wrap { min-width: 0; }
 .xml-view {
@@ -477,27 +515,33 @@ main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; 
 .xml-edit-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
 .xml-edit-actions .hint { margin: 0 auto 0 0; }
 
-.annotation {
-  position: sticky; top: 72px; min-height: 200px; padding: 14px 16px;
+/* The list of the blocks, then the explanation of one: both stay in view
+   while the token scrolls. */
+.token-side { position: sticky; top: 72px; display: grid; gap: 12px; align-self: start; }
+.annotation, .legend-card {
+  padding: 14px 16px;
   border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2);
   font-size: 13.5px;
 }
 .annotation-empty { color: var(--muted); }
-.annotation-empty p { margin: 0 0 10px; }
+.annotation-empty p { margin: 0; }
 .annotation h3 { margin: 0 0 6px; color: var(--text-strong); font: 600 14px/1.4 var(--mono); overflow-wrap: anywhere; }
 .annotation p { margin: 8px 0 0; }
-.annotation .chip { margin-top: 2px; }
+.annotation .chip { margin-top: 2px; max-width: 100%; white-space: normal; } /* wraps rather than overflows the panel */
 .annotation-facts { margin: 12px 0 0; padding: 10px 0 0; border-top: 1px dashed var(--border-strong); display: grid; gap: 6px; }
 .annotation-facts div { display: grid; gap: 1px; }
 .annotation-facts dt { color: var(--faint); font: 600 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
 .annotation-facts dd { margin: 0; color: var(--text-strong); font: 12.5px/1.5 var(--mono); overflow-wrap: anywhere; }
 .annotation-pin { margin-top: 12px; color: var(--faint); font-size: 12px; }
+.annotation { min-height: 200px; }
+.legend-title { margin: 0; color: var(--text-strong); font-weight: 600; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .legend button {
   padding: 2px 8px; border: 1px solid var(--border); border-radius: 6px;
   background: var(--surface); color: var(--muted); font: 12px/1.6 var(--mono); cursor: pointer;
 }
 .legend button:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.legend button[aria-pressed="true"] { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); background: var(--accent-soft); }
 
 /* ---------- Verification ---------- */
 
@@ -559,6 +603,10 @@ main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; 
 .step[data-status="idle"] .step-title, .step[data-status="idle"] .step-detail { opacity: 0.7; }
 .step.is-pending .step-icon { background: var(--surface); border-color: var(--border-strong); color: transparent; box-shadow: none; transform: scale(0.86); }
 .step.is-pending::before { background: var(--border); }
+/* The message of a failed step shows once the animation reaches it. */
+.step.is-pending .step-message { display: none; }
+.step:not(.is-pending) .step-message { animation: message-in 0.2s ease-out; }
+@keyframes message-in { from { opacity: 0; transform: translateY(-3px); } }
 
 .readback { margin: 0 0 16px; }
 .data-tree {
@@ -700,7 +748,8 @@ main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; 
 
 @media (max-width: 1180px) {
   .token-layout { grid-template-columns: minmax(0, 1fr); }
-  .annotation { position: static; min-height: 0; }
+  .token-side { position: static; }
+  .annotation { min-height: 0; }
   .card-details { grid-template-columns: minmax(0, 1fr); }
 }
 

@@ -4,8 +4,9 @@
 # demo.
 #
 # Usage:
-#   bin/gen-test-certs          writes tests/fixtures/certs/
-#   bin/gen-test-certs --demo   writes demo/certs/
+#   bin/gen-test-certs              writes tests/fixtures/certs/
+#   bin/gen-test-certs --demo       writes demo/certs/
+#   bin/gen-test-certs --demo-sso   writes demo-sso/certs/
 #
 # tests/fixtures/certs/ receives:
 #   root.cert.pem, root.key.pem                  root CA (self-signed)
@@ -37,6 +38,14 @@
 #                                                sign.cert.pem (its key is not
 #                                                kept)
 #
+# demo-sso/certs/ receives the encryption certificates of the two
+# applications of the single sign-on demo, each signed by its own key (the
+# library does not verify the chain of an encryption certificate), with keys
+# that have no password:
+#   mail.crypt.cert.pem, mail.crypt.key.pem
+#   crm.crypt.cert.pem, crm.crypt.key.pem
+# The other files of the single sign-on demo come from demo/certs/.
+#
 # Every certificate is valid for 10 years from the time of generation.
 #
 # The script always runs itself again inside an Alpine Docker container
@@ -53,7 +62,8 @@ MODE=tests
 case "${1:-}" in
     "") ;;
     --demo) MODE=demo ;;
-    *) echo "Usage: $0 [--demo]" >&2; exit 2 ;;
+    --demo-sso) MODE=demo-sso ;;
+    *) echo "Usage: $0 [--demo | --demo-sso]" >&2; exit 2 ;;
 esac
 
 if [ "${GEN_CERTS_IN_DOCKER:-}" != 1 ]; then
@@ -78,6 +88,9 @@ fi
 if [ "$MODE" = demo ]; then
     OUT_DIR="$ROOT_DIR/demo/certs"
     CRYPT_KEY_PASSWORD=cryptKeyPassword
+elif [ "$MODE" = demo-sso ]; then
+    OUT_DIR="$ROOT_DIR/demo-sso/certs"
+    CRYPT_KEY_PASSWORD=
 else
     OUT_DIR="$ROOT_DIR/tests/fixtures/certs"
     CRYPT_KEY_PASSWORD=
@@ -149,6 +162,31 @@ issue() {
         -extfile "$WORK_DIR/ext.cnf" -extensions "$3" \
         -out "$WORK_DIR/$1.cert.pem" 2>/dev/null
 }
+
+# Single sign-on demo: one encryption certificate per application.
+if [ "$MODE" = demo-sso ]; then
+    FILES=
+    for app in mail crm; do
+        genkey "$WORK_DIR/$app.crypt.key.pem" 2048
+        openssl req -new -x509 -sha256 -days "$DAYS" \
+            -key "$WORK_DIR/$app.crypt.key.pem" \
+            -subj "/C=DK/O=Lothbrok Ltd/OU=Cryptography Dept/CN=$app.localhost" \
+            -set_serial "0x$(openssl rand -hex 16)" \
+            -config "$WORK_DIR/ext.cnf" -extensions crypt \
+            -out "$WORK_DIR/$app.crypt.cert.pem" 2>/dev/null
+        FILES="$FILES $app.crypt.cert.pem $app.crypt.key.pem"
+    done
+    mkdir -p "$OUT_DIR"
+    for f in $FILES; do
+        cp "$WORK_DIR/$f" "$OUT_DIR/$f"
+        chown "$HOST_UID:$HOST_GID" "$OUT_DIR/$f"
+    done
+    echo "Certificates written to ${OUT_DIR#$ROOT_DIR/}:"
+    for f in $FILES; do
+        echo "  $f"
+    done
+    exit 0
+fi
 
 # Root CA.
 genkey "$WORK_DIR/root.key.pem" 4096

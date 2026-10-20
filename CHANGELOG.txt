@@ -1,3 +1,36 @@
+Unreleased
+----------
+- Add a single sign-on demo, run with `bin/demo-sso` (PHP built-in web
+  server in the php:8.3-cli Docker image, on 127.0.0.1 only): an identity
+  provider and two applications on idp.localhost, mail.localhost and
+  crm.localhost, which exchange ezxmldsig tokens. It shows each hop, each
+  token and each check, the cookies of each site, and lets turn off the
+  protections of idp and of the applications (audience, return address,
+  freshness, replay). Its attack lab plays seven attacks, four stopped by
+  those protections and three by the library. Its accounts show who decides
+  each right: idp decides which applications a user may enter, and crm
+  decides what a user may do, from the role the token carries. See the
+  README, section "Single sign-on demo".
+- `bin/gen-test-certs --demo-sso` writes the encryption certificates of the
+  applications of the single sign-on demo to `demo-sso/certs/`.
+- The receiver of the token demo (`demo/src/Receiver.php`) can turn off its
+  check of freshness, and decrypt with another key; neither is reachable
+  from its API.
+- The buttons of the demos keep their gradient on hover without flickering:
+  the gradient of the hover state is a layer faded in over the one at rest.
+  Before, the background showed the page for a moment on hover, and its
+  colour barely changed.
+- The scrollbars of the demos are thin, rounded and without a track, in the
+  colours of the page.
+- In the data editor of the token demo, keys and values take the colours
+  they have in the token: the name of an element, and its text.
+- In the token demo, the message of a failed check shows once the
+  animation of the verification reaches that check, not from its start.
+- In the token demo, the list of the blocks of the token stays above their
+  explanation, so that another block can be picked at any time; each panel
+  has a number of its own, and the top bar a link to the receiver; the
+  options of the receiver say what they do.
+
 1.1.0 (2026-10-18)
 -------------------
 In short: a token can name the receivers it is addressed to and the date

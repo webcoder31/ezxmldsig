@@ -1,0 +1,227 @@
+/*
+ * Style sheet of the SSO demo, on top of the one of the token demo
+ * (/app.css, served from demo/public/): the colour of each site, the layout
+ * of a page and its trace, and the trace itself.
+ */
+
+:root {
+  --site-idp: #c49bff;
+  --site-mail: #7aa7ff;
+  --site-crm: #f5b84d;
+  --site-browser: #8794a6;
+}
+html[data-site="idp"] { --site: var(--site-idp); }
+html[data-site="mail"] { --site: var(--site-mail); }
+html[data-site="crm"] { --site: var(--site-crm); }
+html[data-site="home"] { --site: var(--accent); }
+
+/* ---------- Top bar: which site this is ---------- */
+
+.topbar { border-bottom-color: color-mix(in srgb, var(--site) 45%, var(--border)); }
+.site-mark {
+  display: inline-grid; place-items: center; min-width: 34px; height: 24px; padding: 0 6px;
+  border-radius: 6px; background: var(--site); color: var(--bg); font: 700 11.5px/1 var(--mono);
+}
+.site-nav a { align-items: center; }
+.site-nav a[aria-current="page"] { color: var(--text-strong); background: var(--surface-2); }
+.site-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--site-browser); }
+.site-nav a[data-site="idp"] .site-dot { background: var(--site-idp); }
+.site-nav a[data-site="mail"] .site-dot { background: var(--site-mail); }
+.site-nav a[data-site="crm"] .site-dot { background: var(--site-crm); }
+
+/* ---------- Layout: the page, then the trace ---------- */
+
+.sso-layout {
+  display: grid; gap: 20px; padding-top: 48px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
+  align-items: start;
+}
+.sso-page { display: grid; gap: 20px; min-width: 0; }
+.sso-page .panel-num { border-color: color-mix(in srgb, var(--site) 45%, var(--border)); background: color-mix(in srgb, var(--site) 14%, transparent); color: var(--site); }
+.sso-hero { padding-top: 0; }
+.sso-steps { margin: 18px 0 0; padding-left: 20px; color: var(--text); }
+.sso-steps li { margin: 4px 0; }
+
+/* Groups of buttons: the same space everywhere, 20px above and below,
+   none at the start or the end of a block. Buttons keep their own width. */
+.sso-page .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 20px 0; }
+.sso-page .actions:first-child { margin-top: 0; }
+.sso-page .actions:last-child { margin-bottom: 0; }
+.sso-page .actions .btn, .sso-page .actions form { flex: none; margin: 0; }
+/* A form that ends with its buttons keeps the space below them, before
+   what follows the form. */
+.sso-page form:has(> .actions:last-child):not(:last-child) { margin-bottom: 20px; }
+/* Unfolded, the verification steps keep the space the code below them has
+   (.code-block) from their title. */
+.code-details > .pipeline { margin-top: 14px; }
+/* In the login form, the grid already spaces its rows. */
+.sso-page .login-form .actions { margin: 6px 0 0; }
+
+/* Links drawn as buttons: the colour of links on hover (a:hover, which
+   outweighs .btn-primary) would match the background of the button. */
+a.btn { text-decoration: none; }
+a.btn-primary, a.btn-primary:hover { color: var(--accent-ink); }
+a.btn-ghost, a.btn-ghost:hover { color: var(--text); }
+
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 12px; }
+.facts dt { color: var(--muted); font-size: 13px; }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.login-form { display: grid; gap: 12px; max-width: 420px; }
+.login-form input {
+  min-height: 36px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--surface-2); color: var(--text-strong); font: inherit;
+}
+.login-form ul.hint { margin: 0; padding-left: 18px; }
+/* Each demo account, with the button that fills in the form with it. */
+.login-form ul.accounts { display: grid; gap: 6px; padding: 0; list-style: none; }
+.login-form ul.accounts li { display: flex; align-items: baseline; gap: 10px; }
+.login-form ul.accounts .btn { flex: none; }
+.post-countdown { margin: 0 0 12px; color: var(--text); }
+.cookie-list { list-style: none; margin: 0; padding: 0; }
+.cookie-list p { margin: 4px 0 0; font-size: 13px; }
+
+/* Step icons drawn by CSS: the pages of the SSO demo carry no icon sprite. */
+.sso-page .step-icon::before { font: 700 13px/1 var(--font); }
+.sso-page .step[data-status="pass"] .step-icon::before { content: "\2713"; }
+.sso-page .step[data-status="fail"] .step-icon::before { content: "\2715"; }
+.sso-page .step[data-status="skip"] .step-icon::before { content: "\2013"; }
+.sso-page .step[data-status="off"] .step-icon::before { content: "\2205"; }
+
+/* ---------- The trace ---------- */
+
+.trace-panel { position: sticky; top: 76px; display: flex; flex-direction: column; max-height: calc(100vh - 96px); }
+.trace-lanes, .trace-hop { display: grid; grid-template-columns: repeat(4, 1fr); }
+.trace-lanes { padding: 10px 18px 6px; border-bottom: 1px solid var(--border); color: var(--muted); font: 600 11px/1.4 var(--mono); text-align: center; text-transform: uppercase; letter-spacing: 0.06em; }
+.trace-lanes span:nth-child(2) { color: var(--site-idp); }
+.trace-lanes span:nth-child(3) { color: var(--site-mail); }
+.trace-lanes span:nth-child(4) { color: var(--site-crm); }
+.trace-list { list-style: none; margin: 0; padding: 8px 18px 18px; overflow-y: auto; }
+.trace-empty { padding: 16px 0; color: var(--muted); font-size: 13.5px; }
+.trace-item { position: relative; padding: 8px 10px 10px; margin: 0 -10px; border-radius: 9px; border-left: 3px solid transparent; }
+.trace-item + .trace-item { margin-top: 4px; }
+.trace-item[data-kind="ok"] { border-left-color: var(--ok); }
+.trace-item[data-kind="bad"] { border-left-color: var(--bad); background: var(--bad-soft); }
+.trace-item[data-kind="sso"] { border-left-color: var(--site-idp); background: color-mix(in srgb, var(--site-idp) 12%, transparent); }
+.trace-item.is-new { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent) inset; }
+
+/* A hop: an arrow from the lane of the sender (a dot) to the lane of the
+   receiver (the arrowhead). An event within a site is a dot on its lane. */
+.trace-hop { position: relative; height: 14px; margin-bottom: 4px; --hop: var(--accent); }
+.trace-item[data-kind="bad"] .trace-hop { --hop: var(--bad); }
+.trace-item[data-kind="sso"] .trace-hop { --hop: var(--site-idp); }
+.trace-cell { position: relative; }
+.trace-cell::after { content: ""; position: absolute; left: 50%; top: 2px; bottom: 2px; width: 1px; background: var(--border); }
+.trace-cell.is-from::before {
+  content: ""; position: absolute; left: calc(50% - 4px); top: 3px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--hop); z-index: 1;
+}
+.trace-hop::after {
+  content: ""; position: absolute; top: 7px; height: 2px; background: var(--hop);
+  left: calc((min(var(--from), var(--to)) + 0.5) * 25%);
+  width: calc((max(var(--from), var(--to)) - min(var(--from), var(--to))) * 25%);
+}
+.trace-hop.is-right::before, .trace-hop.is-left::before {
+  content: ""; position: absolute; top: 3px; width: 0; height: 0; z-index: 1;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+}
+.trace-hop.is-right::before { left: calc((var(--to) + 0.5) * 25% - 9px); border-left: 10px solid var(--hop); }
+.trace-hop.is-left::before { left: calc((var(--to) + 0.5) * 25% - 1px); border-right: 10px solid var(--hop); }
+.trace-hop.is-right::after { width: calc((var(--to) - var(--from)) * 25% - 8px); }
+.trace-hop.is-left::after { left: calc((var(--to) + 0.5) * 25% + 8px); width: calc((var(--from) - var(--to)) * 25% - 8px); }
+
+.trace-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; font: 12px/1.5 var(--mono); color: var(--muted); }
+.trace-route { color: var(--text); }
+.trace-kind { padding: 0 6px; border-radius: 5px; background: var(--surface-3); color: var(--text-strong); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+.trace-item[data-kind="ok"] .trace-kind { background: var(--ok-soft); color: var(--ok); }
+.trace-item[data-kind="bad"] .trace-kind { background: var(--bad); color: var(--surface); }
+.trace-item[data-kind="sso"] .trace-kind { background: var(--site-idp); color: var(--bg); }
+.trace-title { margin: 2px 0 0; color: var(--text-strong); font-size: 13.5px; }
+.trace-toggle { margin-top: 6px; }
+.trace-more { margin-top: 8px; font-size: 13px; color: var(--text); }
+.trace-more p { margin: 0 0 6px; overflow-wrap: anywhere; }
+.trace-steps { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 3px; }
+.trace-steps li { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; padding-left: 18px; position: relative; }
+.trace-steps li::before { position: absolute; left: 0; font-weight: 700; }
+.trace-steps li[data-status="pass"]::before { content: "\2713"; color: var(--ok); }
+.trace-steps li[data-status="fail"]::before { content: "\2715"; color: var(--bad); }
+.trace-steps li[data-status="skip"]::before { content: "\2013"; color: var(--faint); }
+.trace-steps li[data-status="off"]::before { content: "\2205"; color: var(--warn); }
+.trace-step-message { flex-basis: 100%; color: var(--bad); font: 12px/1.5 var(--mono); }
+.trace-xml { max-height: 260px; overflow: auto; font-size: 11.5px; }
+/* A token, one line per block (sso.js): indented by its depth, and a line
+   too long for its panel wraps 2 characters further in. */
+.xml-lines { white-space: pre-wrap; overflow-wrap: anywhere; }
+.xml-row { display: block; padding-left: calc((var(--depth) * 2 + 2) * 1ch); text-indent: -2ch; }
+
+@media (max-width: 1080px) {
+  .sso-layout { grid-template-columns: minmax(0, 1fr); }
+  .trace-panel { position: static; max-height: none; }
+}
+@media (max-width: 600px) {
+  /* The space of the token demo above its content. */
+  .sso-layout { padding-top: 28px; }
+}
+@media (max-width: 720px) {
+  /* The links to the sites go; the one to the home page stays. */
+  .site-nav a:not(.home-link) { display: none; }
+}
+
+/* ---------- Home page: protections and attack lab ---------- */
+
+.sso-page > #protections, .sso-page > #lab { scroll-margin-top: 72px; }
+.protection-list { display: grid; gap: 12px; }
+.protection .switch-label { display: flex; flex-direction: column; gap: 2px; }
+.protection .switch-label .muted { font-size: 12.5px; }
+.step-by-idp { background: color-mix(in srgb, var(--site-idp) 16%, transparent); color: var(--site-idp); }
+
+.lab-cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.lab-card {
+  display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2);
+}
+.lab-card p { margin: 0; font-size: 13.5px; }
+.lab-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: space-between; }
+.lab-head h3 { margin: 0; color: var(--text-strong); font-size: 15px; }
+.lab-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 6px; }
+.lab-foot .btn { flex: none; }
+.lab-verdict { padding: 8px 10px; border-radius: 8px; font-size: 13.5px; }
+.lab-verdict.is-ok { background: var(--ok-soft); border: 1px solid color-mix(in srgb, var(--ok) 40%, var(--border)); }
+.lab-verdict.is-ok strong { color: var(--ok); }
+.lab-verdict.is-bad { background: var(--bad-soft); border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--border)); }
+.lab-verdict.is-bad strong { color: var(--bad); }
+.lab-events { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; display: grid; gap: 3px; }
+.lab-events li[data-kind="bad"] { color: var(--bad); }
+.lab-events li[data-kind="ok"] { color: var(--ok); }
+.lab-events li[data-kind="sso"] { color: var(--site-idp); }
+#lab .panel-tools .btn { white-space: nowrap; }
+
+/* ---------- Banner of each site: icon and name in the colour of its lane ---------- */
+
+.site-banner { display: flex; align-items: center; gap: 14px; padding: 4px 2px; }
+.site-icon {
+  flex: none; width: 46px; height: 46px; padding: 9px; border-radius: 12px;
+  fill: none; stroke: var(--site); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  background: color-mix(in srgb, var(--site) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--site) 40%, var(--border));
+}
+.site-title { margin: 0; color: var(--site); font: 700 22px/1.2 var(--mono); letter-spacing: -0.01em; }
+.site-role { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+
+
+/* ---------- Rights and customers ---------- */
+
+.rights, .customers { margin-top: 16px; }
+.rights .h-small, .customers .h-small { margin: 0 0 6px; }
+.rights-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.right-by { display: inline-block; min-width: 38px; margin-right: 6px; padding: 0 6px; border-radius: 5px; font: 600 10.5px/1.7 var(--mono); text-transform: uppercase; text-align: center; }
+.right-by-idp { background: color-mix(in srgb, var(--site-idp) 16%, transparent); color: var(--site-idp); }
+.right-by-app { background: color-mix(in srgb, var(--site) 16%, transparent); color: var(--site); }
+.customer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.customer-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
+.customer-list form { margin: 0; }
+
+/* ---------- Link to the home page of the demo ---------- */
+
+.site-nav .home-link { gap: 6px; }
+.home-icon { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.site-nav .home-link[aria-current="page"] { color: var(--text-strong); background: var(--surface-2); }

@@ -3,3 +3,4 @@
 /vendor
 /tests/.cache
 /demo/var
+/demo-sso/var

@@ -607,7 +607,7 @@
     if (!top) return null;
     if (top.local === 'SignedInfo') return { text: 'Signed: covered by SignatureValue', kind: 'ok' };
     if (top.local === 'SignatureValue') return { text: 'The signature itself', kind: 'accent' };
-    if (top.local === 'Object') return { text: 'Covered by DigestValue, hence signed', kind: 'ok' };
+    if (top.local === 'Object') return { text: 'Signed: covered by DigestValue', kind: 'ok' };
     if (top.local === 'KeyInfo') return { text: 'Not covered by the signature', kind: 'warn' };
     return { text: 'Not covered by the signature', kind: 'warn' };
   }
@@ -655,24 +655,35 @@
 
   const LEGEND = ['SignedInfo', 'DigestValue', 'SignatureValue', 'X509Certificate', 'Object', 'TokenTimestamp', 'TokenId', 'TokenExpiry', 'TokenAudience', 'TokenData', 'EncryptedData', 'EncryptedKey'];
 
+  /**
+   * The blocks of the token, one button each: always shown, above the
+   * explanation, so that another block can be picked at any time.
+   */
+  function renderLegend(node) {
+    const card = $('token-legend');
+    clear(card);
+    const legend = el('div', { class: 'legend' });
+    LEGEND.forEach(function (local) {
+      const target = findNodeByLocal(local);
+      if (!target) return;
+      legend.appendChild(el('button', {
+        text: local,
+        attrs: { type: 'button', 'aria-label': 'Explain ' + target.name, 'aria-pressed': String(!!node && node.id === target.id) },
+        on: { click: function () { selectNode(target.id, true, true); } }
+      }));
+    });
+    card.appendChild(el('p', { class: 'legend-title', text: 'Highlight a block' }));
+    card.appendChild(legend);
+  }
+
   function renderAnnotation() {
     const box = $('annotation');
     clear(box);
     const node = state.activeId ? findNode(state.activeId) : null;
+    renderLegend(node);
     if (!node) {
-      const legend = el('div', { class: 'legend' });
-      LEGEND.forEach(function (local) {
-        const target = findNodeByLocal(local);
-        if (!target) return;
-        legend.appendChild(el('button', {
-          text: local,
-          attrs: { type: 'button', 'aria-label': 'Explain ' + target.name },
-          on: { click: function () { selectNode(target.id, true, true); } }
-        }));
-      });
       box.appendChild(el('div', { class: 'annotation-empty' }, [
-        el('p', { text: 'Point at a tag, or focus the token and use the arrow keys, to see what each block does and whether the signature covers it.' }),
-        legend
+        el('p', { text: 'Point at a tag, or focus the token and use the arrow keys, to see what each block does and whether the signature covers it. Or pick a block above.' })
       ]));
       return;
     }

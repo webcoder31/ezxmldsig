@@ -44,8 +44,9 @@
     <nav class="topnav" aria-label="Sections">
       <a href="#issuer"><span class="topnav-num">01</span>Issue</a>
       <a href="#token"><span class="topnav-num">02</span>Inspect</a>
-      <a href="#receiver"><span class="topnav-num">03</span>Verify</a>
-      <a href="#lab"><span class="topnav-num">04</span>Attack lab</a>
+      <a href="#receiver-config"><span class="topnav-num">03</span>Receive</a>
+      <a href="#receiver"><span class="topnav-num">04</span>Verify</a>
+      <a href="#lab"><span class="topnav-num">05</span>Attack lab</a>
     </nav>
     <div class="topbar-actions">
       <span class="chip chip-version" id="version" title="Version of the library">ezxmldsig</span>
@@ -153,7 +154,10 @@
               </div>
             </div>
           </div>
-          <aside class="annotation" id="annotation" aria-live="polite"></aside>
+          <div class="token-side">
+            <nav class="legend-card" id="token-legend" aria-label="Blocks of the token"></nav>
+            <aside class="annotation" id="annotation" aria-live="polite"></aside>
+          </div>
         </div>
         <details class="code-details">
           <summary>PHP code of the issuer</summary>
@@ -176,12 +180,12 @@
       <form class="panel-body" id="receiver-form" novalidate>
         <fieldset class="field-group">
           <legend>Trust anchor</legend>
-          <label class="check"><input type="checkbox" id="rc-ca"><span>CA chain <span class="muted"><code>caCertPath</code>: intermediate + root</span></span></label>
-          <label class="check"><input type="checkbox" id="rc-pin"><span>Pinned signer <span class="muted"><code>signerCertPath</code></span></span></label>
-          <label class="check"><input type="checkbox" id="rc-subject"><span>Expected subject <span class="muted"><code>expectedSubject</code></span></span></label>
+          <label class="check"><input type="checkbox" id="rc-ca"><span>CA chain <span class="muted"><code>caCertPath</code>: the CA certificates trusted, <code>intermediate.cert.pem</code> and <code>root.cert.pem</code>; the certificate of the signer must chain up to them</span></span></label>
+          <label class="check"><input type="checkbox" id="rc-pin"><span>Pinned signer <span class="muted"><code>signerCertPath</code>: the token must be signed with this very certificate, <code>sign.cert.pem</code></span></span></label>
+          <label class="check"><input type="checkbox" id="rc-subject"><span>Expected subject <span class="muted"><code>expectedSubject</code>: fields of the subject of the signer's certificate</span></span></label>
           <div class="subject-grid" id="rc-subject-fields">
-            <label class="field"><span class="field-label">O</span><input type="text" id="rc-subjectO" autocomplete="off" spellcheck="false"></label>
-            <label class="field"><span class="field-label">OU</span><input type="text" id="rc-subjectOU" autocomplete="off" spellcheck="false"></label>
+            <label class="field"><span class="field-label">O, organization</span><input type="text" id="rc-subjectO" autocomplete="off" spellcheck="false"></label>
+            <label class="field"><span class="field-label">OU, organizational unit</span><input type="text" id="rc-subjectOU" autocomplete="off" spellcheck="false"></label>
           </div>
         </fieldset>
 
@@ -195,7 +199,7 @@
 
         <fieldset class="field-group">
           <legend>Decryption</legend>
-          <label class="check"><input type="checkbox" id="rc-decrypt"><span>Recipient's private key <span class="muted"><code>crypt.key.pem</code></span></span></label>
+          <label class="check"><input type="checkbox" id="rc-decrypt"><span>Recipient's private key <span class="muted"><code>crypt.key.pem</code>: decrypts the tokens the issuer encrypted for its certificate, <code>crypt.cert.pem</code></span></span></label>
         </fieldset>
 
         <fieldset class="field-group">
@@ -232,7 +236,7 @@
 
     <section class="panel" id="receiver" aria-labelledby="receiver-title">
       <header class="panel-head">
-        <span class="panel-num">03</span>
+        <span class="panel-num">04</span>
         <div>
           <h2 id="receiver-title">Verification</h2>
           <p class="panel-sub">The library's checks, then yours.</p>
@@ -259,7 +263,7 @@
   <section class="lab" id="lab" aria-labelledby="lab-title">
     <header class="lab-head">
       <div>
-        <p class="eyebrow"><span class="panel-num">04</span> Attack lab</p>
+        <p class="eyebrow"><span class="panel-num">05</span> Attack lab</p>
         <h2 id="lab-title">Forge, wrap, swap, replay.</h2>
         <p class="lab-lead">Each attack starts from the last token of the issuer, alters it on the server, and submits it to the receiver configured above, with a replay memory of its own. No vulnerable code runs here: this is what 1.0.0 does with each forged token.</p>
       </div>

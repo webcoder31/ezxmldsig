@@ -40,11 +40,11 @@ final class Issuer
     const DEFAULT_DATA = [
         'name' => 'Ragnar Lothbrok',
         'role' => 'Jarl',
-        'location' => 'Kattegat',
         'permissions' => [
             'fleet' => 'command',
             'treasury' => 'read',
         ],
+        'location' => 'Kattegat',
     ];
 
     /**

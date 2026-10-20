@@ -1,0 +1,91 @@
+#!/bin/sh
+#
+# Runs the single sign-on demo of ezxmldsig in Docker.
+#
+# Usage:
+#   bin/demo-sso [PORT]
+#
+# Three sites, told apart by their host names, are served by one PHP
+# built-in web server on PORT (8090 by default, or the DEMO_SSO_PORT
+# environment variable), published on 127.0.0.1 only:
+#   http://localhost:PORT/       the home page of the demo
+#   http://idp.localhost:PORT/   the identity provider
+#   http://mail.localhost:PORT/  an application
+#   http://crm.localhost:PORT/   another application
+# Browsers resolve *.localhost to this machine. The home page is opened in
+# the browser when a command to do so is found (DEMO_NO_BROWSER=1 skips it).
+# Ctrl-C stops the server.
+#
+# Before that, bin/deps brings vendor/ in line with composer.json, as
+# bin/test and bin/demo do. The sessions, the trace and the replay memories
+# of the demo are kept in demo-sso/var/ (ignored by git).
+#
+# WARNING: the demo signs with the keys of demo/certs/, which are public
+# (see demo/certs/README.md).
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+case "${1:-}" in
+    -h|--help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+esac
+PORT=${1:-${DEMO_SSO_PORT:-8090}}
+case "$PORT" in
+    ''|*[!0-9]*) echo "Invalid port: $PORT" >&2; exit 2 ;;
+esac
+if [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+    echo "Invalid port: $PORT" >&2
+    exit 2
+fi
+
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not reachable (with Colima: colima start)." >&2
+    exit 1
+fi
+
+DOCKER_USER="$(id -u):$(id -g)"
+
+# Dependencies (see bin/deps).
+"$ROOT_DIR/bin/deps"
+
+URL="http://localhost:$PORT/"
+
+# Opens the home page once the server answers (for up to 20 seconds).
+open_browser() {
+    if command -v open >/dev/null 2>&1; then
+        opener=open
+    elif command -v xdg-open >/dev/null 2>&1; then
+        opener=xdg-open
+    else
+        return 0
+    fi
+    i=0
+    while [ $i -lt 40 ]; do
+        if curl -fsS -o /dev/null "$URL" 2>/dev/null; then
+            "$opener" "$URL" >/dev/null 2>&1 || true
+            return 0
+        fi
+        sleep 0.5
+        i=$((i + 1))
+    done
+}
+
+echo "ezxmldsig SSO demo: $URL (Ctrl-C to stop)" >&2
+if [ "${DEMO_NO_BROWSER:-}" != 1 ] && command -v curl >/dev/null 2>&1; then
+    open_browser &
+fi
+
+# A terminal lets Ctrl-C reach the server.
+TTY_FLAGS=
+if [ -t 0 ] && [ -t 1 ]; then
+    TTY_FLAGS=-it
+fi
+
+# The server listens on every interface of the container, and Docker
+# publishes its port on 127.0.0.1 only.
+# shellcheck disable=SC2086
+exec docker run --rm --init $TTY_FLAGS -u "$DOCKER_USER" \
+    -p "127.0.0.1:$PORT:8080" \
+    -v "$ROOT_DIR:/app" -w /app php:8.3-cli \
+    php -S 0.0.0.0:8080 -t demo-sso/public demo-sso/public/index.php
