@@ -2,6 +2,7 @@
 # installs from: the package holds the library, its README, its license and
 # its changelog, not the demo, the tests, the API docs or the tools of the
 # repository.
+/.dockerignore export-ignore
 /.drove.json export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore

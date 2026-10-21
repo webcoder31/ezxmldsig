@@ -699,14 +699,21 @@ Every token of the demo is created and analyzed by the library, in PHP; the page
 
 * **Issuer**: user data (nested values allowed), encryption on or off, the audiences the token is addressed to and its validity (by default, the receiver of the demo, `receiver`, and 300 seconds), and the signature, digest and encryption algorithms.
 * **Token**: the XML token, highlighted, each block explained when you point at it or select it with the arrow keys: what it does, and whether the signature covers it. It can be copied, or edited by hand before it is verified. Below it, a collapsed section shows the PHP code of the issuer that created this token; it changes only when a token is created.
-* **Receiver**: the trust anchor (`caCertPath`, `signerCertPath`, `expectedSubject`), its own audience (`expectedAudience`), the decryption key, the expected algorithms, the time to live and the replay protection. The verification is shown as a pipeline of checks: those of `isSignatureValid()` (structure, algorithms, digest, signature, trust in the certificate, decryption, content, audience), then the two checks left to the caller, freshness (`isOutOfDate()`, expiry included) and replay (`getTokenId()`, stored in a file of `demo/var/`, under a lock). The PHP code of this receiver is shown.
+* **Receiver**: the trust anchor (`caCertPath`, `signerCertPath`, `expectedSubject`), its own audience (`expectedAudience`), the decryption key, the expected algorithms, the time to live and the replay protection. The verification is shown as a pipeline of checks: those of `isSignatureValid()` (structure, algorithms, digest, signature, trust in the certificate, decryption, content, audience), then the two checks left to the caller, freshness (`isOutOfDate()`, expiry included) and replay (`getTokenId()`, stored in a file of `demo/var/`, under a lock, one per visitor: a cookie names it). The PHP code of this receiver is shown.
 * **Attack lab**: each attack alters the last token of the issuer (or a new one, when the last one does not suit the attack) on the server and submits it to the receiver, with a replay memory of its own: data tampering, signature wrapping, look-alike certificate, EC key substitution, replay, expired token, token addressed to another receiver, token past the expiry its issuer set, DOCTYPE with entities, altered ciphertext signed again by a trusted signer, certificate of an untrusted CA, and a script in the data. Each one shows what was changed (as a diff), the check that stops it, the exact message, and the security advisory of the 0.x versions it relates to. No vulnerable code runs: the lab shows what the current version does.
 
 > **WARNING: the private keys of `demo/certs/` are public.** They are published with the source code of this library, with their passwords: anyone can sign tokens that the demo trusts, and decrypt the tokens it encrypts. Use them for the demo only, never in an application or on a server reachable by others, and never trust their CA certificates: generate your own keys and certificates (see `demo/certs/README.md`). The same goes for the keys of `tests/fixtures/certs/`, which only serve the tests.
 
 The certificates of the demo (`demo/certs/`: a root CA, the intermediate CA that issued the signing and encryption certificates, these certificates with their keys, and the certificates of the attacks) are valid for 10 years from their generation. To issue new ones, run `bin/gen-test-certs --demo`.
 
-The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `demo-sso/`, `tests/`, `docs/` and `bin/` out of the archives Composer installs.
+To serve the demo online, `demo/Dockerfile` builds an image with Apache and PHP 8.3, which listens on port 8000 as user `www-data`, every request routed to `demo/public/index.php`, and `GET /health` answering `ok`. `DEMO_PUBLIC_HOST` names the host it answers on besides `127.0.0.1` and `localhost`, served over HTTPS by a proxy in front of it. Only `demo/var/`, `/var/run/apache2` and `/var/lock/apache2` need to be writable. Build it from the root of the repository:
+
+```
+docker build -f demo/Dockerfile -t ezxmldsig-demo .
+docker run --rm -p 127.0.0.1:8000:8000 ezxmldsig-demo
+```
+
+The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `demo-sso/`, `tests/`, `docs/`, `bin/` and `.dockerignore` out of the archives Composer installs.
 
 
 ## Single sign-on demo

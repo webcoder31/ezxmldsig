@@ -30,6 +30,11 @@ Unreleased
   explanation, so that another block can be picked at any time; each panel
   has a number of its own, and the top bar a link to the receiver; the
   options of the receiver say what they do.
+- The token demo can be served online: `demo/Dockerfile` builds an image
+  with Apache and PHP 8.3, with a health check (`GET /health`), and
+  `DEMO_PUBLIC_HOST` names the public host it answers on, over HTTPS. Each
+  visitor has a replay memory of their own, named by a cookie: "Forget all"
+  only forgets theirs.
 
 1.1.0 (2026-10-18)
 -------------------

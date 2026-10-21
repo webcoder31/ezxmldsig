@@ -64,6 +64,12 @@ final class ReplayStore
      */
     public function size()
     {
+        // A store never written to holds nothing: reading it creates no file.
+        if (!is_null($this->path) && !is_file($this->path))
+        {
+            return 0;
+        }
+
         return $this->update(function (array $ids) {
             return [$ids, count($ids)];
         });
@@ -74,9 +80,35 @@ final class ReplayStore
      */
     public function clear()
     {
+        if (!is_null($this->path) && !is_file($this->path))
+        {
+            return;
+        }
         $this->update(function () {
             return [[], null];
         });
+    }
+
+    /**
+     * Removes the stores of a directory that have not been written to for a
+     * while: online, each visitor has a store of their own (see
+     * demo/public/index.php), and most never come back.
+     *
+     * @param string $dir The directory of the stores.
+     * @param int $idle How long a store may stay unwritten, in seconds: at
+     *     least the longest retention of an identifier.
+     */
+    public static function forgetIdle($dir, $idle)
+    {
+        $limit = time() - $idle;
+        foreach (glob($dir . '/*.json') ?: [] as $file)
+        {
+            $written = @filemtime($file);
+            if (false !== $written && $written < $limit)
+            {
+                @unlink($file);
+            }
+        }
     }
 
     /**
