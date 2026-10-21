@@ -107,7 +107,7 @@ The ``X509Cert`` class provides a set of convenient methods for extracting essen
 
 **NOTE:** The library **ezxmldsig** is designed to work with cryptographic material in PEM format.
 
-To see it work before writing any code, run the [demo](#demo) (`bin/demo`): it creates, explains and verifies tokens, and replays the attacks the library refuses.
+To see it work before writing any code, open the [demo](#demo) online (https://ezxmldsig.wbcdr.dev/) or run it on your machine (`bin/demo`): it creates, explains and verifies tokens, and replays the attacks the library refuses.
 
 
 ### XMLDSigToken: Creating a signed XML token
@@ -682,7 +682,7 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 
 ## Demo
 
-An interactive demo runs on your machine. It requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
+An interactive demo is online at **https://ezxmldsig.wbcdr.dev/**: nothing to install, and each visitor has a replay memory of their own. It also runs on your machine, which requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
 
 ```
 git clone https://github.com/webcoder31/ezxmldsig.git
