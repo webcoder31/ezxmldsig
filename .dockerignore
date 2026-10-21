@@ -1,10 +1,14 @@
-# What the image of demo/Dockerfile, the only image built from the root of
-# the repository, needs from it, and nothing else. Left out of the Composer
-# package (see .gitattributes).
+# What the images of demo/Dockerfile and demo-sso/Dockerfile, the only
+# images built from the root of the repository, need from it, and nothing
+# else. Left out of the Composer package (see .gitattributes).
 *
 !composer.json
 !src/
 !demo/
+!demo-sso/
 demo/var
 demo/screenshot.png
 demo/Dockerfile
+demo-sso/var
+demo-sso/screenshot.png
+demo-sso/Dockerfile

@@ -38,6 +38,11 @@ Unreleased
 - The top bar of both demos links to the repository on GitHub. On a narrow
   screen, the single sign-on demo keeps its link to the home page: the
   style sheet of the token demo hid its whole menu below 960 pixels.
+- The single sign-on demo can be served online: `demo-sso/Dockerfile`
+  builds its image, and `DEMO_SSO_PUBLIC_DOMAIN` names the domain whose
+  subdomains are its sites, over HTTPS. Each visitor then has sessions, a
+  trace, protections and replay memories of their own, named by a cookie
+  set on that domain. On this machine, nothing changes.
 
 1.1.0 (2026-10-18)
 -------------------

@@ -3,6 +3,7 @@
 namespace webcoder31\ezxmldsig\Tests;
 
 use webcoder31\ezxmldsig\DemoSso\AttackLab;
+use webcoder31\ezxmldsig\DemoSso\Base;
 
 /**
  * Each attack of the attack lab of the SSO demo, run by the very code the
@@ -65,7 +66,7 @@ class DemoSsoAttackLabTest extends TestCase
             $this->requireSymmetricEncryption();
         }
 
-        $result = (new AttackLab($this->varDir, 8090))->run($id, true);
+        $result = (new AttackLab($this->varDir, Base::local(8090)))->run($id, true);
 
         $this->assertFalse($result['accepted']);
         $this->assertSame($by, $result['stoppedBy']['by']);
@@ -93,7 +94,7 @@ class DemoSsoAttackLabTest extends TestCase
      */
     public function testTheAttackSucceedsWithItsProtectionOff($id)
     {
-        $result = (new AttackLab($this->varDir, 8090))->run($id, false);
+        $result = (new AttackLab($this->varDir, Base::local(8090)))->run($id, false);
 
         $this->assertFalse($result['protected']);
         $this->assertTrue($result['accepted'], 'The attacker gets a session.');
@@ -104,7 +105,7 @@ class DemoSsoAttackLabTest extends TestCase
     {
         foreach (['tamper', 'other-idp'] as $id)
         {
-            $result = (new AttackLab($this->varDir, 8090))->run($id, false);
+            $result = (new AttackLab($this->varDir, Base::local(8090)))->run($id, false);
             $this->assertTrue($result['protected'], $id);
             $this->assertFalse($result['accepted'], $id);
         }

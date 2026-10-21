@@ -13,7 +13,8 @@ namespace webcoder31\ezxmldsig\DemoSso;
  *
  * Plain localhost serves the home page of the demo. Browsers send a cookie
  * to the host that set it, whatever the port: three host names, not three
- * ports, give each site cookies of its own.
+ * ports, give each site cookies of its own. Online, the sites are the
+ * subdomains of a public domain instead (see Base).
  */
 final class Sites
 {
@@ -82,17 +83,34 @@ final class Sites
     /**
      * Returns the site a Host header names, or NULL if it is none of them.
      *
-     * Only *.localhost host names are answered: another name that resolves
-     * to this machine (DNS rebinding) is refused.
+     * On this machine, only *.localhost host names are answered, whatever
+     * the port. Online, $publicDomain and its subdomains are answered too,
+     * without a port (a proxy serves them over HTTPS). Another name that
+     * resolves to the server (DNS rebinding) is refused.
      *
      * @param string $host The Host header, e.g. "mail.localhost:8090".
+     * @param string|null $publicDomain The domain of the demo online, e.g.
+     *     "sso.example.org", or NULL.
      *
      * @return array|null ['site' => 'idp', 'mail', 'crm' or 'home',
-     *     'port' => int|null]
+     *     'base' => Base]
      */
-    public static function parseHost($host)
+    public static function parseHost($host, $publicDomain = null)
     {
-        if (!is_string($host) || !preg_match('/\A(?:([a-z]+)\.)?localhost(?::(\d{1,5}))?\z/', $host, $matches))
+        if (!is_string($host))
+        {
+            return null;
+        }
+        if (preg_match('/\A(?:([a-z]+)\.)?localhost(?::(\d{1,5}))?\z/', $host, $matches))
+        {
+            $base = Base::local(isset($matches[2]) ? (int) $matches[2] : null);
+        }
+        elseif (is_string($publicDomain) && '' !== $publicDomain
+            && preg_match('/\A(?:([a-z]+)\.)?' . preg_quote($publicDomain, '/') . '\z/', $host, $matches))
+        {
+            $base = Base::online($publicDomain);
+        }
+        else
         {
             return null;
         }
@@ -102,22 +120,20 @@ final class Sites
             return null;
         }
 
-        return ['site' => $name, 'port' => isset($matches[2]) ? (int) $matches[2] : null];
+        return ['site' => $name, 'base' => $base];
     }
 
     /**
      * Returns the origin of a site, e.g. "http://mail.localhost:8090".
      *
      * @param string $site
-     * @param int|null $port
+     * @param Base $base
      *
      * @return string
      */
-    public static function origin($site, $port)
+    public static function origin($site, Base $base)
     {
-        $host = self::HOME === $site ? 'localhost' : $site . '.localhost';
-
-        return 'http://' . $host . (is_null($port) ? '' : ':' . $port);
+        return $base->origin($site);
     }
 
     /**
@@ -125,13 +141,13 @@ final class Sites
      * "assertion consumer service" in SAML words).
      *
      * @param string $app
-     * @param int|null $port
+     * @param Base $base
      *
      * @return string
      */
-    public static function acsUrl($app, $port)
+    public static function acsUrl($app, Base $base)
     {
-        return self::origin($app, $port) . '/acs';
+        return $base->origin($app) . '/acs';
     }
 
     /**

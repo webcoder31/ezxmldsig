@@ -15,16 +15,22 @@ final class Demo
     /** @var Settings|null */
     private $settings;
 
+    /** @var string|null */
+    private $publicDomain;
+
     /**
      * @param string $varDir Where the sessions, the trace, the replay
      *     memories and the settings are kept (demo-sso/var/).
      * @param Settings|null $settings The protections in force, NULL to read
      *     them from $varDir/settings.json (see Settings).
+     * @param string|null $publicDomain The domain of the demo online, whose
+     *     subdomains are its sites (see Sites::parseHost()), or NULL.
      */
-    public function __construct($varDir, Settings $settings = null)
+    public function __construct($varDir, Settings $settings = null, $publicDomain = null)
     {
         $this->varDir = $varDir;
         $this->settings = $settings;
+        $this->publicDomain = $publicDomain;
     }
 
     /**
@@ -57,13 +63,13 @@ final class Demo
      */
     public function handle(array $request)
     {
-        $parsed = Sites::parseHost($request['host']);
+        $parsed = Sites::parseHost($request['host'], $this->publicDomain);
         if (is_null($parsed))
         {
-            return Http::text('The SSO demo only answers on localhost, idp.localhost, mail.localhost and crm.localhost.', 421) + ['site' => null];
+            return Http::text('The SSO demo only answers on its own host names: localhost, idp.localhost, mail.localhost and crm.localhost on this machine.', 421) + ['site' => null];
         }
         $site = $parsed['site'];
-        $port = $parsed['port'];
+        $base = $parsed['base'];
         $trace = new Trace($this->varDir . '/trace.json');
         $sessions = new SessionStore($this->varDir . '/sessions');
         $route = $request['method'] . ' ' . $request['path'];
@@ -74,7 +80,7 @@ final class Demo
         }
         // A request that changes the state of the demo must come from one of
         // its own pages.
-        $isOwnPage = !is_null($request['origin']) && Sites::origin($site, $port) === $request['origin'];
+        $isOwnPage = !is_null($request['origin']) && Sites::origin($site, $base) === $request['origin'];
 
         if ('GET /lab.json' === $route)
         {
@@ -88,7 +94,7 @@ final class Demo
             }
             try
             {
-                $result = (new AttackLab($this->varDir, $port))->run(
+                $result = (new AttackLab($this->varDir, $base))->run(
                     isset($request['post']['id']) ? $request['post']['id'] : null,
                     !isset($request['post']['protected']) || 'false' !== $request['post']['protected']
                 );
@@ -147,14 +153,14 @@ final class Demo
 
         if (Sites::HOME === $site)
         {
-            return ('GET /' === $route ? $this->home($request, $port) : Http::text('Not found.', 404)) + ['site' => $site];
+            return ('GET /' === $route ? $this->home($request, $base) : Http::text('Not found.', 404)) + ['site' => $site];
         }
         if (Sites::IDP === $site)
         {
-            return (new IdentityProvider($sessions, $trace, $port, $this->settings()))->handle($request) + ['site' => $site];
+            return (new IdentityProvider($sessions, $trace, $base, $this->settings()))->handle($request) + ['site' => $site];
         }
 
-        return (new Application($site, $sessions, $trace, $port, $this->varDir, $this->settings()))->handle($request) + ['site' => $site];
+        return (new Application($site, $sessions, $trace, $base, $this->varDir, $this->settings()))->handle($request) + ['site' => $site];
     }
 
     /** What the trace calls each setting. */
@@ -187,20 +193,20 @@ final class Demo
     /**
      * The home page: what the demo shows, and where to start.
      */
-    private function home(array $request, $port)
+    private function home(array $request, Base $base)
     {
         $content = '<section class="hero sso-hero" aria-labelledby="hero-title">
   <p class="eyebrow">Single sign-on · signed XML tokens · ezxmldsig</p>
   <h1 id="hero-title">Log in once.<br><span class="hero-accent">Watch every hop.</span></h1>
   <p class="hero-lead">Three sites on three host names: <strong>idp</strong>, the identity provider, which alone knows the passwords, and two applications, <strong>mail</strong> and <strong>crm</strong>, which trust the tokens idp signs with ezxmldsig. The trace on the right shows each hop, each token and each check.</p>
   <ol class="sso-steps">
-    <li>Open <a href="' . Html::e(Sites::origin('mail', $port) . '/') . '">mail.localhost</a>: it has no session, so it sends you to idp.</li>
+    <li>Open <a href="' . Html::e(Sites::origin('mail', $base) . '/') . '">' . Html::e($base->host('mail')) . '</a>: it has no session, so it sends you to idp.</li>
     <li>Log in on idp. idp signs a token for mail, and your browser posts it to mail.</li>
     <li>mail verifies the token and opens its own session.</li>
-    <li>Open <a href="' . Html::e(Sites::origin('crm', $port) . '/') . '">crm.localhost</a>: idp recognizes you and signs a token for crm, without asking for your password again. That is single sign-on.</li>
+    <li>Open <a href="' . Html::e(Sites::origin('crm', $base) . '/') . '">' . Html::e($base->host('crm')) . '</a>: idp recognizes you and signs a token for crm, without asking for your password again. That is single sign-on.</li>
     <li>Rights: log out of idp, then log in as another user. idp signs no token for crm to <code>bjorn</code>, who may only enter mail: idp decides who enters which application. In crm, <code>lagertha</code>, a Shieldmaiden, may read the customers but not delete them: crm decides, from the role idp wrote in the token.</li>
   </ol>
-  <p class="actions"><a class="btn btn-primary" href="' . Html::e(Sites::origin('mail', $port) . '/') . '">Start with mail.localhost</a></p>
+  <p class="actions"><a class="btn btn-primary" href="' . Html::e(Sites::origin('mail', $base) . '/') . '">Start with ' . Html::e($base->host('mail')) . '</a></p>
   <p class="notice" role="note"><span>For a single sign-on in production, prefer a standard, OpenID Connect or SAML, with a maintained library: this demo shows the mechanisms, and what a receiver must check. The keys of <code>demo/certs/</code> and <code>demo-sso/certs/</code> it uses are public: never trust them outside this demo.</span></p>
 </section>
 
@@ -215,6 +221,6 @@ final class Demo
   <div class="panel-body lab-cards" id="lab-cards"></div>
 </section>';
 
-        return Http::html(Html::page(Sites::HOME, $port, 'Single sign-on demo', $content, $request['cookies'], ['/lab.js']));
+        return Http::html(Html::page(Sites::HOME, $base, 'Single sign-on demo', $content, $request['cookies'], ['/lab.js']));
     }
 }

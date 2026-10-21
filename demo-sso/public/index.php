@@ -5,13 +5,21 @@
  *
  *     php -S 0.0.0.0:8080 -t demo-sso/public demo-sso/public/index.php
  *
+ * or by Apache in the image of demo-sso/Dockerfile, every request routed to
+ * it.
+ *
  * One server answers for the three sites, told apart by the Host header
  * (see demo-sso/src/Sites.php). It serves their pages, the trace of the
- * flow, and the style sheet and scripts, with a Content Security Policy
- * that only lets a page load what this server serves.
+ * flow, the style sheet and scripts, and GET /health, with a Content
+ * Security Policy that only lets a page load what this server serves.
  *
- * WARNING: the demo signs with the keys of demo/certs/, which are public.
- * Serve it on your own machine only.
+ * Online, DEMO_SSO_PUBLIC_DOMAIN names the domain whose subdomains are the
+ * sites (idp.<domain>, mail.<domain>, crm.<domain>, the home page on the
+ * domain itself), served over HTTPS by a proxy in front of it. Each visitor
+ * then has a directory of their own (see demo-sso/src/Visitors.php).
+ *
+ * WARNING: the demo signs with the keys of demo/certs/, which are public:
+ * anyone can create the tokens it trusts. Never trust them elsewhere.
  */
 
 require dirname(__DIR__) . '/src/autoload.php';
@@ -20,21 +28,49 @@ use webcoder31\ezxmldsig\DemoSso\Demo;
 use webcoder31\ezxmldsig\DemoSso\Http;
 use webcoder31\ezxmldsig\DemoSso\Settings;
 use webcoder31\ezxmldsig\DemoSso\Sites;
+use webcoder31\ezxmldsig\DemoSso\Visitors;
 
 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
 $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
 $path = parse_url($uri, PHP_URL_PATH);
+$publicDomain = getenv('DEMO_SSO_PUBLIC_DOMAIN') ?: null;
+
+// The health check of the deployment, on any host name: the server
+// answers, and PHP runs.
+if ('GET' === $method && '/health' === $path)
+{
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "ok\n";
+    return true;
+}
+
+$parsed = Sites::parseHost($host, $publicDomain);
+$online = !is_null($parsed) && $parsed['base']->isOnline();
+
+// Online, the sessions, the trace, the protections and the replay memories
+// of this visitor, in a directory of their own.
+$varDir = dirname(__DIR__) . '/var';
+if ($online)
+{
+    $visitor = Visitors::fromCookie(isset($_COOKIE[Visitors::COOKIE]) ? $_COOKIE[Visitors::COOKIE] : null);
+    if (is_null($visitor))
+    {
+        $visitor = Visitors::newId();
+        setcookie(Visitors::COOKIE, $visitor, ['path' => '/', 'domain' => $publicDomain, 'httponly' => true, 'samesite' => 'Lax', 'secure' => true]);
+        Visitors::forgetIdle($varDir . '/visitors');
+    }
+    $varDir .= '/visitors/' . $visitor;
+}
 
 // A page of idp posts the token to an application: the form may target the
 // applications, and nothing else. With the protection "returnUrl" turned off
 // on the home page, idp posts the token wherever the request says, and the
 // policy lets it, so that the demo shows what happens then.
-$parsed = Sites::parseHost($host);
 $formAction = "'self'";
 if (!is_null($parsed) && Sites::IDP === $parsed['site'])
 {
-    if (!Settings::load(dirname(__DIR__) . '/var/settings.json')->on('returnUrl'))
+    if (!Settings::load($varDir . '/settings.json')->on('returnUrl'))
     {
         $formAction .= ' http: https:';
     }
@@ -42,7 +78,7 @@ if (!is_null($parsed) && Sites::IDP === $parsed['site'])
     {
         foreach (array_keys(Sites::APPS) as $app)
         {
-            $formAction .= ' ' . Sites::origin($app, $parsed['port']);
+            $formAction .= ' ' . Sites::origin($app, $parsed['base']);
         }
     }
 }
@@ -71,7 +107,7 @@ if ('GET' === $method && is_string($path) && isset($files[$path]) && !is_null($p
     return true;
 }
 
-$demo = new Demo(dirname(__DIR__) . '/var');
+$demo = new Demo($varDir, null, $publicDomain);
 $response = $demo->handle(Http::request(
     $method,
     $host,
@@ -88,13 +124,14 @@ foreach ($response['headers'] as $name => $value)
 }
 foreach ($response['cookies'] as $cookie)
 {
-    // Host-only (no Domain), HttpOnly, SameSite=Lax; an empty value deletes
-    // the cookie.
+    // Host-only (no Domain), HttpOnly, SameSite=Lax, and Secure online; an
+    // empty value deletes the cookie.
     setcookie($cookie['name'], $cookie['value'], [
         'expires' => '' === $cookie['value'] ? time() - 3600 : 0,
         'path' => '/',
         'httponly' => true,
         'samesite' => 'Lax',
+        'secure' => $online,
     ]);
 }
 echo $response['body'];

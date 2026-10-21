@@ -150,7 +150,7 @@
       const more = el('div', { class: 'trace-more', id: detailsId }, [
         event.detail ? el('p', { text: event.detail }) : null,
         event.http ? el('p', { class: 'trace-http' }, [el('code', { text: event.http })]) : null,
-        event.cookie ? el('p', { class: 'trace-cookie' }, [el('code', { text: event.cookie.name }), document.createTextNode(' ' + event.cookie.action + ' on ' + event.cookie.site + '.localhost')]) : null,
+        event.cookie ? el('p', { class: 'trace-cookie' }, [el('code', { text: event.cookie.name }), document.createTextNode(' ' + event.cookie.action + ' on ' + (event.cookie.host || event.cookie.site + '.localhost'))]) : null,
         event.steps ? steps(event.steps) : null,
         event.xml ? showXml(el('pre', { class: 'code trace-xml' }), event.xml) : null
       ]);
@@ -176,7 +176,7 @@
     lastId = newest;
     while (list.firstChild) list.removeChild(list.firstChild);
     if (!events.length) {
-      list.appendChild(el('li', { class: 'trace-empty', text: 'Nothing yet. Open mail.localhost or crm.localhost to start.' }));
+      list.appendChild(el('li', { class: 'trace-empty', text: 'Nothing yet. Open mail or crm to start.' }));
       return;
     }
     events.forEach(function (event) { list.appendChild(item(event)); });

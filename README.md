@@ -747,6 +747,8 @@ The home page (`http://localhost:8090/`) holds:
 
 The private keys of `demo-sso/certs/` are public, like those of `demo/certs/` (see `demo-sso/certs/README.md`); to issue new ones, run `bin/gen-test-certs --demo-sso`. The sessions, the trace and the replay memories are kept in `demo-sso/var/` (ignored by git).
 
+To serve it online, `demo-sso/Dockerfile` builds an image like the one of the [demo](#demo) (Apache and PHP 8.3, port 8000, user `www-data`, `GET /health`). `DEMO_SSO_PUBLIC_DOMAIN` names the domain whose subdomains are the sites, served over HTTPS by a proxy in front of it: with `sso.example.org`, the home page is `https://sso.example.org/`, and the sites `idp.sso.example.org`, `mail.sso.example.org` and `crm.sso.example.org`. Each visitor then has a directory of their own in `demo-sso/var/visitors/` (sessions, trace, protections, replay memories), named by a cookie set on that domain, which the browser sends to the four host names and to no other; "Reset the demo" only resets theirs. The directories left unwritten for two days are removed. Build it from the root of the repository: `docker build -f demo-sso/Dockerfile -t ezxmldsig-sso .`
+
 ## Tests
 
 The PHPUnit test suite runs in Docker, so neither PHP nor PHPUnit has to be installed locally. Requirements: a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory), `curl` and a POSIX shell.

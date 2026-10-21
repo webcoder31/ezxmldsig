@@ -28,8 +28,8 @@ final class Application
     /** @var Trace */
     private $trace;
 
-    /** @var int|null */
-    private $port;
+    /** @var Base Where the sites live. */
+    private $base;
 
     /** @var string */
     private $varDir;
@@ -41,17 +41,17 @@ final class Application
      * @param string $app 'mail' or 'crm'.
      * @param SessionStore $sessions
      * @param Trace $trace
-     * @param int|null $port
+     * @param Base $base Where the sites live.
      * @param string $varDir Where the replay memory of the application is
      *     kept.
      * @param Settings $settings The protections in force.
      */
-    public function __construct($app, SessionStore $sessions, Trace $trace, $port, $varDir, Settings $settings)
+    public function __construct($app, SessionStore $sessions, Trace $trace, Base $base, $varDir, Settings $settings)
     {
         $this->app = $app;
         $this->sessions = $sessions;
         $this->trace = $trace;
-        $this->port = $port;
+        $this->base = $base;
         $this->varDir = $varDir;
         $this->settings = $settings;
     }
@@ -103,14 +103,14 @@ final class Application
                 {
                     break;
                 }
-                if (!is_null($request['origin']) && Sites::origin($this->app, $this->port) !== $request['origin'])
+                if (!is_null($request['origin']) && Sites::origin($this->app, $this->base) !== $request['origin'])
                 {
                     return Http::text('Cross-origin request refused.', 403);
                 }
 
                 return $this->deleteCustomer($request, $sessionId, $session);
             case 'POST /logout':
-                if (!is_null($request['origin']) && Sites::origin($this->app, $this->port) !== $request['origin'])
+                if (!is_null($request['origin']) && Sites::origin($this->app, $this->base) !== $request['origin'])
                 {
                     return Http::text('Cross-origin request refused.', 403);
                 }
@@ -126,9 +126,9 @@ final class Application
      */
     private function askIdp()
     {
-        $location = Sites::origin(Sites::IDP, $this->port) . '/sso?' . http_build_query([
+        $location = Sites::origin(Sites::IDP, $this->base) . '/sso?' . http_build_query([
             'app' => $this->app,
-            'return' => Sites::acsUrl($this->app, $this->port),
+            'return' => Sites::acsUrl($this->app, $this->base),
         ]);
         $this->trace->add([
             'from' => $this->app, 'to' => 'idp',
@@ -185,10 +185,10 @@ final class Application
             'detail' => 'Library: signature, trust in the certificate of idp, audience "' . $this->app . '". Application: freshness and replay. Then ' . $this->app . ' sets its cookie ' . Sites::sessionCookie($this->app) . ': it will not need idp again until this session ends.',
             'xml' => $xml,
             'steps' => $result['steps'],
-            'cookie' => ['site' => $this->app, 'name' => Sites::sessionCookie($this->app), 'action' => 'set'],
+            'cookie' => ['site' => $this->app, 'host' => $this->base->host($this->app), 'name' => Sites::sessionCookie($this->app), 'action' => 'set'],
         ]);
 
-        return Http::withCookie(Http::redirect(Sites::origin($this->app, $this->port) . '/'), Sites::sessionCookie($this->app), $sessionId);
+        return Http::withCookie(Http::redirect(Sites::origin($this->app, $this->base) . '/'), Sites::sessionCookie($this->app), $sessionId);
     }
 
     /**
@@ -201,10 +201,10 @@ final class Application
             'from' => 'browser', 'to' => $this->app,
             'title' => 'Logout from ' . $this->app . ': ' . $this->app . ' closes its own session.',
             'detail' => 'idp still knows the user: opening ' . $this->app . ' again signs the user back in without a password. The session of the other application stays open too.',
-            'cookie' => ['site' => $this->app, 'name' => Sites::sessionCookie($this->app), 'action' => 'deleted'],
+            'cookie' => ['site' => $this->app, 'host' => $this->base->host($this->app), 'name' => Sites::sessionCookie($this->app), 'action' => 'deleted'],
         ]);
 
-        return Http::withCookie(Http::redirect(Sites::origin($this->app, $this->port) . '/loggedout'), Sites::sessionCookie($this->app), '');
+        return Http::withCookie(Http::redirect(Sites::origin($this->app, $this->base) . '/loggedout'), Sites::sessionCookie($this->app), '');
     }
 
     /**
@@ -227,7 +227,7 @@ final class Application
     <p class="hint">These values come from the token idp signed, read with <code>getData()</code> once every check passed.</p>
     ' . $this->rights($user) . $this->customers($session) . '
     <div class="actions">
-      <a class="btn btn-primary" href="' . Html::e(Sites::origin($other, $this->port) . '/') . '">Open ' . Html::e($other) . '.localhost</a>
+      <a class="btn btn-primary" href="' . Html::e(Sites::origin($other, $this->base) . '/') . '">Open ' . Html::e($this->base->host($other)) . '</a>
       <form method="post" action="/logout"><button type="submit" class="btn btn-ghost">Log out of ' . Html::e($this->app) . '</button></form>
     </div>
     <details class="code-details"><summary>How ' . Html::e($this->app) . ' verified the token</summary>' . self::stepList($session['verified']) . '
@@ -235,7 +235,7 @@ final class Application
   </div>
 </section>';
 
-        return Http::html(Html::page($this->app, $this->port, $info['title'], $content, $request['cookies']));
+        return Http::html(Html::page($this->app, $this->base, $info['title'], $content, $request['cookies']));
     }
 
     /**
@@ -305,7 +305,7 @@ final class Application
   <div class="panel-body"><div class="form-error" role="alert">The role ' . Html::e($user['role']) . ' may not delete customers: only ' . Html::e(implode(', ', Sites::CRM_DELETE_ROLES)) . ' may.</div>
     <div class="actions"><a class="btn btn-ghost" href="/">Back to crm</a></div></div></section>';
 
-            return Http::html(Html::page($this->app, $this->port, 'Not allowed', $content, $request['cookies']), 403);
+            return Http::html(Html::page($this->app, $this->base, 'Not allowed', $content, $request['cookies']), 403);
         }
 
         $session['deleted'] = array_values(array_unique(array_merge(isset($session['deleted']) ? $session['deleted'] : [], [$id])));
@@ -316,7 +316,7 @@ final class Application
             'detail' => 'Decided by crm, from the role idp wrote in the token. The customer is only hidden in this session: the demo deletes nothing.',
         ]);
 
-        return Http::redirect(Sites::origin($this->app, $this->port) . '/');
+        return Http::redirect(Sites::origin($this->app, $this->base) . '/');
     }
 
     /**
@@ -329,7 +329,7 @@ final class Application
   <div class="panel-body"><div class="form-error" role="alert">' . Html::e($message) . '</div>' . (is_null($result) ? '' : self::stepList($result['steps'])) . '</div>
 </section>';
 
-        return Http::html(Html::page($this->app, $this->port, 'Token refused', $content, $request['cookies']), 403);
+        return Http::html(Html::page($this->app, $this->base, 'Token refused', $content, $request['cookies']), 403);
     }
 
     /**
@@ -363,6 +363,6 @@ final class Application
         $content = '<section class="panel"><header class="panel-head"><div><h2>Logged out of ' . Html::e($this->app) . '</h2><p class="panel-sub">' . Html::e($this->app) . ' closed its session. idp did not.</p></div></header>
   <div class="panel-body"><div class="actions"><a class="btn btn-primary" href="/">Open ' . Html::e($this->app) . ' again</a></div></div></section>';
 
-        return Http::html(Html::page($this->app, $this->port, 'Logged out', $content, $request['cookies']));
+        return Http::html(Html::page($this->app, $this->base, 'Logged out', $content, $request['cookies']));
     }
 }

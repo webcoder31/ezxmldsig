@@ -28,17 +28,17 @@ final class IdentityProvider
     /** @var Trace */
     private $trace;
 
-    /** @var int|null */
-    private $port;
+    /** @var Base Where the sites live. */
+    private $base;
 
     /** @var Settings */
     private $settings;
 
-    public function __construct(SessionStore $sessions, Trace $trace, $port, Settings $settings)
+    public function __construct(SessionStore $sessions, Trace $trace, Base $base, Settings $settings)
     {
         $this->sessions = $sessions;
         $this->trace = $trace;
-        $this->port = $port;
+        $this->base = $base;
         $this->settings = $settings;
     }
 
@@ -56,7 +56,7 @@ final class IdentityProvider
         $session = $this->sessions->get(Sites::IDP, $sessionId);
 
         if (('POST /login' === $route || 'POST /logout' === $route)
-            && !is_null($request['origin']) && Sites::origin(Sites::IDP, $this->port) !== $request['origin'])
+            && !is_null($request['origin']) && Sites::origin(Sites::IDP, $this->base) !== $request['origin'])
         {
             return Http::text('Cross-origin request refused.', 403);
         }
@@ -105,7 +105,7 @@ final class IdentityProvider
         $this->trace->add([
             'from' => 'idp', 'to' => 'idp', 'kind' => 'sso',
             'title' => 'Single sign-on: idp already knows ' . Sites::USERS[$session['user']]['name'] . ' by its own session cookie, idp_session. No login.',
-            'detail' => 'The browser sent idp_session to idp.localhost: the session opened when the user logged in, for another application. idp signs a new token, for ' . $app . ' this time.',
+            'detail' => 'The browser sent idp_session to ' . $this->base->host(Sites::IDP) . ': the session opened when the user logged in, for another application. idp signs a new token, for ' . $app . ' this time.',
         ]);
 
         return $this->issue($request, $session['user'], $app, $return);
@@ -138,8 +138,8 @@ final class IdentityProvider
         $this->trace->add([
             'from' => 'browser', 'to' => 'idp', 'kind' => 'ok',
             'title' => Sites::USERS[$user]['name'] . ' logs in on idp: idp opens its own session.',
-            'detail' => 'idp sets the cookie idp_session on idp.localhost. The applications never see it: it is how idp will recognize the user next time, for any application.',
-            'cookie' => ['site' => 'idp', 'name' => Sites::sessionCookie(Sites::IDP), 'action' => 'set'],
+            'detail' => 'idp sets the cookie idp_session on ' . $this->base->host(Sites::IDP) . '. The applications never see it: it is how idp will recognize the user next time, for any application.',
+            'cookie' => ['site' => 'idp', 'host' => $this->base->host(Sites::IDP), 'name' => Sites::sessionCookie(Sites::IDP), 'action' => 'set'],
         ]);
 
         return Http::withCookie($this->issue($request, $user, $app, $return), Sites::sessionCookie(Sites::IDP), $sessionId);
@@ -155,10 +155,10 @@ final class IdentityProvider
             'from' => 'browser', 'to' => 'idp',
             'title' => 'Logout from idp: idp closes its own session.',
             'detail' => 'The sessions of mail and crm stay open: each application has its own. Logging out of every site at once (single logout) is a separate mechanism, which this demo does not implement.',
-            'cookie' => ['site' => 'idp', 'name' => Sites::sessionCookie(Sites::IDP), 'action' => 'deleted'],
+            'cookie' => ['site' => 'idp', 'host' => $this->base->host(Sites::IDP), 'name' => Sites::sessionCookie(Sites::IDP), 'action' => 'deleted'],
         ]);
 
-        return Http::withCookie(Http::redirect(Sites::origin(Sites::IDP, $this->port) . '/'), Sites::sessionCookie(Sites::IDP), '');
+        return Http::withCookie(Http::redirect(Sites::origin(Sites::IDP, $this->base) . '/'), Sites::sessionCookie(Sites::IDP), '');
     }
 
     /**
@@ -181,10 +181,10 @@ final class IdentityProvider
             $content = '<section class="panel" aria-labelledby="denied-title">
   <header class="panel-head"><span class="panel-num">!</span><div><h2 id="denied-title">No access to ' . Html::e($app) . '</h2><p class="panel-sub">Decided by idp, which signs no token for this application.</p></div></header>
   <div class="panel-body"><div class="form-error" role="alert">' . Html::e($account['name']) . ' may enter ' . Html::e(implode(', ', $account['apps'])) . ' only.</div>
-    <div class="actions"><a class="btn btn-ghost" href="' . Html::e(Sites::origin($account['apps'][0], $this->port) . '/') . '">Open ' . Html::e($account['apps'][0]) . '.localhost</a></div></div>
+    <div class="actions"><a class="btn btn-ghost" href="' . Html::e(Sites::origin($account['apps'][0], $this->base) . '/') . '">Open ' . Html::e($this->base->host($account['apps'][0])) . '</a></div></div>
 </section>';
 
-            return Http::html(Html::page(Sites::IDP, $this->port, 'No access', $content, $request['cookies']), 403);
+            return Http::html(Html::page(Sites::IDP, $this->base, 'No access', $content, $request['cookies']), 403);
         }
 
         $data = ['user' => $user, 'name' => $account['name'], 'role' => $account['role'], 'email' => $account['email']];
@@ -213,8 +213,8 @@ final class IdentityProvider
 
         $this->trace->add([
             'from' => 'idp', 'to' => $app,
-            'title' => 'idp signs a token for ' . $app . ', and the browser posts it to ' . (Sites::acsUrl($app, $this->port) === $return ? $app . '/acs.' : $return . ', which is not the address of ' . $app . '!'),
-            'kind' => Sites::acsUrl($app, $this->port) === $return ? 'info' : 'bad',
+            'title' => 'idp signs a token for ' . $app . ', and the browser posts it to ' . (Sites::acsUrl($app, $this->base) === $return ? $app . '/acs.' : $return . ', which is not the address of ' . $app . '!'),
+            'kind' => Sites::acsUrl($app, $this->base) === $return ? 'info' : 'bad',
             'detail' => ($this->settings->on('audience') ? 'Addressed to "' . $app . '" (audience)' : 'Addressed to no one: the protection "audience" is off'). ', valid ' . Sites::TOKEN_VALIDITY . ' s (validity)' . ($this->settings->on('encrypt') ? ', encrypted for ' . $app . ' with ' . $app . '.crypt.cert.pem' : '') . '. It travels through the browser, as a hidden form field: idp and ' . $app . ' never talk to each other directly.',
             'http' => 'POST ' . $return,
             'xml' => $token->getXML(),
@@ -241,7 +241,7 @@ final class IdentityProvider
   </div>
 </section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->port, 'Sending you back', $content, $request['cookies'], ['/post.js']));
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Sending you back', $content, $request['cookies'], ['/post.js']));
     }
 
     /**
@@ -251,7 +251,7 @@ final class IdentityProvider
     {
         if (is_null($session))
         {
-            $state = '<p>No one is logged in on idp. Open <a href="' . Html::e(Sites::origin('mail', $this->port) . '/') . '">mail.localhost</a> or <a href="' . Html::e(Sites::origin('crm', $this->port) . '/') . '">crm.localhost</a>: they will send you here to log in.</p>';
+            $state = '<p>No one is logged in on idp. Open <a href="' . Html::e(Sites::origin('mail', $this->base) . '/') . '">' . Html::e($this->base->host('mail')) . '</a> or <a href="' . Html::e(Sites::origin('crm', $this->base) . '/') . '">' . Html::e($this->base->host('crm')) . '</a>: they will send you here to log in.</p>';
         }
         else
         {
@@ -263,7 +263,7 @@ final class IdentityProvider
   <div class="panel-body">' . $state . '</div>
 </section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->port, 'Identity provider', $content, $request['cookies']));
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Identity provider', $content, $request['cookies']));
     }
 
     /**
@@ -278,7 +278,7 @@ final class IdentityProvider
                 . '<span><code>' . Html::e($name) . '</code> / <code>' . Html::e($account['password']) . '</code> <span class="muted">(' . Html::e($account['name']) . ', ' . Html::e($account['role']) . '; may enter ' . Html::e(implode(' and ', $account['apps'])) . ')</span></span></li>';
         }
         $content = '<section class="panel" aria-labelledby="login-title">
-  <header class="panel-head"><span class="panel-num">IdP</span><div><h2 id="login-title">Log in to continue to ' . Html::e($app) . '</h2><p class="panel-sub">' . Html::e($app) . '.localhost sent you here: it has no password of its own.</p></div></header>
+  <header class="panel-head"><span class="panel-num">IdP</span><div><h2 id="login-title">Log in to continue to ' . Html::e($app) . '</h2><p class="panel-sub">' . Html::e($this->base->host($app)) . ' sent you here: it has no password of its own.</p></div></header>
   <form class="panel-body login-form" method="post" action="/login">
     <input type="hidden" name="app" value="' . Html::e($app) . '">
     <input type="hidden" name="return" value="' . Html::e($return) . '">
@@ -290,7 +290,7 @@ final class IdentityProvider
   </form>
 </section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->port, 'Log in', $content, $request['cookies'], ['/login.js']));
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Log in', $content, $request['cookies'], ['/login.js']));
     }
 
     /**
@@ -300,7 +300,7 @@ final class IdentityProvider
     {
         $content = '<section class="panel"><div class="panel-body"><div class="form-error" role="alert">' . Html::e($message) . '</div></div></section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->port, 'Error', $content, $request['cookies']), 400);
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Error', $content, $request['cookies']), 400);
     }
 
     /**
@@ -322,9 +322,9 @@ final class IdentityProvider
         {
             return is_string($return) && preg_match('#\Ahttps?://[^\s<>"]+\z#', $return) ? null : 'the return address is not a web address.';
         }
-        if (!is_string($return) || Sites::acsUrl($app, $this->port) !== $return)
+        if (!is_string($return) || Sites::acsUrl($app, $this->base) !== $return)
         {
-            return 'the return address is not the one registered for ' . $app . ' (' . Sites::acsUrl($app, $this->port) . ').';
+            return 'the return address is not the one registered for ' . $app . ' (' . Sites::acsUrl($app, $this->base) . ').';
         }
 
         return null;
