@@ -1,3 +1,10 @@
+Unreleased
+----------
+- The README documents the interoperability with other libraries (section
+  "Interoperability"): the exact format of a token, and how to create and
+  read one in Node.js with xml-crypto and xml-encryption, with what a
+  receiver must check itself.
+
 1.2.0 (2026-10-21)
 -------------------
 In short: encrypted tokens follow XML Encryption more closely, and both

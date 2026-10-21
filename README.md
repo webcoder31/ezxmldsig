@@ -4,6 +4,8 @@ Built on the library **xmlseclibs** developed by Rob Richards (https://github.co
 
 The library signs its own tokens only. It does not sign existing XML documents in place, parts of them, or external files: for these, use **xmlseclibs** directly, or a format designed for document signatures such as XAdES or PAdES.
 
+The tokens are standard XML digital signatures and, when encrypted, standard XML Encryption: other platforms can create and read them. In Node.js, **xml-crypto** and **xml-encryption** do, both ways, which has been checked: a single sign-on can mix PHP nodes, using **ezxmldsig**, and Node.js nodes, using these libraries. On the Node.js side, the receiver must make the checks **ezxmldsig** makes besides the signature (trust in the certificate, data read from the signed content, timestamp, expiry, audience, replay): see [Interoperability](#interoperability).
+
 The author of the **ezxmldsig** library is Thierry Thiers.
 
 
@@ -23,6 +25,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
     * [XML parsing](#xml-parsing)
     * [Trust anchor](#trust-anchor)
     * [Encryption](#encryption)
+    * [Interoperability](#interoperability)
     * [Certificates and keys](#certificates-and-keys)
     * [Options](#options)
     * [Upgrading from 0.x](#upgrading-from-0x)
@@ -507,6 +510,108 @@ The token data are encrypted with a session key generated for each token, and th
   $token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword, $options);
   ```
 
+
+### Interoperability
+
+A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check the exact format below. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways: their tokens are analyzed by this library, and they read its tokens.
+
+**The format of a token.** An enveloping signature: ``ds:Signature`` is the document element, and its ``ds:Object Id="Token"`` holds the node ``Token``, referenced by ``URI="#Token"``. Inclusive canonicalization (http://www.w3.org/TR/2001/REC-xml-c14n-20010315) for ``ds:SignedInfo`` and as the only transform, RSA-SHA256 and an SHA-256 digest by default (see [Options](#options)), and the signing certificate in ``ds:KeyInfo/ds:X509Data/ds:X509Certificate``. The node ``Token`` holds, in this order:
+
+* ``TokenTimestamp``: the date of creation, in UTC, as ``2026-10-21T18:30:07Z``;
+* ``TokenId``: 16 random bytes, in 32 lowercase hexadecimal characters;
+* ``TokenExpiry`` (optional): the date after which the token is out of date, in the same format;
+* ``TokenAudience`` (optional): one node per audience;
+* ``TokenData``: the data, a node per key, nested for nested arrays, each value encoded in Base64 and marked ``Algorithm="base64"``.
+
+Encrypted, the node ``Token`` is replaced by an ``xenc:EncryptedData`` of type http://www.w3.org/2001/04/xmlenc#Element (``Content`` is read as well, see [Encryption](#encryption)), encrypted with AES-256-GCM, its session key encrypted with RSA-OAEP (http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p) and held in its ``ds:KeyInfo``.
+
+**Creating a token in Node.js.** xml-crypto places a signature inside an existing document: sign in a throwaway root, then keep the signature alone, as the document element.
+
+```js
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import { SignedXml } from 'xml-crypto';
+import xmlenc from 'xml-encryption';
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
+
+const C14N = 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
+const date = (d) => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+const b64 = (s) => Buffer.from(s, 'utf8').toString('base64');
+
+const now = new Date();
+let token = '<Token>'
+  + '<TokenTimestamp>' + date(now) + '</TokenTimestamp>'
+  + '<TokenId>' + crypto.randomBytes(16).toString('hex') + '</TokenId>'
+  + '<TokenExpiry>' + date(new Date(now.getTime() + 300e3)) + '</TokenExpiry>'
+  + '<TokenAudience>receiver</TokenAudience>'
+  + '<TokenData><name Algorithm="base64">' + b64('Ragnar Lothbrok') + '</name></TokenData>'
+  + '</Token>';
+
+// Optional: encrypt it for the recipient.
+token = await new Promise((resolve, reject) => xmlenc.encrypt(token, {
+  rsa_pub: fs.readFileSync('crypt.cert.pem'),
+  pem: fs.readFileSync('crypt.cert.pem'),
+  encryptionAlgorithm: 'http://www.w3.org/2009/xmlenc11#aes256-gcm',
+  keyEncryptionAlgorithm: 'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p',
+}, (err, result) => err ? reject(err) : resolve(result)));
+
+const sig = new SignedXml({
+  privateKey: fs.readFileSync('sign.key.pem'), // without password
+  publicCert: fs.readFileSync('sign.cert.pem'),
+  canonicalizationAlgorithm: C14N,
+  signatureAlgorithm: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+  objects: [{ content: token, attributes: { Id: 'Token' } }],
+});
+sig.addReference({
+  xpath: "//*[@Id='Token']",
+  digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
+  transforms: [C14N],
+});
+sig.computeSignature('<root/>', { prefix: 'ds' });
+
+const doc = new DOMParser().parseFromString(sig.getSignedXml(), 'text/xml');
+const xml = '<?xml version="1.0"?>\n' + new XMLSerializer().serializeToString(doc.documentElement.firstChild);
+```
+
+``analyzeXMLToken($xml, $options)`` (or ``analyzeSecureXMLToken()``) then checks it as any token of this library.
+
+**Reading a token in Node.js.** xml-crypto only verifies the signature, with the key it is given, and xml-encryption only decrypts. Read the data from the content the signature covers, never from the document received, or a forged ``Token`` placed elsewhere in it would be read (signature wrapping):
+
+```js
+import fs from 'node:fs';
+import { SignedXml } from 'xml-crypto';
+import xmlenc from 'xml-encryption';
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
+
+// The first child element of a node: whitespace may come before it.
+const firstElement = (node) => {
+  for (let child = node.firstChild; child; child = child.nextSibling) {
+    if (child.nodeType === 1) return child;
+  }
+  return null;
+};
+
+const doc = new DOMParser().parseFromString(xml, 'text/xml');
+const sig = new SignedXml({ publicCert: fs.readFileSync('sign.cert.pem') });
+sig.loadSignature(doc.documentElement);
+if (!sig.checkSignature(xml)) {
+  throw new Error('Invalid signature');
+}
+const [signed] = sig.getSignedReferences(); // the canonical ds:Object
+let content = firstElement(new DOMParser().parseFromString(signed, 'text/xml').documentElement);
+
+// An encrypted token: decrypt the xenc:EncryptedData the signature covers.
+if (content.localName === 'EncryptedData') {
+  const plain = await new Promise((resolve, reject) => xmlenc.decrypt(
+    new XMLSerializer().serializeToString(content),
+    { key: fs.readFileSync('crypt.key.pem') }, // without password
+    (err, result) => err ? reject(err) : resolve(result)));
+  content = new DOMParser().parseFromString(plain, 'text/xml').documentElement;
+}
+// content is the node Token.
+```
+
+The rest is left to the receiver, which ``isSignatureValid()`` does here: refuse a document type declaration; check the algorithms; trust the signing certificate (its chain up to your CA, its validity, its subject), not only the key it holds; check the structure of ``Token``, the format of ``TokenTimestamp`` and ``TokenId``, and the audience against its own; then, as with this library, the time to live, the expiry and the replay of the identifier (see [Replay](#replay) and [Audience and expiry](#audience-and-expiry)).
 
 ### Certificates and keys
 
