@@ -161,9 +161,13 @@ a.btn-ghost, a.btn-ghost:hover { color: var(--text); }
   /* The space of the token demo above its content. */
   .sso-layout { padding-top: 28px; }
 }
-@media (max-width: 720px) {
-  /* The links to the sites go; the one to the home page stays. */
+@media (max-width: 960px) {
+  /* The token demo hides its whole menu here. This one keeps the link to
+     the home page, without those to the sites, and the actions at the end
+     of the bar. */
+  .site-nav { display: flex; }
   .site-nav a:not(.home-link) { display: none; }
+  .topbar-actions { margin-left: 0; }
 }
 
 /* ---------- Home page: protections and attack lab ---------- */
@@ -223,5 +227,6 @@ a.btn-ghost, a.btn-ghost:hover { color: var(--text); }
 /* ---------- Link to the home page of the demo ---------- */
 
 .site-nav .home-link { gap: 6px; }
+.github-icon { fill: currentColor; }
 .home-icon { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .site-nav .home-link[aria-current="page"] { color: var(--text-strong); background: var(--surface-2); }

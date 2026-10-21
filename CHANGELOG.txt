@@ -35,6 +35,9 @@ Unreleased
   `DEMO_PUBLIC_HOST` names the public host it answers on, over HTTPS. Each
   visitor has a replay memory of their own, named by a cookie: "Forget all"
   only forgets theirs.
+- The top bar of both demos links to the repository on GitHub. On a narrow
+  screen, the single sign-on demo keeps its link to the home page: the
+  style sheet of the token demo hid its whole menu below 960 pixels.
 
 1.1.0 (2026-10-18)
 -------------------
