@@ -32,7 +32,7 @@
  * @author    Thierry Thiers <webcoder31@gmail.com>
  * @copyright 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
- * @version   1.1.0
+ * @version   1.2.0
  */
 
 
@@ -260,7 +260,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *     </ds:X509Data>
  *   </ds:KeyInfo>
  *   <ds:Object Id="Token">
- *     <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Content">
+ *     <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Element">
  *       <xenc:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>
  *       <ds:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
  *         <xenc:EncryptedKey>
@@ -289,9 +289,14 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * - Store the ciphered session key in the node `<xenc:CipherValue />` which is
  *   located inside the node `<xenc:EncryptedKey />`.
  *
- * - Encrypt the content of the node `<ds:Object Id="Token" />` using the
- *   non-ciphered session key and store the result in the last node
- *   `<xenc:CipherValue />`.
+ * - Encrypt the node `<Token />`, the only child of the node
+ *   `<ds:Object Id="Token" />`, using the non-ciphered session key, and store
+ *   the result in the last node `<xenc:CipherValue />`. The node
+ *   `<xenc:EncryptedData />` replaces the node `<Token />` and declares the
+ *   type `http://www.w3.org/2001/04/xmlenc#Element`: an element is encrypted.
+ *   Versions up to 1.1 declared the type
+ *   `http://www.w3.org/2001/04/xmlenc#Content` (the content of the node
+ *   `<ds:Object />`) for the same encrypted bytes.
  *
  * **The decryption process is the following:**
  *
@@ -303,7 +308,13 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  *   perform the encryption.
  *
  * - Decrypt the content of the last node `<xenc:CipherValue />` using the
- *   deciphered session key.
+ *   deciphered session key, and put the plaintext, the node `<Token />`, in
+ *   place of the node `<xenc:EncryptedData />`. Both types XML Encryption 1.1
+ *   defines for an XML plaintext are read, `Element` and `Content`, as the
+ *   standard requires: tokens of the versions up to 1.1, and tokens that
+ *   other XML Encryption libraries encrypt, are decrypted. Any other type is
+ *   refused. The plaintext is read as an XML fragment whatever its type: it
+ *   cannot hold a document type declaration (DOCTYPE).
  *
  * The decryption only takes place once the digest, the signature, the trust
  * in the signing certificate and the algorithms have been verified, and
@@ -1848,11 +1859,15 @@ class XMLDSigToken
             $objXMLSecEnc = new XMLSecEnc();
             $objXMLSecEnc->encryptKey($asymKey, $sessionKey);
 
-            // Encrypt the content (cf. XMLSecEnc::Content) of the node
-            // "ds:Object" that holds our node "Token" using the encrypted
-            // session key.
-            $objXMLSecEnc->setNode($objectNode);
-            $objXMLSecEnc->type  = XMLSecEnc::Content;
+            // Encrypt our node "Token", the only child of the node
+            // "ds:Object", using the session key: the node "xenc:EncryptedData"
+            // replaces it, and declares the type Element (cf.
+            // XMLSecEnc::Element), the exact description of what is encrypted.
+            // Versions up to 1.1 declared the type Content, the content of the
+            // node "ds:Object", for the same bytes; both are read (see
+            // _decryptToken()).
+            $objXMLSecEnc->setNode($objectNode->firstChild);
+            $objXMLSecEnc->type  = XMLSecEnc::Element;
             $encryptedObjectNode = $objXMLSecEnc->encryptNode($sessionKey);
         }
 
@@ -2088,13 +2103,17 @@ class XMLDSigToken
                 }
             }
 
+            // The encrypted content is our node "Token": an element, or the
+            // content of the node "ds:Object", which XML Encryption 1.1
+            // (section 4.2) describes as the types Element and Content, both
+            // of which a decryptor must read. Any other type is refused.
             $queries = array(
-                "//ds:Signature/ds:Object/xenc:EncryptedData/@Type" => XMLSecEnc::Content
+                "//ds:Signature/ds:Object/xenc:EncryptedData/@Type" => array(XMLSecEnc::Element, XMLSecEnc::Content)
             );
 
-            foreach ($queries as $query => $value)
+            foreach ($queries as $query => $values)
             {
-                if ($this->xpath->evaluate("string(" . $query . ")") !== $value)
+                if (!in_array($this->xpath->evaluate("string(" . $query . ")"), $values, true))
                 {
                     // ERROR: Encrypted data is malformed!
                     throw new Exception("Encrypted data is malformed!");
@@ -2623,11 +2642,10 @@ class XMLDSigToken
         }
 
         // Passes the node containing the ciphered token to an XMLSecEnc
-        // object, and indicates to it what is encrypted (the node element or
-        // only its content) by reading the attribute "Type" of this node.
+        // object. Its type, Element or Content (checked by _readXML()), is
+        // not passed: the plaintext is inserted below the same way for both.
         $objXMLSecEnc = new XMLSecEnc();
         $objXMLSecEnc->setNode($encryptedDataNode);
-        $objXMLSecEnc->type = $encryptedDataNode->getAttribute("Type");
 
         // Get an XMLSecurityKey object already configured with the algorithm
         // which was used to encrypt the token data with the session key.
@@ -2680,7 +2698,23 @@ class XMLDSigToken
         {
             $sessionKey = $objKeyInfoCrypt->encryptedCtx->decryptKey($objKeyInfoCrypt);
             $objKeyCrypt->loadKey($sessionKey);
-            $objXMLSecEnc->decryptNode($objKeyCrypt, true);
+            $plaintext = $objXMLSecEnc->decryptNode($objKeyCrypt, false);
+
+            // The plaintext replaces the node "xenc:EncryptedData" as an XML
+            // fragment, for the type Element as for the type Content: an
+            // element is a valid content. XMLSecEnc would parse an Element
+            // plaintext as a whole document instead, which may hold a
+            // document type declaration (DOCTYPE) with its entities, refused
+            // everywhere else (see _loadXML()); a fragment cannot hold one.
+            $fragment = $encryptedDataNode->ownerDocument->createDocumentFragment();
+            if (!is_string($plaintext) || '' === $plaintext || !$fragment->appendXML($plaintext))
+            {
+                $failed = true;
+            }
+            else
+            {
+                $encryptedDataNode->parentNode->replaceChild($fragment, $encryptedDataNode);
+            }
             if (count(libxml_get_errors()) > 0)
             {
                 $failed = true;

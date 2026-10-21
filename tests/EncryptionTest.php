@@ -42,8 +42,10 @@ class EncryptionTest extends TestCase
      * @param callable|null $alter Receives the DOMXPath of the encrypted
      *     token, before it is digested and signed.
      * @param string $signer 'sign' (trusted) or 'attacker' (not trusted).
+     * @param string $type XMLSecEnc::Content (the content of ds:Object, as
+     *     up to version 1.1) or XMLSecEnc::Element (the node Token).
      */
-    private static function buildEncryptedToken($keyTransport, $cipher, ?callable $alter = null, $signer = 'sign')
+    private static function buildEncryptedToken($keyTransport, $cipher, ?callable $alter = null, $signer = 'sign', $type = XMLSecEnc::Content)
     {
         $plain = new DOMDocument();
         $plain->loadXML(self::createToken(self::sampleData())->getXML());
@@ -60,8 +62,8 @@ class EncryptionTest extends TestCase
         $publicKey->loadKey(self::cert('crypt.cert.pem'), true, true);
         $enc = new XMLSecEnc();
         $enc->encryptKey($publicKey, $sessionKey);
-        $enc->setNode($object);
-        $enc->type = XMLSecEnc::Content;
+        $enc->setNode(XMLSecEnc::Element === $type ? $object->firstChild : $object);
+        $enc->type = $type;
         $enc->encryptNode($sessionKey);
 
         if (!is_null($alter))
@@ -103,6 +105,20 @@ class EncryptionTest extends TestCase
         openssl_public_encrypt($sessionKey, $encrypted, $publicKey, OPENSSL_PKCS1_OAEP_PADDING);
 
         return $encrypted;
+    }
+
+    /**
+     * Returns an alteration that encrypts $plaintext instead of the token,
+     * with a new AES-256-GCM session key encrypted for crypt.cert.pem.
+     */
+    private static function encryptPlaintext($plaintext)
+    {
+        return function (DOMXPath $xpath) use ($plaintext) {
+            $sessionKey = new XMLSecurityKey(XMLSecurityKey::AES256_GCM);
+            $sessionKey->generateSessionKey();
+            $xpath->query(self::ENCRYPTED_KEY)->item(0)->nodeValue = base64_encode(self::oaepEncrypt($sessionKey->key));
+            $xpath->query(self::ENCRYPTED_DATA)->item(0)->nodeValue = base64_encode($sessionKey->encryptData($plaintext));
+        };
     }
 
     /**
@@ -152,6 +168,102 @@ class EncryptionTest extends TestCase
         $this->assertTrue($token->isSignatureValid());
         $this->assertTrue($token->isDataEncrypted());
         $this->assertSame($data, $token->getData());
+    }
+
+    public function testAnEncryptedTokenDeclaresTheTypeElement()
+    {
+        $created = $this->createSecureToken(self::sampleData());
+
+        $doc = new DOMDocument();
+        $doc->loadXML($created->getXML());
+        $xpath = self::xpath($doc);
+        $this->assertSame(XMLSecEnc::Element, $xpath->evaluate('string(/ds:Signature/ds:Object/xenc:EncryptedData/@Type)'));
+        // xenc:EncryptedData replaces the node Token: it is the only child of
+        // ds:Object.
+        $this->assertSame(1, $xpath->query('/ds:Signature/ds:Object/node()')->length);
+    }
+
+    /**
+     * @return array Type => [type of xenc:EncryptedData]
+     */
+    public function encryptedDataTypes()
+    {
+        return [
+            'Element (another library, or this one from version 1.2)' => [XMLSecEnc::Element],
+            'Content (this library up to version 1.1)' => [XMLSecEnc::Content],
+        ];
+    }
+
+    /**
+     * @dataProvider encryptedDataTypes
+     */
+    public function testATokenEncryptedWithEitherTypeIsDecrypted($type)
+    {
+        $this->requireSymmetricEncryption();
+        $xml = self::buildEncryptedToken(XMLSecurityKey::RSA_OAEP_MGF1P, XMLSecurityKey::AES256_GCM, null, 'sign', $type);
+
+        $token = self::analyze($xml, self::cert('crypt.key.pem'));
+
+        $this->assertNull($token->getError());
+        $this->assertTrue($token->isSignatureValid());
+        $this->assertSame(self::sampleData(), $token->getData());
+    }
+
+    /**
+     * @return array Case => [value of the attribute Type, or NULL to remove it]
+     */
+    public function otherEncryptedDataTypes()
+    {
+        return [
+            'no type' => [null],
+            'empty type' => [''],
+            'type EncryptedKey' => ['http://www.w3.org/2001/04/xmlenc#EncryptedKey'],
+            'MIME type' => ['text/xml'],
+        ];
+    }
+
+    /**
+     * @dataProvider otherEncryptedDataTypes
+     */
+    public function testAnyOtherTypeIsRefusedWithoutDecryption($type)
+    {
+        $this->requireSymmetricEncryption();
+        $xml = self::buildEncryptedToken(XMLSecurityKey::RSA_OAEP_MGF1P, XMLSecurityKey::AES256_GCM, function (DOMXPath $xpath) use ($type) {
+            $encryptedData = $xpath->query('/ds:Signature/ds:Object/xenc:EncryptedData')->item(0);
+            is_null($type) ? $encryptedData->removeAttribute('Type') : $encryptedData->setAttribute('Type', $type);
+        }, 'sign', XMLSecEnc::Element);
+
+        $token = self::analyze($xml, $this->unloadableKey());
+
+        self::assertNotDecrypted($token, 'Encrypted data is malformed!');
+    }
+
+    /**
+     * A trusted signer may encrypt any plaintext: it is decrypted as an XML
+     * fragment, which cannot hold a document type declaration, whatever the
+     * type it declares.
+     *
+     * @dataProvider encryptedDataTypes
+     */
+    public function testAPlaintextWithADoctypeIsRefused($type)
+    {
+        $this->requireSymmetricEncryption();
+        $plain = new DOMDocument();
+        $plain->loadXML(self::createToken(self::sampleData())->getXML());
+        $tokenXml = $plain->saveXML(self::xpath($plain)->query('/ds:Signature/ds:Object/Token')->item(0));
+        $plaintext = '<!DOCTYPE Token [<!ENTITY role "Admin">]>' . str_replace('<TokenData>', '<TokenData><extra>&role;</extra>', $tokenXml);
+        $xml = self::buildEncryptedToken(XMLSecurityKey::RSA_OAEP_MGF1P, XMLSecurityKey::AES256_GCM, self::encryptPlaintext($plaintext), 'sign', $type);
+
+        $token = self::analyze($xml, self::cert('crypt.key.pem'));
+
+        $this->assertSame(self::DECRYPTION_FAILED, $token->getError());
+        $this->assertFalse($token->isSignatureValid());
+        $this->assertNull($token->getData());
+
+        // Without the document type declaration, the same plaintext is a
+        // valid token: the declaration alone makes it refused.
+        $xml = self::buildEncryptedToken(XMLSecurityKey::RSA_OAEP_MGF1P, XMLSecurityKey::AES256_GCM, self::encryptPlaintext($tokenXml), 'sign', $type);
+        $this->assertTrue(self::analyze($xml, self::cert('crypt.key.pem'))->isSignatureValid());
     }
 
     public function testRsa15IsRefusedAtCreation()

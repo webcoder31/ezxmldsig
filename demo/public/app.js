@@ -575,7 +575,7 @@
     'TokenData': 'The user data, as nested elements. With base64Encode (the default), each value is base64 encoded and marked Algorithm="base64".',
     'data-leaf': 'A user data value. getData() returns it decoded, as a string.',
     'data-group': 'A group of user data values: getData() returns it as a nested array.',
-    'EncryptedData': 'XML Encryption of the token content (Type="…#Content"). The data are encrypted before they are signed: the signature covers the ciphertext, so an altered ciphertext fails the digest check before any decryption.',
+    'EncryptedData': 'XML Encryption of the node Token, which it replaces (Type="…#Element"; tokens of the versions up to 1.1 declare "…#Content", read as well). The data are encrypted before they are signed: the signature covers the ciphertext, so an altered ciphertext fails the digest check before any decryption.',
     'EncryptionMethod@data': 'Symmetric algorithm of the content (option sessionKeyCipheringAlgorithm). AES-GCM checks an authentication tag before returning any data; CBC has no integrity and is only accepted when the receiver declares it.',
     'KeyInfo@enc': 'Holds the session key, encrypted for the recipient.',
     'EncryptedKey': 'The random session key of this token, encrypted with the public key of the recipient\'s certificate (key transport). Only the recipient\'s private key decrypts it.',

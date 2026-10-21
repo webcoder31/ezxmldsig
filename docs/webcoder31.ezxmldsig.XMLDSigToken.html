@@ -327,7 +327,7 @@ ciphering).</p>
     &lt;/ds:X509Data&gt;
   &lt;/ds:KeyInfo&gt;
   &lt;ds:Object Id=&quot;Token&quot;&gt;
-    &lt;xenc:EncryptedData xmlns:xenc=&quot;http://www.w3.org/2001/04/xmlenc#&quot; Type=&quot;http://www.w3.org/2001/04/xmlenc#Content&quot;&gt;
+    &lt;xenc:EncryptedData xmlns:xenc=&quot;http://www.w3.org/2001/04/xmlenc#&quot; Type=&quot;http://www.w3.org/2001/04/xmlenc#Element&quot;&gt;
       &lt;xenc:EncryptionMethod Algorithm=&quot;http://www.w3.org/2009/xmlenc11#aes256-gcm&quot;/&gt;
       &lt;ds:KeyInfo xmlns:dsig=&quot;http://www.w3.org/2000/09/xmldsig#&quot;&gt;
         &lt;xenc:EncryptedKey&gt;
@@ -359,9 +359,14 @@ Signature.</p>
 located inside the node <code>&lt;xenc:EncryptedKey /&gt;</code>.</p>
 </li>
 <li>
-<p>Encrypt the content of the node <code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code> using the
-non-ciphered session key and store the result in the last node
-<code>&lt;xenc:CipherValue /&gt;</code>.</p>
+<p>Encrypt the node <code>&lt;Token /&gt;</code>, the only child of the node
+<code>&lt;ds:Object Id=&quot;Token&quot; /&gt;</code>, using the non-ciphered session key, and store
+the result in the last node <code>&lt;xenc:CipherValue /&gt;</code>. The node
+<code>&lt;xenc:EncryptedData /&gt;</code> replaces the node <code>&lt;Token /&gt;</code> and declares the
+type <code>http://www.w3.org/2001/04/xmlenc#Element</code>: an element is encrypted.
+Versions up to 1.1 declared the type
+<code>http://www.w3.org/2001/04/xmlenc#Content</code> (the content of the node
+<code>&lt;ds:Object /&gt;</code>) for the same encrypted bytes.</p>
 </li>
 </ul>
 <p><strong>The decryption process is the following:</strong></p>
@@ -377,7 +382,13 @@ perform the encryption.</p>
 </li>
 <li>
 <p>Decrypt the content of the last node <code>&lt;xenc:CipherValue /&gt;</code> using the
-deciphered session key.</p>
+deciphered session key, and put the plaintext, the node <code>&lt;Token /&gt;</code>, in
+place of the node <code>&lt;xenc:EncryptedData /&gt;</code>. Both types XML Encryption 1.1
+defines for an XML plaintext are read, <code>Element</code> and <code>Content</code>, as the
+standard requires: tokens of the versions up to 1.1, and tokens that
+other XML Encryption libraries encrypt, are decrypted. Any other type is
+refused. The plaintext is read as an XML fragment whatever its type: it
+cannot hold a document type declaration (DOCTYPE).</p>
 </li>
 </ul>
 <p>The decryption only takes place once the digest, the signature, the trust
@@ -395,7 +406,7 @@ token whose identifier is among them.</p>
 
 
 		<div class="classLikeSection">
-			<b>Located at</b> <a href="source-XMLDSigToken.html#321" title="Go to source code">XMLDSigToken.php</a><br>
+			<b>Located at</b> <a href="source-XMLDSigToken.html#332" title="Go to source code">XMLDSigToken.php</a><br>
 		</div>
 
 
@@ -416,7 +427,7 @@ token whose identifier is among them.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#572-593" title="Go to source code">__debugInfo</a>()</code>
+				<code><a href="source-XMLDSigToken.html#583-604" title="Go to source code">__debugInfo</a>()</code>
 
 
 	<div class="expandable-collapsedView">
@@ -452,7 +463,7 @@ security reasons.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#596-1264" title="Go to source code">__construct</a>(
+				<code><a href="source-XMLDSigToken.html#607-1275" title="Go to source code">__construct</a>(
 	<span>mixed <var>$xmlOrData</var></span>,
 	<span>string <var>$signKeyPath</var> = <span class="php-kw">null</span></span>,
 	<span>string <var>$signKeyPassword</var> = <span class="php-kw">null</span></span>,
@@ -881,7 +892,7 @@ encrypt the token.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1462-1508" title="Go to source code">createXMLToken</a>(
+				<code><a href="source-XMLDSigToken.html#1473-1519" title="Go to source code">createXMLToken</a>(
 	<span>array <var>$data</var></span>,
 	<span>string <var>$signKeyPath</var></span>,
 	<span>string <var>$signCertPath</var></span>,
@@ -965,7 +976,7 @@ created, <code>getError()</code> tells why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1511-1602" title="Go to source code">createSecureXMLToken</a>(
+				<code><a href="source-XMLDSigToken.html#1522-1613" title="Go to source code">createSecureXMLToken</a>(
 	<span>array <var>$data</var></span>,
 	<span>string <var>$signKeyPath</var></span>,
 	<span>string <var>$signCertPath</var></span>,
@@ -1096,7 +1107,7 @@ created, <code>getError()</code> tells why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1605-1645" title="Go to source code">analyzeXMLToken</a>(<span>string <var>$xml</var></span>, <span>array <var>$options</var> = []</span>): <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">XMLDSigToken</span></b></code>
+				<code><a href="source-XMLDSigToken.html#1616-1656" title="Go to source code">analyzeXMLToken</a>(<span>string <var>$xml</var></span>, <span>array <var>$options</var> = []</span>): <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">XMLDSigToken</span></b></code>
 
 
 	<div class="expandable-collapsedView">
@@ -1160,7 +1171,7 @@ why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#1648-1694" title="Go to source code">analyzeSecureXMLToken</a>(
+				<code><a href="source-XMLDSigToken.html#1659-1705" title="Go to source code">analyzeSecureXMLToken</a>(
 	<span>string <var>$xml</var></span>,
 	<span>string <var>$cryptKeyPath</var></span>,
 	<span>string <var>$cryptKeyPassword</var> = <span class="php-kw">null</span></span>,
@@ -1240,7 +1251,7 @@ why.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2892-2948" title="Go to source code">isSignatureValid</a>(): boolean</code>
+				<code><a href="source-XMLDSigToken.html#2926-2982" title="Go to source code">isSignatureValid</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1328,7 +1339,7 @@ token passed (see <code>createSecureXMLToken()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2951-2965" title="Go to source code">isCertTrusted</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#2985-2999" title="Go to source code">isCertTrusted</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1370,7 +1381,7 @@ otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#2968-3036" title="Go to source code">isOutOfDate</a>(<span>int <var>$ttl</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_DEFAULT_TTL">TOKEN_DEFAULT_TTL</a></span>): boolean</code>
+				<code><a href="source-XMLDSigToken.html#3002-3070" title="Go to source code">isOutOfDate</a>(<span>int <var>$ttl</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_DEFAULT_TTL">TOKEN_DEFAULT_TTL</a></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1427,7 +1438,7 @@ upgraded only applies its own <code>$ttl</code>.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3039-3054" title="Go to source code">isDataEncrypted</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#3073-3088" title="Go to source code">isDataEncrypted</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1467,7 +1478,7 @@ NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3057-3070" title="Go to source code">isDigestValueOk</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#3091-3104" title="Go to source code">isDigestValueOk</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1507,7 +1518,7 @@ FALSE otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3073-3086" title="Go to source code">isSignatureValueOk</a>(): boolean|null</code>
+				<code><a href="source-XMLDSigToken.html#3107-3120" title="Go to source code">isSignatureValueOk</a>(): boolean|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1547,7 +1558,7 @@ is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3089-3097" title="Go to source code">getXML</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3123-3131" title="Go to source code">getXML</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1582,7 +1593,7 @@ is valid, FALSE otherwise, NULL if cannot be evaluated.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3100-3118" title="Go to source code">getData</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#3134-3152" title="Go to source code">getData</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1625,7 +1636,7 @@ not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3121-3136" title="Go to source code">getTimestamp</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3155-3170" title="Go to source code">getTimestamp</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1666,7 +1677,7 @@ unread (see <code>createSecureXMLToken()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3139-3163" title="Go to source code">getTokenId</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3173-3197" title="Go to source code">getTokenId</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1715,7 +1726,7 @@ unread (see <code>createSecureXMLToken()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3166-3183" title="Go to source code">getAudience</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#3200-3217" title="Go to source code">getAudience</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1758,7 +1769,7 @@ the recipient, which leaves its content unread (see
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3186-3201" title="Go to source code">getExpiry</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3220-3235" title="Go to source code">getExpiry</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1799,7 +1810,7 @@ leaves its content unread (see <code>createSecureXMLToken()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3204-3212" title="Go to source code">getError</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3238-3246" title="Go to source code">getError</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1834,7 +1845,7 @@ leaves its content unread (see <code>createSecureXMLToken()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3215-3223" title="Go to source code">getAnomalies</a>(): array</code>
+				<code><a href="source-XMLDSigToken.html#3249-3257" title="Go to source code">getAnomalies</a>(): array</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1869,7 +1880,7 @@ leaves its content unread (see <code>createSecureXMLToken()</code>).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3226-3240" title="Go to source code">getCertificate</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3260-3274" title="Go to source code">getCertificate</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1905,7 +1916,7 @@ available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3243-3258" title="Go to source code">getCertIssuer</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#3277-3292" title="Go to source code">getCertIssuer</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1943,7 +1954,7 @@ if not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3261-3276" title="Go to source code">getCertSubject</a>(): array|null</code>
+				<code><a href="source-XMLDSigToken.html#3295-3310" title="Go to source code">getCertSubject</a>(): array|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -1981,7 +1992,7 @@ if not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3279-3294" title="Go to source code">getCertDN</a>(): string|null</code>
+				<code><a href="source-XMLDSigToken.html#3313-3328" title="Go to source code">getCertDN</a>(): string|null</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2019,7 +2030,7 @@ if not available.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3297-3315" title="Go to source code">getCertValidFrom</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
+				<code><a href="source-XMLDSigToken.html#3331-3349" title="Go to source code">getCertValidFrom</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2066,7 +2077,7 @@ valid, NULL if not available, FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3318-3337" title="Go to source code">getCertValidTo</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
+				<code><a href="source-XMLDSigToken.html#3352-3371" title="Go to source code">getCertValidTo</a>(<span>string <var>$dateFormat</var> = <b><span class="active" title="webcoder31\ezxmldsig\XMLDSigToken">self</span></b>::<a href="webcoder31.ezxmldsig.XMLDSigToken.html#TOKEN_TIMESTAMP_FORMAT">TOKEN_TIMESTAMP_FORMAT</a></span>): string|null|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2114,7 +2125,7 @@ not available, FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3340-3355" title="Go to source code">isCertOutOfDate</a>(): boolean</code>
+				<code><a href="source-XMLDSigToken.html#3374-3389" title="Go to source code">isCertOutOfDate</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2152,7 +2163,7 @@ otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3358-3407" title="Go to source code">isValidCertIssuer</a>(<span>array <var>$expectedIssuerInfo</var></span>): boolean</code>
+				<code><a href="source-XMLDSigToken.html#3392-3441" title="Go to source code">isValidCertIssuer</a>(<span>array <var>$expectedIssuerInfo</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2221,7 +2232,7 @@ expected information, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3410-3452" title="Go to source code">isValidCertCA</a>(<span>string <var>$caCertPath</var></span>): boolean</code>
+				<code><a href="source-XMLDSigToken.html#3444-3486" title="Go to source code">isValidCertCA</a>(<span>string <var>$caCertPath</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2286,7 +2297,7 @@ from the token).</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3692-3792" title="Go to source code">alterXML</a>(<span>string &amp;<var>$xml</var></span>, <span>string <var>$nodePath</var></span>, <span>string <var>$nodeAttribute</var></span>, <span>string <var>$newValue</var></span>, <span>boolean <var>$delete</var> = <span class="php-kw">false</span></span>): string|false</code>
+				<code><a href="source-XMLDSigToken.html#3726-3826" title="Go to source code">alterXML</a>(<span>string &amp;<var>$xml</var></span>, <span>string <var>$nodePath</var></span>, <span>string <var>$nodeAttribute</var></span>, <span>string <var>$newValue</var></span>, <span>boolean <var>$delete</var> = <span class="php-kw">false</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2360,7 +2371,7 @@ modification or deletion, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3795-3880" title="Go to source code">getPrettyXML</a>(): string</code>
+				<code><a href="source-XMLDSigToken.html#3829-3914" title="Go to source code">getPrettyXML</a>(): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2397,7 +2408,7 @@ function to obtain the raw XML token you want to work with.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-XMLDSigToken.html#3883-3958" title="Go to source code">getHTMLDump</a>(): string</code>
+				<code><a href="source-XMLDSigToken.html#3917-3992" title="Go to source code">getHTMLDump</a>(): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -2448,7 +2459,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#323-327" title="Go to source code">XMLDSIG_NS_PREFIX</a> = <span class="php-str">'ds'</span></code>
+<code><a href="source-XMLDSigToken.html#334-338" title="Go to source code">XMLDSIG_NS_PREFIX</a> = <span class="php-str">'ds'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2468,7 +2479,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#329-330" title="Go to source code">TOKEN_NAME</a> = <span class="php-str">'Token'</span></code>
+<code><a href="source-XMLDSigToken.html#340-341" title="Go to source code">TOKEN_NAME</a> = <span class="php-str">'Token'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2488,7 +2499,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#332-333" title="Go to source code">TOKEN_DATA_NAME</a> = <span class="php-str">'TokenData'</span></code>
+<code><a href="source-XMLDSigToken.html#343-344" title="Go to source code">TOKEN_DATA_NAME</a> = <span class="php-str">'TokenData'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2508,7 +2519,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#335-336" title="Go to source code">TOKEN_TIMESTAMP_NAME</a> = <span class="php-str">'TokenTimestamp'</span></code>
+<code><a href="source-XMLDSigToken.html#346-347" title="Go to source code">TOKEN_TIMESTAMP_NAME</a> = <span class="php-str">'TokenTimestamp'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2528,7 +2539,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#338-339" title="Go to source code">TOKEN_ID_NAME</a> = <span class="php-str">'TokenId'</span></code>
+<code><a href="source-XMLDSigToken.html#349-350" title="Go to source code">TOKEN_ID_NAME</a> = <span class="php-str">'TokenId'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2548,7 +2559,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#341-343" title="Go to source code">TOKEN_ID_BYTES</a> = <span class="php-num">16</span></code>
+<code><a href="source-XMLDSigToken.html#352-354" title="Go to source code">TOKEN_ID_BYTES</a> = <span class="php-num">16</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2568,7 +2579,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#345-347" title="Go to source code">TOKEN_AUDIENCE_NAME</a> = <span class="php-str">'TokenAudience'</span></code>
+<code><a href="source-XMLDSigToken.html#356-358" title="Go to source code">TOKEN_AUDIENCE_NAME</a> = <span class="php-str">'TokenAudience'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2588,7 +2599,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#349-350" title="Go to source code">TOKEN_EXPIRY_NAME</a> = <span class="php-str">'TokenExpiry'</span></code>
+<code><a href="source-XMLDSigToken.html#360-361" title="Go to source code">TOKEN_EXPIRY_NAME</a> = <span class="php-str">'TokenExpiry'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2608,7 +2619,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#356-358" title="Go to source code">TOKEN_TIMESTAMP_FORMAT</a> = <span class="php-str">'Y-m-d\TH:i:s\Z'</span></code>
+<code><a href="source-XMLDSigToken.html#367-369" title="Go to source code">TOKEN_TIMESTAMP_FORMAT</a> = <span class="php-str">'Y-m-d\TH:i:s\Z'</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2628,7 +2639,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#360-362" title="Go to source code">TOKEN_DEFAULT_TTL</a> = <span class="php-num">60</span></code>
+<code><a href="source-XMLDSigToken.html#371-373" title="Go to source code">TOKEN_DEFAULT_TTL</a> = <span class="php-num">60</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2648,7 +2659,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#364-366" title="Go to source code">DESYNC_TOLERANCE</a> = <span class="php-num">30</span></code>
+<code><a href="source-XMLDSigToken.html#375-377" title="Go to source code">DESYNC_TOLERANCE</a> = <span class="php-num">30</span></code>
 
 
 	<div class="expandable-expandedView">
@@ -2668,7 +2679,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#369" title="Go to source code">C14N</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#C14N">C14N</a></code>
+<code><a href="source-XMLDSigToken.html#380" title="Go to source code">C14N</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#C14N">C14N</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2688,7 +2699,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#370" title="Go to source code">C14N_COMMENTS</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#C14N_COMMENTS">C14N_COMMENTS</a></code>
+<code><a href="source-XMLDSigToken.html#381" title="Go to source code">C14N_COMMENTS</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#C14N_COMMENTS">C14N_COMMENTS</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2708,7 +2719,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#371" title="Go to source code">EXC_C14N</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#EXC_C14N">EXC_C14N</a></code>
+<code><a href="source-XMLDSigToken.html#382" title="Go to source code">EXC_C14N</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#EXC_C14N">EXC_C14N</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2728,7 +2739,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#372" title="Go to source code">EXC_C14N_COMMENTS</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#EXC_C14N_COMMENTS">EXC_C14N_COMMENTS</a></code>
+<code><a href="source-XMLDSigToken.html#383" title="Go to source code">EXC_C14N_COMMENTS</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#EXC_C14N_COMMENTS">EXC_C14N_COMMENTS</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2748,7 +2759,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#374" title="Go to source code">SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA1">SHA1</a></code>
+<code><a href="source-XMLDSigToken.html#385" title="Go to source code">SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA1">SHA1</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2768,7 +2779,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#375" title="Go to source code">SHA256</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA256">SHA256</a></code>
+<code><a href="source-XMLDSigToken.html#386" title="Go to source code">SHA256</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA256">SHA256</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2788,7 +2799,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#376" title="Go to source code">SHA384</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA384">SHA384</a></code>
+<code><a href="source-XMLDSigToken.html#387" title="Go to source code">SHA384</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA384">SHA384</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2808,7 +2819,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#377" title="Go to source code">SHA512</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA512">SHA512</a></code>
+<code><a href="source-XMLDSigToken.html#388" title="Go to source code">SHA512</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#SHA512">SHA512</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2828,7 +2839,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#378" title="Go to source code">RIPEMD160</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#RIPEMD160">RIPEMD160</a></code>
+<code><a href="source-XMLDSigToken.html#389" title="Go to source code">RIPEMD160</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html"><span title="RobRichards\XMLSecLibs\XMLSecurityDSig">XMLSecurityDSig</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityDSig.html#RIPEMD160">RIPEMD160</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2848,7 +2859,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#380" title="Go to source code">TRIPLEDES_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#TRIPLEDES_CBC">TRIPLEDES_CBC</a></code>
+<code><a href="source-XMLDSigToken.html#391" title="Go to source code">TRIPLEDES_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#TRIPLEDES_CBC">TRIPLEDES_CBC</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2868,7 +2879,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#381" title="Go to source code">AES128_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES128_CBC">AES128_CBC</a></code>
+<code><a href="source-XMLDSigToken.html#392" title="Go to source code">AES128_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES128_CBC">AES128_CBC</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2888,7 +2899,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#382" title="Go to source code">AES192_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES192_CBC">AES192_CBC</a></code>
+<code><a href="source-XMLDSigToken.html#393" title="Go to source code">AES192_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES192_CBC">AES192_CBC</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2908,7 +2919,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#383" title="Go to source code">AES256_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES256_CBC">AES256_CBC</a></code>
+<code><a href="source-XMLDSigToken.html#394" title="Go to source code">AES256_CBC</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES256_CBC">AES256_CBC</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2928,7 +2939,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#384" title="Go to source code">AES128_GCM</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES128_GCM">AES128_GCM</a></code>
+<code><a href="source-XMLDSigToken.html#395" title="Go to source code">AES128_GCM</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES128_GCM">AES128_GCM</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2948,7 +2959,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#385" title="Go to source code">AES192_GCM</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES192_GCM">AES192_GCM</a></code>
+<code><a href="source-XMLDSigToken.html#396" title="Go to source code">AES192_GCM</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES192_GCM">AES192_GCM</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2968,7 +2979,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#386" title="Go to source code">AES256_GCM</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES256_GCM">AES256_GCM</a></code>
+<code><a href="source-XMLDSigToken.html#397" title="Go to source code">AES256_GCM</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#AES256_GCM">AES256_GCM</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -2988,7 +2999,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#387" title="Go to source code">RSA_OAEP_MGF1P</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_OAEP_MGF1P">RSA_OAEP_MGF1P</a></code>
+<code><a href="source-XMLDSigToken.html#398" title="Go to source code">RSA_OAEP_MGF1P</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_OAEP_MGF1P">RSA_OAEP_MGF1P</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -3008,7 +3019,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#388" title="Go to source code">DSA_SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#DSA_SHA1">DSA_SHA1</a></code>
+<code><a href="source-XMLDSigToken.html#399" title="Go to source code">DSA_SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#DSA_SHA1">DSA_SHA1</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -3028,7 +3039,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#389" title="Go to source code">RSA_SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA1">RSA_SHA1</a></code>
+<code><a href="source-XMLDSigToken.html#400" title="Go to source code">RSA_SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA1">RSA_SHA1</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -3048,7 +3059,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#390" title="Go to source code">RSA_SHA256</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA256">RSA_SHA256</a></code>
+<code><a href="source-XMLDSigToken.html#401" title="Go to source code">RSA_SHA256</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA256">RSA_SHA256</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -3068,7 +3079,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#391" title="Go to source code">RSA_SHA384</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA384">RSA_SHA384</a></code>
+<code><a href="source-XMLDSigToken.html#402" title="Go to source code">RSA_SHA384</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA384">RSA_SHA384</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -3088,7 +3099,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#392" title="Go to source code">RSA_SHA512</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA512">RSA_SHA512</a></code>
+<code><a href="source-XMLDSigToken.html#403" title="Go to source code">RSA_SHA512</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#RSA_SHA512">RSA_SHA512</a></code>
 
 
 	<div class="expandable-expandedView">
@@ -3108,7 +3119,7 @@ loads no external resource (script, style sheet, image).</p>
 
 <td class="table-cell table-shrink"></td>
 			<td class="table-cell">
-<code><a href="source-XMLDSigToken.html#393" title="Go to source code">HMAC_SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#HMAC_SHA1">HMAC_SHA1</a></code>
+<code><a href="source-XMLDSigToken.html#404" title="Go to source code">HMAC_SHA1</a> = <a href="RobRichards.XMLSecLibs.XMLSecurityKey.html"><span title="RobRichards\XMLSecLibs\XMLSecurityKey">XMLSecurityKey</span></a>::<a href="RobRichards.XMLSecLibs.XMLSecurityKey.html#HMAC_SHA1">HMAC_SHA1</a></code>
 
 
 	<div class="expandable-expandedView">

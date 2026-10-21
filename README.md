@@ -260,28 +260,28 @@ The result below was produced by this code with the certificates of `demo/certs/
         <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
       </ds:Transforms>
       <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-      <ds:DigestValue>IDS0UTTp ... 5wuPKks=</ds:DigestValue>
+      <ds:DigestValue>SiYOh23w ... TBgPfRA=</ds:DigestValue>
     </ds:Reference>
   </ds:SignedInfo>
-  <ds:SignatureValue>Q65Aoros ... 1pKHUQ==</ds:SignatureValue>
+  <ds:SignatureValue>rN234Axi ... FBh6aA==</ds:SignatureValue>
   <ds:KeyInfo>
     <ds:X509Data>
       <ds:X509Certificate>MIIFMTCC ... tV4guQ==</ds:X509Certificate>
     </ds:X509Data>
   </ds:KeyInfo>
   <ds:Object Id="Token">
-    <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Content">
+    <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Element">
       <xenc:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>
       <ds:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
         <xenc:EncryptedKey>
           <xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
           <xenc:CipherData>
-            <xenc:CipherValue>T7VtnPzT ... LM83BA==</xenc:CipherValue>
+            <xenc:CipherValue>pcZ/cEMe ... IHhH9g==</xenc:CipherValue>
           </xenc:CipherData>
         </xenc:EncryptedKey>
       </ds:KeyInfo>
       <xenc:CipherData>
-        <xenc:CipherValue>cFU72/hC ... RC2xH8M=</xenc:CipherValue>
+        <xenc:CipherValue>lOKmB8Fv ... QFJ3MpQ=</xenc:CipherValue>
       </xenc:CipherData>
     </xenc:EncryptedData>
   </ds:Object>
@@ -493,6 +493,7 @@ The token data are encrypted with a session key generated for each token, and th
 * **The sender needs no private key of the recipient.** ``createSecureXMLToken()`` takes the private key of the recipient (``$cryptKeyPath``) only to decrypt the created token and check its content: pass ``null`` instead, and the created token is checked up to its decryption (structure, algorithms, digest, signature, trust in the signing certificate), its content left unread (``getData()``, ``getTimestamp()``, ``getTokenId()``, ``getAudience()`` and ``getExpiry()`` return ``NULL``). A password (``$cryptKeyPassword``) given without this key throws an exception.
 
 * **Default algorithms.** The data are encrypted with AES-256-GCM (``AES256_GCM``) and the session key with RSA-OAEP (``RSA_OAEP_MGF1P``, http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p). AES-GCM checks an authentication tag before returning any data: altered data are rejected as a whole. A 256-bit key costs no more than a 128-bit one for data of this size.
+* **Type of the encrypted data.** Since version 1.2, the node ``xenc:EncryptedData`` replaces the node ``Token`` and declares the type http://www.w3.org/2001/04/xmlenc#Element: an element is encrypted, as other XML Encryption libraries declare it (xml-encryption for Node.js among them). The analysis reads both types XML Encryption 1.1 defines for an XML plaintext, ``Element`` and ``Content``, as the standard requires, and refuses any other. The plaintext is read as an XML fragment whatever its type, so that it cannot hold a document type declaration (see [XML parsing](#xml-parsing)). Versions up to 1.1 declared ``Content`` (the content of ``ds:Object``) for the same encrypted bytes, and refuse ``Element`` (``Encrypted data is malformed!``): upgrade the receivers before the senders.
 * **Decryption after verification.** A token is only decrypted once its digest, its signature, the trust in its certificate (see [Trust anchor](#trust-anchor)) and its algorithms have been verified. A token that fails one of these checks is never decrypted.
 * **One error for every decryption failure.** Whatever fails once the decryption starts (session key, data, parsing of the decrypted XML), ``getError()`` returns ``Token decryption failed!``, with no reason, no anomaly and no PHP warning. A distinct message per failure would let someone who can submit altered tokens tell which step failed, which is what padding oracle attacks need. Failures that do not depend on the encrypted content keep their own message (no decryption key, a key that cannot be loaded, a malformed ``xenc:EncryptedData``).
 * **RSA 1.5 is refused.** The key transport algorithm http://www.w3.org/2001/04/xmlenc#rsa-1_5 (PKCS #1 v1.5 padding) is accepted neither at creation nor at analysis, and no option allows it: whether the padding of a submitted session key is valid can be told from its decryption (Bleichenbacher's attack), depending on the OpenSSL version PHP is built with. ezxmldsig always used RSA-OAEP by default; tokens created with RSA 1.5 on purpose must be created again with RSA-OAEP.

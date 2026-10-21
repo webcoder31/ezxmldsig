@@ -1,5 +1,28 @@
-Unreleased
-----------
+1.2.0 (2026-10-21)
+-------------------
+In short: encrypted tokens follow XML Encryption more closely, and both
+demos are online. An encrypted token now declares the type Element, as
+other XML Encryption libraries do; the analysis reads Element and Content,
+and reads a decrypted plaintext as a fragment, which cannot hold a DOCTYPE.
+Upgrade the receivers before the senders: a receiver still in 1.0 or 1.1
+refuses the encrypted tokens of this version. Signed tokens that are not
+encrypted are unchanged. The rest concerns the demos, which are not part of
+the Composer package: a single sign-on demo, and both served online.
+
+- An encrypted token declares the type of its encrypted data as Element
+  (http://www.w3.org/2001/04/xmlenc#Element): its node xenc:EncryptedData
+  replaces the node Token, the element that is encrypted, as other XML
+  Encryption libraries declare it. Versions up to 1.1 declared Content (the
+  content of ds:Object) for the same encrypted bytes, and refuse Element:
+  upgrade the receivers before the senders.
+- The analysis reads both types XML Encryption 1.1 defines for an XML
+  plaintext, Element and Content, as the standard requires, and refuses any
+  other. Tokens of earlier versions are read as before, and tokens encrypted
+  by xml-encryption (Node.js) are read without change.
+- The decrypted plaintext is read as an XML fragment whatever its type, so
+  that it cannot hold a document type declaration (DOCTYPE), as everywhere
+  else in the library. Read as a whole document, the way xmlseclibs reads an
+  Element plaintext, it could.
 - Add a single sign-on demo, run with `bin/demo-sso` (PHP built-in web
   server in the php:8.3-cli Docker image, on 127.0.0.1 only): an identity
   provider and two applications on idp.localhost, mail.localhost and
