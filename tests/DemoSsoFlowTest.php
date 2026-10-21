@@ -100,7 +100,7 @@ class DemoSsoFlowTest extends TestCase
 
         $response = $this->browse('GET', $location);
         $this->assertSame(200, $response['status']);
-        $this->assertStringContainsString('Log in to continue to mail', $response['body']);
+        $this->assertStringContainsString('Log in to continue to MAIL', $response['body']);
 
         $response = $this->browse('POST', self::url('idp', '/login'), [
             'app' => 'mail', 'return' => self::url('mail', '/acs'), 'username' => 'ragnar', 'password' => 'kattegat',
@@ -183,7 +183,7 @@ class DemoSsoFlowTest extends TestCase
         $response = $this->browse('GET', self::url('idp', '/sso?app=mail&return=' . rawurlencode('http://evil.example/steal')));
 
         $this->assertSame(400, $response['status']);
-        $this->assertStringContainsString('the return address is not the one registered for mail', $response['body']);
+        $this->assertStringContainsString('the return address is not the one registered for MAIL', $response['body']);
     }
 
     public function testAWrongPasswordIsRefused()
@@ -279,7 +279,7 @@ class DemoSsoFlowTest extends TestCase
         $response = $this->logInAs('bjorn', 'ironside', 'crm');
 
         $this->assertSame(403, $response['status']);
-        $this->assertStringContainsString('No access to crm', $response['body']);
+        $this->assertStringContainsString('No access to CRM', $response['body']);
         $this->assertNull(Browser::postedToken($response));
         $this->assertNull($this->cookies('crm.localhost:' . self::PORT));
     }

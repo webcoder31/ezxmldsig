@@ -132,8 +132,8 @@ final class Application
         ]);
         $this->trace->add([
             'from' => $this->app, 'to' => 'idp',
-            'title' => $this->app . ' has no session for this browser: it sends the browser to idp.',
-            'detail' => 'No cookie ' . Sites::sessionCookie($this->app) . ' came with the request. ' . $this->app . ' has no password: it asks idp who the user is, and where to post the answer (its own address, /acs).',
+            'title' => Sites::name($this->app) . ' has no session for this browser: it sends the browser to IDP.',
+            'detail' => 'No cookie ' . Sites::sessionCookie($this->app) . ' came with the request. ' . Sites::name($this->app) . ' has no password: it asks IDP who the user is, and where to post the answer (its own address, /acs).',
             'http' => '303 → ' . $location,
         ]);
 
@@ -149,7 +149,7 @@ final class Application
         $xml = base64_decode($encoded, true);
         if (false === $xml || '' === $xml)
         {
-            $this->trace->add(['from' => 'browser', 'to' => $this->app, 'kind' => 'bad', 'title' => $this->app . ' received no token.']);
+            $this->trace->add(['from' => 'browser', 'to' => $this->app, 'kind' => 'bad', 'title' => Sites::name($this->app) . ' received no token.']);
 
             return $this->refusedPage($request, null, 'No token was posted.');
         }
@@ -169,7 +169,7 @@ final class Application
             }
             $this->trace->add([
                 'from' => $this->app, 'to' => $this->app, 'kind' => 'bad',
-                'title' => $this->app . ' refuses the token' . (is_null($failure) ? '.' : ' at "' . $failure['label'] . '" (' . ('caller' === $failure['by'] ? 'its own check' : 'library') . ').'),
+                'title' => Sites::name($this->app) . ' refuses the token' . (is_null($failure) ? '.' : ' at "' . $failure['label'] . '" (' . ('caller' === $failure['by'] ? 'its own check' : 'library') . ').'),
                 'detail' => is_null($failure) ? null : $failure['message'],
                 'xml' => $xml,
                 'steps' => $result['steps'],
@@ -181,8 +181,8 @@ final class Application
         $sessionId = $this->sessions->open($this->app, ['user' => $result['data'], 'verified' => $result['steps'], 'tokenId' => $result['token']['tokenId']]);
         $this->trace->add([
             'from' => $this->app, 'to' => $this->app, 'kind' => 'ok',
-            'title' => $this->app . ' verifies the token and opens its own session for ' . $result['data']['name'] . '.',
-            'detail' => 'Library: signature, trust in the certificate of idp, audience "' . $this->app . '". Application: freshness and replay. Then ' . $this->app . ' sets its cookie ' . Sites::sessionCookie($this->app) . ': it will not need idp again until this session ends.',
+            'title' => Sites::name($this->app) . ' verifies the token and opens its own session for ' . $result['data']['name'] . '.',
+            'detail' => 'Library: signature, trust in the certificate of IDP, audience "' . $this->app . '". Application: freshness and replay. Then ' . Sites::name($this->app) . ' sets its cookie ' . Sites::sessionCookie($this->app) . ': it will not need IDP again until this session ends.',
             'xml' => $xml,
             'steps' => $result['steps'],
             'cookie' => ['site' => $this->app, 'host' => $this->base->host($this->app), 'name' => Sites::sessionCookie($this->app), 'action' => 'set'],
@@ -199,8 +199,8 @@ final class Application
         $this->sessions->close($this->app, $sessionId);
         $this->trace->add([
             'from' => 'browser', 'to' => $this->app,
-            'title' => 'Logout from ' . $this->app . ': ' . $this->app . ' closes its own session.',
-            'detail' => 'idp still knows the user: opening ' . $this->app . ' again signs the user back in without a password. The session of the other application stays open too.',
+            'title' => 'Logout from ' . Sites::name($this->app) . ': ' . Sites::name($this->app) . ' closes its own session.',
+            'detail' => 'IDP still knows the user: opening ' . Sites::name($this->app) . ' again signs the user back in without a password. The session of the other application stays open too.',
             'cookie' => ['site' => $this->app, 'host' => $this->base->host($this->app), 'name' => Sites::sessionCookie($this->app), 'action' => 'deleted'],
         ]);
 
@@ -216,7 +216,7 @@ final class Application
         $other = 'mail' === $this->app ? 'crm' : 'mail';
         $info = Sites::APPS[$this->app];
         $content = '<section class="panel app-panel" aria-labelledby="app-title">
-  <header class="panel-head"><span class="panel-num">' . Html::e($info['title']) . '</span><div><h2 id="app-title">' . Html::e($info['tagline']) . ', ' . Html::e($user['name']) . '</h2><p class="panel-sub">Signed in through idp: ' . Html::e($this->app) . ' never saw a password.</p></div></header>
+  <header class="panel-head"><span class="panel-num">' . Html::e($info['title']) . '</span><div><h2 id="app-title">' . Html::e($info['tagline']) . ', ' . Html::e($user['name']) . '</h2><p class="panel-sub">Signed in through IDP: ' . Html::e(Sites::name($this->app)) . ' never saw a password.</p></div></header>
   <div class="panel-body">
     <dl class="facts">
       <dt>User</dt><dd><code>' . Html::e($user['user']) . '</code></dd>
@@ -224,13 +224,13 @@ final class Application
       <dt>Role</dt><dd>' . Html::e($user['role']) . '</dd>
       <dt>Email</dt><dd>' . Html::e($user['email']) . '</dd>
     </dl>
-    <p class="hint">These values come from the token idp signed, read with <code>getData()</code> once every check passed.</p>
+    <p class="hint">These values come from the token IDP signed, read with <code>getData()</code> once every check passed.</p>
     ' . $this->rights($user) . $this->customers($session) . '
     <div class="actions">
       <a class="btn btn-primary" href="' . Html::e(Sites::origin($other, $this->base) . '/') . '">Open ' . Html::e($this->base->host($other)) . '</a>
-      <form method="post" action="/logout"><button type="submit" class="btn btn-ghost">Log out of ' . Html::e($this->app) . '</button></form>
+      <form method="post" action="/logout"><button type="submit" class="btn btn-ghost">Log out of ' . Html::e(Sites::name($this->app)) . '</button></form>
     </div>
-    <details class="code-details"><summary>How ' . Html::e($this->app) . ' verified the token</summary>' . self::stepList($session['verified']) . '
+    <details class="code-details"><summary>How ' . Html::e(Sites::name($this->app)) . ' verified the token</summary>' . self::stepList($session['verified']) . '
       <div class="code-block"><pre class="code">' . Html::e($this->receiver()->phpCode()) . '</pre></div></details>
   </div>
 </section>';
@@ -243,12 +243,12 @@ final class Application
      */
     private function rights(array $user)
     {
-        $items = '<li><span class="right-by right-by-idp">idp</span> Access to ' . Html::e($this->app) . ': granted, since idp signed a token for ' . Html::e($this->app) . '. idp decides which applications each user may enter; the token does not carry the list.</li>';
+        $items = '<li><span class="right-by right-by-idp">IDP</span> Access to ' . Html::e(Sites::name($this->app)) . ': granted, since IDP signed a token for ' . Html::e(Sites::name($this->app)) . '. IDP decides which applications each user may enter; the token does not carry the list.</li>';
         if ('crm' === $this->app)
         {
             $canDelete = in_array($user['role'], Sites::CRM_DELETE_ROLES, true);
-            $items .= '<li><span class="right-by right-by-app">crm</span> Delete customers: ' . ($canDelete ? 'allowed' : 'not allowed') . ' for the role ' . Html::e($user['role'])
-                . '. crm decides, from the role idp wrote in the token (allowed to: ' . Html::e(implode(', ', Sites::CRM_DELETE_ROLES)) . ').</li>';
+            $items .= '<li><span class="right-by right-by-app">CRM</span> Delete customers: ' . ($canDelete ? 'allowed' : 'not allowed') . ' for the role ' . Html::e($user['role'])
+                . '. CRM decides, from the role IDP wrote in the token (allowed to: ' . Html::e(implode(', ', Sites::CRM_DELETE_ROLES)) . ').</li>';
         }
 
         return '<div class="rights"><p class="h-small">Your rights</p><ul class="rights-list">' . $items . '</ul></div>';
@@ -298,12 +298,12 @@ final class Application
         {
             $this->trace->add([
                 'from' => 'browser', 'to' => 'crm', 'kind' => 'bad',
-                'title' => 'crm refuses to let ' . $user['name'] . ' delete ' . $customer . ': the role ' . $user['role'] . ' may only read.',
-                'detail' => 'Decided by crm, from the role idp wrote in the token (' . $user['role'] . '). idp let the user in; what the user may do inside is up to crm.',
+                'title' => 'CRM refuses to let ' . $user['name'] . ' delete ' . $customer . ': the role ' . $user['role'] . ' may only read.',
+                'detail' => 'Decided by CRM, from the role IDP wrote in the token (' . $user['role'] . '). IDP let the user in; what the user may do inside is up to CRM.',
             ]);
-            $content = '<section class="panel"><header class="panel-head"><span class="panel-num">!</span><div><h2>Not allowed</h2><p class="panel-sub">Decided by crm, from your role.</p></div></header>
+            $content = '<section class="panel"><header class="panel-head"><span class="panel-num">!</span><div><h2>Not allowed</h2><p class="panel-sub">Decided by CRM, from your role.</p></div></header>
   <div class="panel-body"><div class="form-error" role="alert">The role ' . Html::e($user['role']) . ' may not delete customers: only ' . Html::e(implode(', ', Sites::CRM_DELETE_ROLES)) . ' may.</div>
-    <div class="actions"><a class="btn btn-ghost" href="/">Back to crm</a></div></div></section>';
+    <div class="actions"><a class="btn btn-ghost" href="/">Back to CRM</a></div></div></section>';
 
             return Http::html(Html::page($this->app, $this->base, 'Not allowed', $content, $request['cookies']), 403);
         }
@@ -312,8 +312,8 @@ final class Application
         $this->sessions->update($this->app, $sessionId, $session);
         $this->trace->add([
             'from' => 'browser', 'to' => 'crm', 'kind' => 'ok',
-            'title' => $user['name'] . ' deletes ' . $customer . ': crm allows it for the role ' . $user['role'] . '.',
-            'detail' => 'Decided by crm, from the role idp wrote in the token. The customer is only hidden in this session: the demo deletes nothing.',
+            'title' => $user['name'] . ' deletes ' . $customer . ': CRM allows it for the role ' . $user['role'] . '.',
+            'detail' => 'Decided by CRM, from the role IDP wrote in the token. The customer is only hidden in this session: the demo deletes nothing.',
         ]);
 
         return Http::redirect(Sites::origin($this->app, $this->base) . '/');
@@ -325,7 +325,7 @@ final class Application
     private function refusedPage(array $request, $result, $message)
     {
         $content = '<section class="panel" aria-labelledby="refused-title">
-  <header class="panel-head"><span class="panel-num">!</span><div><h2 id="refused-title">' . Html::e($this->app) . ' refused the token</h2><p class="panel-sub">No session was opened.</p></div></header>
+  <header class="panel-head"><span class="panel-num">!</span><div><h2 id="refused-title">' . Html::e(Sites::name($this->app)) . ' refused the token</h2><p class="panel-sub">No session was opened.</p></div></header>
   <div class="panel-body"><div class="form-error" role="alert">' . Html::e($message) . '</div>' . (is_null($result) ? '' : self::stepList($result['steps'])) . '</div>
 </section>';
 
@@ -360,8 +360,8 @@ final class Application
      */
     public function loggedOut(array $request)
     {
-        $content = '<section class="panel"><header class="panel-head"><div><h2>Logged out of ' . Html::e($this->app) . '</h2><p class="panel-sub">' . Html::e($this->app) . ' closed its session. idp did not.</p></div></header>
-  <div class="panel-body"><div class="actions"><a class="btn btn-primary" href="/">Open ' . Html::e($this->app) . ' again</a></div></div></section>';
+        $content = '<section class="panel"><header class="panel-head"><div><h2>Logged out of ' . Html::e(Sites::name($this->app)) . '</h2><p class="panel-sub">' . Html::e(Sites::name($this->app)) . ' closed its session. IDP did not.</p></div></header>
+  <div class="panel-body"><div class="actions"><a class="btn btn-primary" href="/">Open ' . Html::e(Sites::name($this->app)) . ' again</a></div></div></section>';
 
         return Http::html(Html::page($this->app, $this->base, 'Logged out', $content, $request['cookies']));
     }

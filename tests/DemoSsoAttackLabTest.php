@@ -21,7 +21,7 @@ class DemoSsoAttackLabTest extends TestCase
         'other-app' => ['library', 'Audience', "Token is not addressed to the expected audience! Expected: 'crm'. Token audience: 'mail'."],
         'replay' => ['application', 'Replay', 'Token already used!'],
         'expired' => ['application', 'Freshness', 'Token is out of date!'],
-        'return-url' => ['idp', 'Return address', 'the return address is not the one registered for mail'],
+        'return-url' => ['idp', 'Return address', 'the return address is not the one registered for MAIL'],
         'tamper' => ['library', 'Digest', 'Token hash verification failed!'],
         'other-idp' => ['library', 'Certificate trust', self::UNTRUSTED_CA],
         'wrong-key' => ['library', 'Decryption', 'Token decryption failed!'],

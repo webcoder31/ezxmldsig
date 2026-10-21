@@ -26,7 +26,7 @@ final class Sites
 
     /** The applications: name => what the demo shows of them. */
     const APPS = [
-        'mail' => ['title' => 'Mail', 'tagline' => 'Your messages'],
+        'mail' => ['title' => 'MAIL', 'tagline' => 'Your messages'],
         'crm' => ['title' => 'CRM', 'tagline' => 'Your customers'],
     ];
 
@@ -148,6 +148,20 @@ final class Sites
     public static function acsUrl($app, Base $base)
     {
         return $base->origin($app) . '/acs';
+    }
+
+    /**
+     * Returns the name of a site as the pages and the trace write it, in
+     * capitals: IDP, MAIL, CRM. Host names, addresses, cookie names and the
+     * values a token carries keep the lowercase identifier.
+     *
+     * @param string $site
+     *
+     * @return string
+     */
+    public static function name($site)
+    {
+        return strtoupper($site);
     }
 
     /**

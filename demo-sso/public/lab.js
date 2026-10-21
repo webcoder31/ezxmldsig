@@ -9,13 +9,19 @@
   'use strict';
 
   const PROTECTIONS = {
-    audience: ['Audience', 'idp addresses each token to its application, which checks it (audience, expectedAudience).'],
-    returnUrl: ['Return address', 'idp only posts a token to the address registered for the application.'],
+    audience: ['Audience', 'IDP addresses each token to its application, which checks it (audience, expectedAudience).'],
+    returnUrl: ['Return address', 'IDP only posts a token to the address registered for the application.'],
     freshness: ['Freshness', 'Each application refuses a token that is out of date (isOutOfDate()).'],
     replay: ['Replay', 'Each application refuses a token it has already accepted (getTokenId()).'],
-    encrypt: ['Encryption', 'idp encrypts each token for its application, with the certificate of that application. An option rather than a protection.']
+    encrypt: ['Encryption', 'IDP encrypts each token for its application, with the certificate of that application. An option rather than a protection.']
   };
-  const BY = { library: 'library', application: 'application', idp: 'idp' };
+  const BY = { library: 'library', application: 'application', idp: 'IDP' };
+
+  /** The name of a party of the trace as the pages write it: the sites in
+      capitals (IDP, MAIL, CRM), the browser as it is. */
+  function siteName(party) {
+    return party === 'browser' ? party : String(party).toUpperCase();
+  }
 
   function el(tag, props, children) {
     const node = document.createElement(tag);
@@ -91,7 +97,7 @@
     const list = el('ol', { class: 'lab-events' });
     result.events.forEach(function (event) {
       list.appendChild(el('li', { 'data-kind': event.kind }, [
-        el('code', { text: event.from === event.to ? event.from : event.from + ' → ' + event.to }),
+        el('code', { text: event.from === event.to ? siteName(event.from) : siteName(event.from) + ' → ' + siteName(event.to) }),
         ' ' + event.title
       ]));
     });

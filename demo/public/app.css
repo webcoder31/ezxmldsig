@@ -7,7 +7,7 @@
 
 :root {
   --bg: #0a0e13;
-  --bg-glow: rgba(56, 214, 196, 0.07);
+  --bg-glow: rgba(56, 214, 196, 0.25);
   --surface: #10151c;
   --surface-2: #151b24;
   --surface-3: #1b2330;
@@ -52,7 +52,7 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #f4f6f9;
-    --bg-glow: rgba(13, 148, 136, 0.08);
+    --bg-glow: rgba(13, 148, 136, 0.25);
     --surface: #ffffff;
     --surface-2: #f6f8fb;
     --surface-3: #edf1f6;
@@ -92,7 +92,7 @@
 
 :root[data-theme="light"] {
   --bg: #f4f6f9;
-  --bg-glow: rgba(13, 148, 136, 0.08);
+  --bg-glow: rgba(13, 148, 136, 0.25);
   --surface: #ffffff;
   --surface-2: #f6f8fb;
   --surface-3: #edf1f6;

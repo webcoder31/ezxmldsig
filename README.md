@@ -718,7 +718,7 @@ The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `
 
 ## Single sign-on demo
 
-A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **idp**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **mail** and **crm**, which have no password and trust the tokens of idp. It is online at **https://sso.wbcdr.dev/**, each visitor with sessions, a trace and protections of their own. It also runs on your machine, with the same requirements as the [demo](#demo); browsers resolve `*.localhost` to the local machine.
+A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **IDP**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **MAIL** and **CRM**, which have no password and trust the tokens of IDP. It is online at **https://sso.wbcdr.dev/**, each visitor with sessions, a trace and protections of their own. It also runs on your machine, with the same requirements as the [demo](#demo); browsers resolve `*.localhost` to the local machine.
 
 ```
 git clone https://github.com/webcoder31/ezxmldsig.git
@@ -727,23 +727,23 @@ bin/demo-sso          # http://localhost:8090/
 bin/demo-sso 9090     # another port (or DEMO_SSO_PORT=9090)
 ```
 
-1. Open `http://mail.localhost:8090/`: mail has no session, so it sends the browser to idp.
-2. Log in on idp (the demo accounts are shown). idp opens its own session, signs a token addressed to mail (`audience`), valid 60 seconds (`validity`), and the browser posts it to mail, in a form, as the HTTP-POST binding of SAML does.
-3. mail verifies the token: the checks of the library (`isSignatureValid()`: signature, trust in the certificate of idp, audience), then its own (freshness, replay). It opens its own session.
-4. Open `http://crm.localhost:8090/`: idp recognizes the user by its own session cookie and signs a token for crm, without asking for the password again. That is single sign-on.
+1. Open `http://mail.localhost:8090/`: MAIL has no session, so it sends the browser to IDP.
+2. Log in on IDP (the demo accounts are shown). IDP opens its own session, signs a token addressed to MAIL (`audience`), valid 60 seconds (`validity`), and the browser posts it to MAIL, in a form, as the HTTP-POST binding of SAML does.
+3. MAIL verifies the token: the checks of the library (`isSignatureValid()`: signature, trust in the certificate of IDP, audience), then its own (freshness, replay). It opens its own session.
+4. Open `http://crm.localhost:8090/`: IDP recognizes the user by its own session cookie and signs a token for CRM, without asking for the password again. That is single sign-on.
 
-![The single sign-on demo: crm, entered without a new login, and the trace of the flow between the browser, idp, mail and crm](demo-sso/screenshot.png)
+![The single sign-on demo: CRM, entered without a new login, and the trace of the flow between the browser, IDP, MAIL and CRM](demo-sso/screenshot.png)
 
-The pages show what the library checks and what each application checks itself, the cookies of each site (each site has its own: a cookie is sent to the host that set it), and the trace of the flow: each hop between the browser, idp, mail and crm, with each token and each check.
+The pages show what the library checks and what each application checks itself, the cookies of each site (each site has its own: a cookie is sent to the host that set it), and the trace of the flow: each hop between the browser, IDP, MAIL and CRM, with each token and each check.
 
-The demo accounts show two kinds of rights. **Access to an application** is decided by idp, which signs no token for an application the user may not enter: `bjorn` may only enter mail. **What a user may do in an application** is decided by the application, from an attribute idp writes in the token: in crm, `ragnar`, a Jarl, may delete a customer, and `lagertha`, a Shieldmaiden, may only read them. An attribute in a token stays as it is until the token expires, and so does the session the application opened with it: a right withdrawn in idp only takes effect with the next token.
+The demo accounts show two kinds of rights. **Access to an application** is decided by IDP, which signs no token for an application the user may not enter: `bjorn` may only enter MAIL. **What a user may do in an application** is decided by the application, from an attribute IDP writes in the token: in CRM, `ragnar`, a Jarl, may delete a customer, and `lagertha`, a Shieldmaiden, may only read them. An attribute in a token stays as it is until the token expires, and so does the session the application opened with it: a right withdrawn in IDP only takes effect with the next token.
 
 The home page (`http://localhost:8090/`) holds:
 
-* **The protections of the live demo**, which turn off the code of idp or of the applications that stops an attack: the audience, the registered return address, the freshness, the replay memory. And an option: idp encrypts each token for its application, with the certificate of that application (`demo-sso/certs/`).
-* **The attack lab**: each attack runs in a sandbox of its own, with a victim and an attacker, through the very code of the three sites. Four of them are stopped by a protection of idp or of the applications, which can be turned off for a run to see the attack succeed: a token for another application, a replayed token, an old token, a hijacked return address. Three are stopped by the library itself, and have no switch: a tampered token, a token of another identity provider, and an encrypted token presented to another application.
+* **The protections of the live demo**, which turn off the code of IDP or of the applications that stops an attack: the audience, the registered return address, the freshness, the replay memory. And an option: IDP encrypts each token for its application, with the certificate of that application (`demo-sso/certs/`).
+* **The attack lab**: each attack runs in a sandbox of its own, with a victim and an attacker, through the very code of the three sites. Four of them are stopped by a protection of IDP or of the applications, which can be turned off for a run to see the attack succeed: a token for another application, a replayed token, an old token, a hijacked return address. Three are stopped by the library itself, and have no switch: a tampered token, a token of another identity provider, and an encrypted token presented to another application.
 
-> **For a single sign-on in production, prefer a standard, OpenID Connect or SAML, with a maintained library.** This demo shows the mechanisms, and what a receiver must check. Logging out of an application leaves idp and the other application logged in: logging out of every site at once (single logout) is a separate mechanism, which the demo does not implement.
+> **For a single sign-on in production, prefer a standard, OpenID Connect or SAML, with a maintained library.** This demo shows the mechanisms, and what a receiver must check. Logging out of an application leaves IDP and the other application logged in: logging out of every site at once (single logout) is a separate mechanism, which the demo does not implement.
 
 The private keys of `demo-sso/certs/` are public, like those of `demo/certs/` (see `demo-sso/certs/README.md`); to issue new ones, run `bin/gen-test-certs --demo-sso`. The sessions, the trace and the replay memories are kept in `demo-sso/var/` (ignored by git).
 

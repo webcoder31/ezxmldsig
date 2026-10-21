@@ -12,8 +12,8 @@ final class Html
 {
     /** What the top bar shows of each site. */
     const IDENTITY = [
-        'idp' => ['label' => 'Identity provider', 'mark' => 'IdP'],
-        'mail' => ['label' => 'Application', 'mark' => 'Mail'],
+        'idp' => ['label' => 'Identity provider', 'mark' => 'IDP'],
+        'mail' => ['label' => 'Application', 'mark' => 'MAIL'],
         'crm' => ['label' => 'Application', 'mark' => 'CRM'],
         'home' => ['label' => 'SSO demo', 'mark' => 'SSO'],
     ];
@@ -30,11 +30,11 @@ final class Html
         ],
         'mail' => [
             'icon' => '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 6 8-6"/>',
-            'role' => 'Application: no password of its own, trusts the tokens of idp.',
+            'role' => 'Application: no password of its own, trusts the tokens of IDP.',
         ],
         'crm' => [
             'icon' => '<circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.5 14.2a4.6 4.6 0 0 1 5 4.8"/>',
-            'role' => 'Application: no password of its own, trusts the tokens of idp.',
+            'role' => 'Application: no password of its own, trusts the tokens of IDP.',
         ],
     ];
 
@@ -123,7 +123,7 @@ final class Html
         <button type="button" class="btn btn-ghost btn-xs" id="trace-reset">Reset the demo</button>
       </div>
     </header>
-    <div class="trace-lanes" aria-hidden="true"><span>Browser</span><span>idp</span><span>mail</span><span>crm</span></div>
+    <div class="trace-lanes" aria-hidden="true"><span>Browser</span><span>IDP</span><span>MAIL</span><span>CRM</span></div>
     <ol class="trace-list" id="trace-list" aria-live="polite"></ol>
   </aside>
 </main>

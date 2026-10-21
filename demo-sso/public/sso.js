@@ -16,6 +16,12 @@
   let lastId;
   const open = {};
 
+  /** The name of a party of the trace as the pages write it: the sites in
+      capitals (IDP, MAIL, CRM), the browser as it is. */
+  function siteName(party) {
+    return party === 'browser' ? party : String(party).toUpperCase();
+  }
+
   function el(tag, props, children) {
     const node = document.createElement(tag);
     if (props) {
@@ -144,7 +150,7 @@
     const hasMore = event.detail || event.http || event.xml || event.steps || event.cookie;
     const head = el('div', { class: 'trace-head' }, [
       el('span', { class: 'trace-time', text: event.at }),
-      el('span', { class: 'trace-route', text: event.from === event.to ? event.from : event.from + ' → ' + event.to }),
+      el('span', { class: 'trace-route', text: event.from === event.to ? siteName(event.from) : siteName(event.from) + ' → ' + siteName(event.to) }),
       KIND_LABEL[event.kind] ? el('span', { class: 'trace-kind', text: KIND_LABEL[event.kind] }) : null
     ]);
     const li = el('li', { class: 'trace-item', 'data-kind': event.kind }, [hop(event), head, el('p', { class: 'trace-title', text: event.title })]);
@@ -178,7 +184,7 @@
     lastId = newest;
     while (list.firstChild) list.removeChild(list.firstChild);
     if (!events.length) {
-      list.appendChild(el('li', { class: 'trace-empty', text: 'Nothing yet. Open mail or crm to start.' }));
+      list.appendChild(el('li', { class: 'trace-empty', text: 'Nothing yet. Open MAIL or CRM to start.' }));
       return;
     }
     events.forEach(function (event) { list.appendChild(item(event)); });

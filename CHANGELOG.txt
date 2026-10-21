@@ -5,10 +5,10 @@ Unreleased
   provider and two applications on idp.localhost, mail.localhost and
   crm.localhost, which exchange ezxmldsig tokens. It shows each hop, each
   token and each check, the cookies of each site, and lets turn off the
-  protections of idp and of the applications (audience, return address,
+  protections of IDP and of the applications (audience, return address,
   freshness, replay). Its attack lab plays seven attacks, four stopped by
   those protections and three by the library. Its accounts show who decides
-  each right: idp decides which applications a user may enter, and crm
+  each right: IDP decides which applications a user may enter, and CRM
   decides what a user may do, from the role the token carries. See the
   README, section "Single sign-on demo".
 - `bin/gen-test-certs --demo-sso` writes the encryption certificates of the
@@ -45,6 +45,13 @@ Unreleased
   set on that domain. On this machine, nothing changes.
 - The trace of the single sign-on demo says "Nothing yet" when it is empty
   on the first load of a page; it only showed it after a reset.
+- The glow at the top of the pages of both demos is stronger (alpha 0.25).
+  In the single sign-on demo, it takes the colour of each site: IDP, MAIL
+  and CRM, the home page keeping the green of the accent.
+- The single sign-on demo writes the names of its sites in capitals, IDP,
+  MAIL and CRM, wherever its pages, its trace and its attack lab cite them;
+  host names, addresses, cookie names and the values of the tokens keep
+  their lowercase identifiers.
 
 1.1.0 (2026-10-18)
 -------------------

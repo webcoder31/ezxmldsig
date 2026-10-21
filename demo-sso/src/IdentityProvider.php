@@ -86,7 +86,7 @@ final class IdentityProvider
         $error = $this->checkReturn($app, $return);
         if (!is_null($error))
         {
-            $this->trace->add(['from' => 'idp', 'to' => 'idp', 'kind' => 'bad', 'title' => 'idp refuses the request: ' . $error]);
+            $this->trace->add(['from' => 'idp', 'to' => 'idp', 'kind' => 'bad', 'title' => 'IDP refuses the request: ' . $error]);
 
             return $this->errorPage($request, $error);
         }
@@ -95,8 +95,8 @@ final class IdentityProvider
         {
             $this->trace->add([
                 'from' => 'idp', 'to' => 'browser',
-                'title' => 'idp does not know the user yet: it shows its login form.',
-                'detail' => $app . ' sent the browser here. The password is typed on idp only: ' . $app . ' never sees it.',
+                'title' => 'IDP does not know the user yet: it shows its login form.',
+                'detail' => Sites::name($app) . ' sent the browser here. The password is typed on IDP only: ' . Sites::name($app) . ' never sees it.',
             ]);
 
             return $this->loginPage($request, $app, $return, null);
@@ -104,8 +104,8 @@ final class IdentityProvider
 
         $this->trace->add([
             'from' => 'idp', 'to' => 'idp', 'kind' => 'sso',
-            'title' => 'Single sign-on: idp already knows ' . Sites::USERS[$session['user']]['name'] . ' by its own session cookie, idp_session. No login.',
-            'detail' => 'The browser sent idp_session to ' . $this->base->host(Sites::IDP) . ': the session opened when the user logged in, for another application. idp signs a new token, for ' . $app . ' this time.',
+            'title' => 'Single sign-on: IDP already knows ' . Sites::USERS[$session['user']]['name'] . ' by its own session cookie, idp_session. No login.',
+            'detail' => 'The browser sent idp_session to ' . $this->base->host(Sites::IDP) . ': the session opened when the user logged in, for another application. IDP signs a new token, for ' . Sites::name($app) . ' this time.',
         ]);
 
         return $this->issue($request, $session['user'], $app, $return);
@@ -129,7 +129,7 @@ final class IdentityProvider
         $password = isset($post['password']) && is_string($post['password']) ? $post['password'] : '';
         if (!isset(Sites::USERS[$user]) || !hash_equals(Sites::USERS[$user]['password'], $password))
         {
-            $this->trace->add(['from' => 'browser', 'to' => 'idp', 'kind' => 'bad', 'title' => 'Wrong user name or password: idp shows its form again.']);
+            $this->trace->add(['from' => 'browser', 'to' => 'idp', 'kind' => 'bad', 'title' => 'Wrong user name or password: IDP shows its form again.']);
 
             return $this->loginPage($request, $app, $return, 'Wrong user name or password.');
         }
@@ -137,8 +137,8 @@ final class IdentityProvider
         $sessionId = $this->sessions->open(Sites::IDP, ['user' => $user]);
         $this->trace->add([
             'from' => 'browser', 'to' => 'idp', 'kind' => 'ok',
-            'title' => Sites::USERS[$user]['name'] . ' logs in on idp: idp opens its own session.',
-            'detail' => 'idp sets the cookie idp_session on ' . $this->base->host(Sites::IDP) . '. The applications never see it: it is how idp will recognize the user next time, for any application.',
+            'title' => Sites::USERS[$user]['name'] . ' logs in on IDP: IDP opens its own session.',
+            'detail' => 'IDP sets the cookie idp_session on ' . $this->base->host(Sites::IDP) . '. The applications never see it: it is how IDP will recognize the user next time, for any application.',
             'cookie' => ['site' => 'idp', 'host' => $this->base->host(Sites::IDP), 'name' => Sites::sessionCookie(Sites::IDP), 'action' => 'set'],
         ]);
 
@@ -153,8 +153,8 @@ final class IdentityProvider
         $this->sessions->close(Sites::IDP, $sessionId);
         $this->trace->add([
             'from' => 'browser', 'to' => 'idp',
-            'title' => 'Logout from idp: idp closes its own session.',
-            'detail' => 'The sessions of mail and crm stay open: each application has its own. Logging out of every site at once (single logout) is a separate mechanism, which this demo does not implement.',
+            'title' => 'Logout from IDP: IDP closes its own session.',
+            'detail' => 'The sessions of MAIL and CRM stay open: each application has its own. Logging out of every site at once (single logout) is a separate mechanism, which this demo does not implement.',
             'cookie' => ['site' => 'idp', 'host' => $this->base->host(Sites::IDP), 'name' => Sites::sessionCookie(Sites::IDP), 'action' => 'deleted'],
         ]);
 
@@ -175,12 +175,12 @@ final class IdentityProvider
         {
             $this->trace->add([
                 'from' => 'idp', 'to' => 'idp', 'kind' => 'bad',
-                'title' => 'idp refuses to sign a token for ' . $app . ': ' . $account['name'] . ' has no access to ' . $app . '.',
-                'detail' => 'Access to an application is decided by idp, from its own list of the applications each user may enter (' . $account['name'] . ': ' . implode(', ', $account['apps']) . '). No token is signed, so ' . $app . ' cannot let the user in: it is not even asked.',
+                'title' => 'IDP refuses to sign a token for ' . Sites::name($app) . ': ' . $account['name'] . ' has no access to ' . Sites::name($app) . '.',
+                'detail' => 'Access to an application is decided by IDP, from its own list of the applications each user may enter (' . $account['name'] . ': ' . implode(', ', array_map([Sites::class, 'name'], $account['apps'])) . '). No token is signed, so ' . Sites::name($app) . ' cannot let the user in: it is not even asked.',
             ]);
             $content = '<section class="panel" aria-labelledby="denied-title">
-  <header class="panel-head"><span class="panel-num">!</span><div><h2 id="denied-title">No access to ' . Html::e($app) . '</h2><p class="panel-sub">Decided by idp, which signs no token for this application.</p></div></header>
-  <div class="panel-body"><div class="form-error" role="alert">' . Html::e($account['name']) . ' may enter ' . Html::e(implode(', ', $account['apps'])) . ' only.</div>
+  <header class="panel-head"><span class="panel-num">!</span><div><h2 id="denied-title">No access to ' . Html::e(Sites::name($app)) . '</h2><p class="panel-sub">Decided by IDP, which signs no token for this application.</p></div></header>
+  <div class="panel-body"><div class="form-error" role="alert">' . Html::e($account['name']) . ' may enter ' . Html::e(implode(', ', array_map([Sites::class, 'name'], $account['apps']))) . ' only.</div>
     <div class="actions"><a class="btn btn-ghost" href="' . Html::e(Sites::origin($account['apps'][0], $this->base) . '/') . '">Open ' . Html::e($this->base->host($account['apps'][0])) . '</a></div></div>
 </section>';
 
@@ -213,20 +213,20 @@ final class IdentityProvider
 
         $this->trace->add([
             'from' => 'idp', 'to' => $app,
-            'title' => 'idp signs a token for ' . $app . ', and the browser posts it to ' . (Sites::acsUrl($app, $this->base) === $return ? $app . '/acs.' : $return . ', which is not the address of ' . $app . '!'),
+            'title' => 'IDP signs a token for ' . Sites::name($app) . ', and the browser posts it to ' . (Sites::acsUrl($app, $this->base) === $return ? 'the /acs address of ' . Sites::name($app) . '.' : $return . ', which is not the address of ' . Sites::name($app) . '!'),
             'kind' => Sites::acsUrl($app, $this->base) === $return ? 'info' : 'bad',
-            'detail' => ($this->settings->on('audience') ? 'Addressed to "' . $app . '" (audience)' : 'Addressed to no one: the protection "audience" is off'). ', valid ' . Sites::TOKEN_VALIDITY . ' s (validity)' . ($this->settings->on('encrypt') ? ', encrypted for ' . $app . ' with ' . $app . '.crypt.cert.pem' : '') . '. It travels through the browser, as a hidden form field: idp and ' . $app . ' never talk to each other directly.',
+            'detail' => ($this->settings->on('audience') ? 'Addressed to "' . $app . '" (audience)' : 'Addressed to no one: the protection "audience" is off'). ', valid ' . Sites::TOKEN_VALIDITY . ' s (validity)' . ($this->settings->on('encrypt') ? ', encrypted for ' . Sites::name($app) . ' with ' . $app . '.crypt.cert.pem' : '') . '. It travels through the browser, as a hidden form field: IDP and ' . Sites::name($app) . ' never talk to each other directly.',
             'http' => 'POST ' . $return,
             'xml' => $token->getXML(),
         ]);
 
         $content = '<section class="panel" aria-labelledby="post-title">
-  <header class="panel-head"><span class="panel-num">→</span><div><h2 id="post-title">Sending you back to ' . Html::e($app) . '</h2><p class="panel-sub">Signed in as ' . Html::e($account['name']) . '. idp signed a token for ' . Html::e($app) . '; your browser now posts it to ' . Html::e($return) . '.</p></div></header>
+  <header class="panel-head"><span class="panel-num">→</span><div><h2 id="post-title">Sending you back to ' . Html::e(Sites::name($app)) . '</h2><p class="panel-sub">Signed in as ' . Html::e($account['name']) . '. IDP signed a token for ' . Html::e(Sites::name($app)) . '; your browser now posts it to ' . Html::e($return) . '.</p></div></header>
   <div class="panel-body">
     <form id="post-token" method="post" action="' . Html::e($return) . '">
       <input type="hidden" name="token" value="' . Html::e(base64_encode($token->getXML())) . '">
       <p class="post-countdown" id="post-countdown">Posting in a moment…</p>
-      <p class="hint">The token is valid for ' . Html::e(Sites::TOKEN_VALIDITY) . ' s: paused longer than that, it reaches ' . Html::e($app) . ' out of date, and ' . Html::e($app) . ' refuses it (freshness).</p>
+      <p class="hint">The token is valid for ' . Html::e(Sites::TOKEN_VALIDITY) . ' s: paused longer than that, it reaches ' . Html::e(Sites::name($app)) . ' out of date, and ' . Html::e(Sites::name($app)) . ' refuses it (freshness).</p>
       <div class="actions">
         <button type="submit" class="btn btn-primary">Post the token now</button>
         <button type="button" class="btn btn-ghost" id="post-pause" aria-pressed="false">Pause</button>
@@ -235,7 +235,7 @@ final class IdentityProvider
     <dl class="facts">
       <dt>Audience</dt><dd>' . ($this->settings->on('audience') ? '<code>' . Html::e($app) . '</code>' : '<span class="muted">none (protection off)</span>') . '</dd>
       <dt>Valid for</dt><dd>' . Html::e(Sites::TOKEN_VALIDITY) . ' s</dd>
-      <dt>Encrypted</dt><dd>' . ($this->settings->on('encrypt') ? 'for ' . Html::e($app) . ', with <code>' . Html::e($app) . '.crypt.cert.pem</code>' : 'no') . '</dd>
+      <dt>Encrypted</dt><dd>' . ($this->settings->on('encrypt') ? 'for ' . Html::e(Sites::name($app)) . ', with <code>' . Html::e($app) . '.crypt.cert.pem</code>' : 'no') . '</dd>
     </dl>
     <details class="code-details"><summary>The token (XML)</summary><div class="code-block"><pre class="code" data-xml>' . Html::e($token->getPrettyXML()) . '</pre></div></details>
   </div>
@@ -251,15 +251,15 @@ final class IdentityProvider
     {
         if (is_null($session))
         {
-            $state = '<p>No one is logged in on idp. Open <a href="' . Html::e(Sites::origin('mail', $this->base) . '/') . '">' . Html::e($this->base->host('mail')) . '</a> or <a href="' . Html::e(Sites::origin('crm', $this->base) . '/') . '">' . Html::e($this->base->host('crm')) . '</a>: they will send you here to log in.</p>';
+            $state = '<p>No one is logged in on IDP. Open <a href="' . Html::e(Sites::origin('mail', $this->base) . '/') . '">' . Html::e($this->base->host('mail')) . '</a> or <a href="' . Html::e(Sites::origin('crm', $this->base) . '/') . '">' . Html::e($this->base->host('crm')) . '</a>: they will send you here to log in.</p>';
         }
         else
         {
-            $state = '<p><strong>' . Html::e(Sites::USERS[$session['user']]['name']) . '</strong> is logged in on idp. Any application that sends the browser here gets a token without a new login.</p>
-<div class="actions"><form method="post" action="/logout"><button type="submit" class="btn btn-ghost">Log out of idp</button></form></div>';
+            $state = '<p><strong>' . Html::e(Sites::USERS[$session['user']]['name']) . '</strong> is logged in on IDP. Any application that sends the browser here gets a token without a new login.</p>
+<div class="actions"><form method="post" action="/logout"><button type="submit" class="btn btn-ghost">Log out of IDP</button></form></div>';
         }
         $content = '<section class="panel" aria-labelledby="idp-title">
-  <header class="panel-head"><span class="panel-num">IdP</span><div><h2 id="idp-title">Identity provider</h2><p class="panel-sub">Knows the users and their passwords; signs the tokens.</p></div></header>
+  <header class="panel-head"><span class="panel-num">IDP</span><div><h2 id="idp-title">Identity provider</h2><p class="panel-sub">Knows the users and their passwords; signs the tokens.</p></div></header>
   <div class="panel-body">' . $state . '</div>
 </section>';
 
@@ -278,7 +278,7 @@ final class IdentityProvider
                 . '<span><code>' . Html::e($name) . '</code> / <code>' . Html::e($account['password']) . '</code> <span class="muted">(' . Html::e($account['name']) . ', ' . Html::e($account['role']) . '; may enter ' . Html::e(implode(' and ', $account['apps'])) . ')</span></span></li>';
         }
         $content = '<section class="panel" aria-labelledby="login-title">
-  <header class="panel-head"><span class="panel-num">IdP</span><div><h2 id="login-title">Log in to continue to ' . Html::e($app) . '</h2><p class="panel-sub">' . Html::e($this->base->host($app)) . ' sent you here: it has no password of its own.</p></div></header>
+  <header class="panel-head"><span class="panel-num">IDP</span><div><h2 id="login-title">Log in to continue to ' . Html::e(Sites::name($app)) . '</h2><p class="panel-sub">' . Html::e($this->base->host($app)) . ' sent you here: it has no password of its own.</p></div></header>
   <form class="panel-body login-form" method="post" action="/login">
     <input type="hidden" name="app" value="' . Html::e($app) . '">
     <input type="hidden" name="return" value="' . Html::e($return) . '">
@@ -324,7 +324,7 @@ final class IdentityProvider
         }
         if (!is_string($return) || Sites::acsUrl($app, $this->base) !== $return)
         {
-            return 'the return address is not the one registered for ' . $app . ' (' . Sites::acsUrl($app, $this->base) . ').';
+            return 'the return address is not the one registered for ' . Sites::name($app) . ' (' . Sites::acsUrl($app, $this->base) . ').';
         }
 
         return null;

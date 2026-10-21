@@ -14,6 +14,14 @@ html[data-site="idp"] { --site: var(--site-idp); }
 html[data-site="mail"] { --site: var(--site-mail); }
 html[data-site="crm"] { --site: var(--site-crm); }
 html[data-site="home"] { --site: var(--accent); }
+/* The glow at the top of the page in the colour of the site, at the alpha of
+   the token demo (--bg-glow, 0.25); the home page keeps the green of the
+   accent. :root, for the specificity of the rules of the themes. */
+@supports (color: color-mix(in srgb, red 25%, transparent)) {
+  :root[data-site="idp"], :root[data-site="mail"], :root[data-site="crm"] {
+    --bg-glow: color-mix(in srgb, var(--site) 25%, transparent);
+  }
+}
 
 /* ---------- Top bar: which site this is ---------- */
 

@@ -198,20 +198,20 @@ final class Demo
         $content = '<section class="hero sso-hero" aria-labelledby="hero-title">
   <p class="eyebrow">Single sign-on · signed XML tokens · ezxmldsig</p>
   <h1 id="hero-title">Log in once.<br><span class="hero-accent">Watch every hop.</span></h1>
-  <p class="hero-lead">Three sites on three host names: <strong>idp</strong>, the identity provider, which alone knows the passwords, and two applications, <strong>mail</strong> and <strong>crm</strong>, which trust the tokens idp signs with ezxmldsig. The trace on the right shows each hop, each token and each check.</p>
+  <p class="hero-lead">Three sites on three host names: <strong>IDP</strong>, the identity provider, which alone knows the passwords, and two applications, <strong>MAIL</strong> and <strong>CRM</strong>, which trust the tokens IDP signs with ezxmldsig. The trace on the right shows each hop, each token and each check.</p>
   <ol class="sso-steps">
-    <li>Open <a href="' . Html::e(Sites::origin('mail', $base) . '/') . '">' . Html::e($base->host('mail')) . '</a>: it has no session, so it sends you to idp.</li>
-    <li>Log in on idp. idp signs a token for mail, and your browser posts it to mail.</li>
-    <li>mail verifies the token and opens its own session.</li>
-    <li>Open <a href="' . Html::e(Sites::origin('crm', $base) . '/') . '">' . Html::e($base->host('crm')) . '</a>: idp recognizes you and signs a token for crm, without asking for your password again. That is single sign-on.</li>
-    <li>Rights: log out of idp, then log in as another user. idp signs no token for crm to <code>bjorn</code>, who may only enter mail: idp decides who enters which application. In crm, <code>lagertha</code>, a Shieldmaiden, may read the customers but not delete them: crm decides, from the role idp wrote in the token.</li>
+    <li>Open <a href="' . Html::e(Sites::origin('mail', $base) . '/') . '">' . Html::e($base->host('mail')) . '</a>: it has no session, so it sends you to IDP.</li>
+    <li>Log in on IDP. IDP signs a token for MAIL, and your browser posts it to MAIL.</li>
+    <li>MAIL verifies the token and opens its own session.</li>
+    <li>Open <a href="' . Html::e(Sites::origin('crm', $base) . '/') . '">' . Html::e($base->host('crm')) . '</a>: IDP recognizes you and signs a token for CRM, without asking for your password again. That is single sign-on.</li>
+    <li>Rights: log out of IDP, then log in as another user. IDP signs no token for CRM to <code>bjorn</code>, who may only enter MAIL: IDP decides who enters which application. In CRM, <code>lagertha</code>, a Shieldmaiden, may read the customers but not delete them: CRM decides, from the role IDP wrote in the token.</li>
   </ol>
   <p class="actions"><a class="btn btn-primary" href="' . Html::e(Sites::origin('mail', $base) . '/') . '">Start with ' . Html::e($base->host('mail')) . '</a></p>
   <p class="notice" role="note"><span>For a single sign-on in production, prefer a standard, OpenID Connect or SAML, with a maintained library: this demo shows the mechanisms, and what a receiver must check. The keys of <code>demo/certs/</code> and <code>demo-sso/certs/</code> it uses are public: never trust them outside this demo.</span></p>
 </section>
 
 <section class="panel" id="protections" aria-labelledby="protections-title">
-  <header class="panel-head"><span class="panel-num">01</span><div><h2 id="protections-title">Protections of the live demo</h2><p class="panel-sub">They apply to your own browsing of idp, mail and crm. Each one is code of idp or of the applications, never of the library.</p></div></header>
+  <header class="panel-head"><span class="panel-num">01</span><div><h2 id="protections-title">Protections of the live demo</h2><p class="panel-sub">They apply to your own browsing of IDP, MAIL and CRM. Each one is code of IDP or of the applications, never of the library.</p></div></header>
   <form class="panel-body protection-list" id="protection-form" novalidate></form>
 </section>
 
