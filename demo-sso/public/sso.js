@@ -11,7 +11,9 @@
 
   const LANES = ['browser', 'idp', 'mail', 'crm'];
   const KIND_LABEL = { ok: 'accepted', bad: 'refused', sso: 'single sign-on', info: '' };
-  let lastId = null;
+  // The newest event shown: undefined until the first render, so that an
+  // empty trace (newest NULL) is drawn too.
+  let lastId;
   const open = {};
 
   function el(tag, props, children) {

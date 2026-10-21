@@ -43,6 +43,8 @@ Unreleased
   subdomains are its sites, over HTTPS. Each visitor then has sessions, a
   trace, protections and replay memories of their own, named by a cookie
   set on that domain. On this machine, nothing changes.
+- The trace of the single sign-on demo says "Nothing yet" when it is empty
+  on the first load of a page; it only showed it after a reset.
 
 1.1.0 (2026-10-18)
 -------------------

@@ -718,7 +718,7 @@ The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `
 
 ## Single sign-on demo
 
-A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **idp**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **mail** and **crm**, which have no password and trust the tokens of idp. Same requirements as the [demo](#demo); browsers resolve `*.localhost` to the local machine.
+A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **idp**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **mail** and **crm**, which have no password and trust the tokens of idp. It is online at **https://sso.wbcdr.dev/**, each visitor with sessions, a trace and protections of their own. It also runs on your machine, with the same requirements as the [demo](#demo); browsers resolve `*.localhost` to the local machine.
 
 ```
 git clone https://github.com/webcoder31/ezxmldsig.git
