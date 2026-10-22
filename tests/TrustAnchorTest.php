@@ -179,6 +179,52 @@ class TrustAnchorTest extends TestCase
         self::assertRejected($token, 'not valid at the current date');
     }
 
+    /**
+     * From 2050 on, X.509 writes a date as GeneralizedTime (4-digit year).
+     * long.cert.pem, issued by the trusted intermediate, ends in 2060.
+     */
+    public function testAcceptsACertificateValidAfter2049()
+    {
+        $created = XMLDSigToken::createXMLToken(self::sampleData(), self::cert('long.key.pem'), self::cert('long.cert.pem'));
+        $this->assertNull($created->getError());
+
+        $token = XMLDSigToken::analyzeXMLToken($created->getXML(), self::trustAnchor());
+
+        self::assertAccepted($token);
+        $this->assertSame('2060-01-01T00:00:00Z', $token->getCertValidTo());
+    }
+
+    /**
+     * future.cert.pem, issued by the trusted intermediate, is valid in 2099
+     * only: refused, not a fatal error.
+     */
+    public function testRejectsACertificateValidOnlyAfter2049()
+    {
+        $created = XMLDSigToken::createXMLToken(self::sampleData(), self::cert('future.key.pem'), self::cert('future.cert.pem'));
+        $this->assertStringContainsString('valid from 2099-01-01T00:00:00Z to 2099-12-31T23:59:59Z', (string) $created->getError());
+
+        $token = XMLDSigToken::analyzeXMLToken($created->getXML(), self::trustAnchor());
+
+        $this->assertTrue($token->isSignatureValueOk());
+        self::assertRejected($token, 'not valid at the current date (valid from 2099-01-01T00:00:00Z');
+    }
+
+    /**
+     * Anyone can sign a token with a self-signed certificate valid after
+     * 2049: the analysis refuses it, and does not stop on a fatal error.
+     */
+    public function testRejectsASelfSignedCertificateValidAfter2049()
+    {
+        $days = (int) ceil((strtotime('2060-06-01 00:00:00 UTC') - time()) / 86400);
+        $selfSigned = $this->issueCertificate('self-signed', 'sign', null, $days);
+        $xml = self::createTokenWith($selfSigned, self::sampleData())->getXML();
+
+        $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
+
+        $this->assertTrue($token->isSignatureValueOk());
+        self::assertRejected($token, 'Signing certificate is not issued by a trusted CA');
+    }
+
     public function testAcceptsACertificateIssuedOnTheFlyByTheTrustedIntermediate()
     {
         // Control of the test above and below: the certificates issued by

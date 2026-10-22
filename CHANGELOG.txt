@@ -1,5 +1,13 @@
 Unreleased
 ----------
+- A certificate with a date from 2050 on no longer stops the creation or
+  the analysis of a token on a fatal PHP error. X.509 writes such a date as
+  GeneralizedTime (4-digit year), which X509Cert read as UTCTime (2-digit
+  year): getValidFrom(), getValidTo() and isOutOfDate() called a method on
+  FALSE, an Error the library does not catch. Anyone could send a token
+  signed with a self-signed certificate valid after 2049, so that its
+  analysis by a receiver stopped instead of refusing the token. X509Cert now
+  reads the dates from the UNIX timestamps OpenSSL gives for them.
 - The README documents the interoperability with other libraries (section
   "Interoperability"): the exact format of a token, and how to create and
   read one in Node.js with xml-crypto and xml-encryption, with what a

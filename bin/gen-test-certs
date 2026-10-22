@@ -19,6 +19,14 @@
 #   attacker.cert.pem, attacker.key.pem          certificate signed by its own key,
 #                                                whose subject and issuer DN copy
 #                                                those of sign.cert.pem
+#   future.cert.pem, future.key.pem              signing certificate issued by the
+#                                                intermediate, valid in 2099 only:
+#                                                not yet valid, both its dates
+#                                                written as GeneralizedTime
+#   long.cert.pem, long.key.pem                  signing certificate issued by the
+#                                                intermediate, valid from 2026 to
+#                                                2060: its end date is written as
+#                                                GeneralizedTime (from 2050 on)
 #
 # demo/certs/ receives the files the demo uses: root.cert.pem and
 # intermediate.cert.pem (the trust anchor of the demo receiver),
@@ -46,7 +54,8 @@
 #   crm.crypt.cert.pem, crm.crypt.key.pem
 # The other files of the single sign-on demo come from demo/certs/.
 #
-# Every certificate is valid for 10 years from the time of generation.
+# Every certificate is valid for 10 years from the time of generation, but
+# future.cert.pem and long.cert.pem, which have fixed dates.
 #
 # The script always runs itself again inside an Alpine Docker container
 # (alpine:3.22), whatever openssl the host has: the certificates then come
@@ -163,6 +172,19 @@ issue() {
         -out "$WORK_DIR/$1.cert.pem" 2>/dev/null
 }
 
+# issue_dated <name> <subject DN> <extension section> <CA cert> <CA key>
+#             <not before> <not after>
+# Same as issue, with fixed dates (YYYYMMDDHHMMSSZ).
+issue_dated() {
+    openssl req -new -key "$WORK_DIR/$1.key.pem" \
+        -subj "$2" -out "$WORK_DIR/$1.csr"
+    openssl x509 -req -in "$WORK_DIR/$1.csr" -sha256 \
+        -not_before "$6" -not_after "$7" \
+        -CA "$4" -CAkey "$5" -set_serial "0x$(openssl rand -hex 16)" \
+        -extfile "$WORK_DIR/ext.cnf" -extensions "$3" \
+        -out "$WORK_DIR/$1.cert.pem" 2>/dev/null
+}
+
 # Single sign-on demo: one encryption certificate per application.
 if [ "$MODE" = demo-sso ]; then
     FILES=
@@ -221,6 +243,19 @@ openssl req -new -x509 -sha256 -days "$DAYS" -key "$WORK_DIR/attacker.key.pem" \
 issue attacker "$SIGN_DN" sign \
     "$WORK_DIR/attacker-issuer.cert.pem" "$WORK_DIR/attacker.key.pem"
 
+if [ "$MODE" = tests ]; then
+    # Signing certificates with dates from 2050 on, which X.509 writes as
+    # GeneralizedTime (4-digit year) instead of UTCTime.
+    genkey "$WORK_DIR/future.key.pem" 2048
+    issue_dated future "$SIGN_DN" sign \
+        "$WORK_DIR/intermediate.cert.pem" "$WORK_DIR/intermediate.key.pem" \
+        20990101000000Z 20991231235959Z
+    genkey "$WORK_DIR/long.key.pem" 2048
+    issue_dated long "$SIGN_DN" sign \
+        "$WORK_DIR/intermediate.cert.pem" "$WORK_DIR/intermediate.key.pem" \
+        20260101000000Z 20600101000000Z
+fi
+
 if [ "$MODE" = demo ]; then
     # Untrusted root CA, and a signing certificate it issued with the subject
     # DN of the signing certificate.
@@ -261,7 +296,8 @@ if [ "$MODE" = demo ]; then
 else
     FILES="root.cert.pem root.key.pem intermediate.cert.pem intermediate.key.pem
            sign.cert.pem sign.key.pem crypt.cert.pem crypt.key.pem
-           attacker.cert.pem attacker.key.pem"
+           attacker.cert.pem attacker.key.pem future.cert.pem future.key.pem
+           long.cert.pem long.key.pem"
 fi
 
 mkdir -p "$OUT_DIR"

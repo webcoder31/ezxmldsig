@@ -172,10 +172,7 @@ class X509Cert
      */
     public function getValidFrom($dateFormat = 'ymdHise')
     {
-        $tz = new DateTimeZone('UTC');
-        $validFrom = $this->x509Info['validFrom'];
-        $dt = DateTime::createFromFormat('ymdHise', $validFrom, $tz);
-        return $dt->format($dateFormat);
+        return $this->_date('validFrom_time_t')->format($dateFormat);
     }
 
 
@@ -190,10 +187,30 @@ class X509Cert
      */
     public function getValidTo($dateFormat = 'ymdHise')
     {
-        $tz = new DateTimeZone('UTC');
-        $validTo = $this->x509Info['validTo'];
-        $dt = DateTime::createFromFormat('ymdHise', $validTo, $tz);
-        return $dt->format($dateFormat);
+        return $this->_date('validTo_time_t')->format($dateFormat);
+    }
+
+
+    /**
+     * Get a date of the certificate, from the UNIX timestamp OpenSSL gives
+     * for it.
+     *
+     * openssl_x509_parse() also gives the dates as written in the
+     * certificate, "validFrom" and "validTo", but X.509 writes a date before
+     * 2050 as UTCTime (YYMMDDHHMMSSZ) and from 2050 on as GeneralizedTime
+     * (YYYYMMDDHHMMSSZ): read with one format, the other gives no date. The
+     * timestamps "validFrom_time_t" and "validTo_time_t" hold both.
+     *
+     * @param string $field "validFrom_time_t" or "validTo_time_t".
+     *
+     * @return DateTime The date, in UTC.
+     */
+    private function _date($field)
+    {
+        $date = new DateTime('@' . (int) $this->x509Info[$field]);
+        $date->setTimezone(new DateTimeZone('UTC'));
+
+        return $date;
     }
 
 
@@ -205,25 +222,11 @@ class X509Cert
      */
     public function isOutOfDate()
     {
-        // We will compare date in UTC.
-        $tz = new DateTimeZone('UTC');
+        // Compare UNIX timestamps (see _date()).
+        $now = time();
 
-        // Compute the UTC UNIX timestamp for the current date/time.
-        $curDate = new DateTime('now', $tz);
-        $curTimestamp = $curDate->getTimestamp();
-
-        // Compute the UTC UNIX timestamp certificate 'validFrom' date.
-        $validFrom = $this->x509Info['validFrom'];
-        $fromDate = DateTime::createFromFormat('ymdHise', $validFrom, $tz);
-        $fromTimestamp = $fromDate->getTimestamp();
-
-        // Compute the UTC UNIX timestamp certificate 'validTo' date.
-        $validTo = $this->x509Info['validTo'];
-        $toDate = DateTime::createFromFormat('ymdHise', $validTo, $tz);
-        $toTimestamp = $toDate->getTimestamp();
-
-        // Return timestamps comparison result.
-        return $curTimestamp < $fromTimestamp || $curTimestamp > $toTimestamp;
+        return $now < $this->_date('validFrom_time_t')->getTimestamp()
+            || $now > $this->_date('validTo_time_t')->getTimestamp();
     }
 
 
