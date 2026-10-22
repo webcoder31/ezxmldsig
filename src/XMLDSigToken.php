@@ -1809,8 +1809,12 @@ class XMLDSigToken
             }
             else
             {
-                // Appends leaf.
-                $element = $parentNode->ownerDocument->createElement($nodeName, $base64Encode ? base64_encode($data) : $data);
+                // Appends leaf. The value is added as a text node, as for the
+                // audiences: the second argument of createElement() would read
+                // "&" as the start of an entity reference, and alter or lose
+                // the value when it is not base64 encoded.
+                $element = $parentNode->ownerDocument->createElement($nodeName);
+                $element->appendChild($parentNode->ownerDocument->createTextNode($base64Encode ? base64_encode($data) : (string) $data));
                 if ($base64Encode)
                 {
                     $attribute = $parentNode->ownerDocument->createAttribute('Algorithm');

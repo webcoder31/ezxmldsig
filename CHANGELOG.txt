@@ -19,6 +19,12 @@ Unreleased
   token signed in ECDSA under rsa-sha256, with the key of a certificate
   issued by a trusted CA, was valid, while the signature algorithms are RSA
   ones and the README says EC and DSA keys are not supported.
+- Without base64 (option base64Encode set to FALSE), a value holding "&"
+  is written as given. It was passed as second argument of
+  DOMDocument::createElement(), which reads "&" as the start of an entity
+  reference: "a&amp;b" was signed as "a&b", and "a & b" was lost (an empty
+  element, with a PHP warning), with no error and a valid signature. Each
+  value is now added as a text node, as the audiences are.
 - The README documents the interoperability with other libraries (section
   "Interoperability"): the exact format of a token, and how to create and
   read one in Node.js with xml-crypto and xml-encryption, with what a

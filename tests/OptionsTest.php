@@ -131,6 +131,52 @@ class OptionsTest extends TestCase
         $this->assertStringContainsString('<name>Ragnar Lothbrok</name>', $xml);
     }
 
+    /**
+     * Without base64, each value is written as text: the characters that
+     * XML escapes are read back as given, and none is taken for the start of
+     * an entity reference.
+     */
+    public function testWithoutBase64TheValuesAreReadBackAsGiven()
+    {
+        $data = [
+            'ampersand' => 'a & b',
+            'entity' => 'a&amp;b',
+            'reference' => '&#65;&lt;',
+            'lessThan' => 'a<b',
+            'greaterThan' => 'a>b',
+            'quotes' => 'a"b\'c',
+            'cdataEnd' => 'a]]>b',
+            'carriageReturn' => "a\rb\r\nc",
+            'nested' => ['ampersand' => 'x & y'],
+        ];
+
+        $messages = [];
+        set_error_handler(function ($level, $message) use (&$messages) {
+            if (error_reporting() & $level)
+            {
+                $messages[] = $message;
+            }
+            return true;
+        });
+        try
+        {
+            $created = XMLDSigToken::createXMLToken($data, self::cert('sign.key.pem'), self::cert('sign.cert.pem'), self::SIGN_KEY_PASSWORD, ['base64Encode' => false]);
+        }
+        finally
+        {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $messages);
+        $this->assertNull($created->getError());
+        $this->assertSame($data, $created->getData());
+
+        $token = XMLDSigToken::analyzeXMLToken($created->getXML(), self::trustAnchor());
+
+        $this->assertTrue($token->isSignatureValid());
+        $this->assertSame($data, $token->getData());
+    }
+
     public function testATokenCreatedWithoutOptionIsSignedWithRsaSha256AndSha256()
     {
         $algorithms = self::algorithmsOf(self::createToken(self::sampleData())->getXML());
