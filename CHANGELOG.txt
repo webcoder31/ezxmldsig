@@ -8,6 +8,11 @@ Unreleased
   signed with a self-signed certificate valid after 2049, so that its
   analysis by a receiver stopped instead of refusing the token. X509Cert now
   reads the dates from the UNIX timestamps OpenSSL gives for them.
+- A token whose ds:X509Certificate does not hold a certificate is refused,
+  as before ("Unable to extract public key"), but without the PHP warnings
+  (and, from PHP 8.1, the deprecation) that xmlseclibs emitted while
+  reading it. Anyone can send such a token, read before its signature is
+  verified: the messages reached the response or the logs of the receiver.
 - The README documents the interoperability with other libraries (section
   "Interoperability"): the exact format of a token, and how to create and
   read one in Node.js with xml-crypto and xml-encryption, with what a

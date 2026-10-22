@@ -250,6 +250,57 @@ class XMLParsingTest extends TestCase
         $this->assertTrue($analyzed->isSignatureValid(), (string) $analyzed->getError());
         $this->assertSame($data, $analyzed->getData());
     }
+    /**
+     * @return array Case => [content of ds:X509Certificate]
+     */
+    public function unreadableCertificates()
+    {
+        return [
+            'base64 of nothing' => ['AAAA'],
+            'empty' => [''],
+            'not base64' => ['not a certificate'],
+            'a truncated certificate' => [substr(preg_replace('/-----[^-]+-----|\s/', '', file_get_contents(self::cert('sign.cert.pem'))), 0, 200)],
+        ];
+    }
+
+    /**
+     * The content of ds:X509Certificate comes from the sender, and is read
+     * before the signature is verified: a token whose certificate cannot be
+     * read is refused without any PHP message (warning, deprecation), which
+     * would reach the response or the logs of the receiver.
+     *
+     * @dataProvider unreadableCertificates
+     */
+    public function testAnUnreadableCertificateIsRefusedWithoutPhpMessage($content)
+    {
+        $doc = new \DOMDocument();
+        $doc->loadXML(self::createToken(self::sampleData())->getXML());
+        $doc->getElementsByTagNameNS('http://www.w3.org/2000/09/xmldsig#', 'X509Certificate')->item(0)->nodeValue = $content;
+        $xml = $doc->saveXML();
+
+        $messages = [];
+        // The messages PHP would display or log: not those silenced with @.
+        set_error_handler(function ($level, $message, $file, $line) use (&$messages) {
+            if (error_reporting() & $level)
+            {
+                $messages[] = $message . ' (' . basename($file) . ':' . $line . ')';
+            }
+            return true;
+        });
+        try
+        {
+            $token = XMLDSigToken::analyzeXMLToken($xml, self::trustAnchor());
+        }
+        finally
+        {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $messages, implode(" | ", $messages));
+        $this->assertFalse($token->isSignatureValid());
+        $this->assertStringContainsString('Unable to extract public key', (string) $token->getError());
+    }
+
 }
 
 /**

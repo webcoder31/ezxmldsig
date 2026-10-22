@@ -2184,6 +2184,28 @@ class XMLDSigToken
             throw new Exception("Cannot locate signature!");
         }
 
+        // The certificate the token carries comes from its sender, and is
+        // read before the signature is verified: refuse it, without any PHP
+        // message, if it cannot be read. xmlseclibs reads it below without
+        // silencing OpenSSL, whose warnings (and, from PHP 8.1, a
+        // deprecation) would reach the response or the logs of the receiver.
+        // The PEM is rebuilt as XMLSecEnc::staticLocateKeyInfo() does.
+        $certNode = $this->xpath->query("/ds:Signature/ds:KeyInfo/ds:X509Data/ds:X509Certificate")->item(0);
+        if (!is_null($certNode))
+        {
+            $certBase64 = str_replace(array("\r", "\n", " ", "\t"), "", $certNode->textContent);
+            $certPem = "-----BEGIN CERTIFICATE-----\n" . chunk_split($certBase64, 64, "\n") . "-----END CERTIFICATE-----\n";
+            if (false === @openssl_x509_read($certPem))
+            {
+                // Empty the OpenSSL error queue, which the failure filled.
+                while (false !== openssl_error_string())
+                {
+                }
+                // ERROR: The certificate cannot be read (message of xmlseclibs).
+                throw new Exception("Unable to extract public key");
+            }
+        }
+
         // Build an XMLSecurityKey object from the X.509 certificate which is
         // included in the XML Digital Signature.
         $objKeyX509 = $XMLDSig->locateKey();
