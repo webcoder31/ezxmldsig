@@ -1,5 +1,15 @@
-Unreleased
-----------
+1.2.1 (2026-10-22)
+-------------------
+In short: five defects fixed, found while writing the Node.js version of the
+library (@webcoder31/ezxmldsig on npm). Two could be triggered by anyone who
+sends a token: a certificate dated from 2050 on stopped the analysis on a
+fatal PHP error, and an unreadable certificate made it emit PHP warnings.
+A token signed in ECDSA under an RSA algorithm, with a trusted certificate,
+was accepted; values holding "&" were altered without base64. Tokens are
+unchanged, and so is the API. One change of behavior: a key that is not an
+RSA key, which the README already said was not supported, is now refused at
+creation and at analysis.
+
 - A certificate with a date from 2050 on no longer stops the creation or
   the analysis of a token on a fatal PHP error. X.509 writes such a date as
   GeneralizedTime (4-digit year), which X509Cert read as UTCTime (2-digit

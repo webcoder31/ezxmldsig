@@ -356,7 +356,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#164-179" title="Go to source code">getValidFrom</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
+				<code><a href="source-X509Cert.html#164-176" title="Go to source code">getValidFrom</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -401,7 +401,7 @@ FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#182-197" title="Go to source code">getValidTo</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
+				<code><a href="source-X509Cert.html#179-191" title="Go to source code">getValidTo</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -446,7 +446,7 @@ FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#200-227" title="Go to source code">isOutOfDate</a>(): boolean</code>
+				<code><a href="source-X509Cert.html#217-230" title="Go to source code">isOutOfDate</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -482,7 +482,7 @@ FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#230-251" title="Go to source code">canSign</a>(): boolean</code>
+				<code><a href="source-X509Cert.html#233-254" title="Go to source code">canSign</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -522,7 +522,7 @@ extension is not restricted.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#254-315" title="Go to source code">isTrustedBy</a>(<span>string|array <var>$caCertPaths</var></span>): boolean</code>
+				<code><a href="source-X509Cert.html#257-318" title="Go to source code">isTrustedBy</a>(<span>string|array <var>$caCertPaths</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -587,7 +587,7 @@ FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#340-406" title="Go to source code">isValidCA</a>(<span>string <var>$caCert</var></span>): boolean</code>
+				<code><a href="source-X509Cert.html#343-409" title="Go to source code">isValidCA</a>(<span>string <var>$caCert</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -653,7 +653,7 @@ validated, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#409-435" title="Go to source code">pemToDer</a>(<span>string <var>$pemCertificate</var></span>): string|false</code>
+				<code><a href="source-X509Cert.html#412-438" title="Go to source code">pemToDer</a>(<span>string <var>$pemCertificate</var></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -697,7 +697,7 @@ FALSE on failure.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#438-460" title="Go to source code">derToPem</a>(<span>string <var>$derCertificate</var></span>): string|false</code>
+				<code><a href="source-X509Cert.html#441-468" title="Go to source code">derToPem</a>(<span>string <var>$derCertificate</var></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -707,6 +707,8 @@ FALSE on failure.</p>
 
 	<div class="expandable-expandedView">
 	<div class="description"><p>Convert DER encoded X.509 certificate to PEM encoding.</p>
+<p>The base64 is written in lines of 64 characters (RFC 7468): the PEM is
+the one OpenSSL writes for the same certificate.</p>
 </div>
 
 							<h4>Parameters</h4>
