@@ -25,6 +25,10 @@ Unreleased
   reference: "a&amp;b" was signed as "a&b", and "a & b" was lost (an empty
   element, with a PHP warning), with no error and a valid signature. Each
   value is now added as a text node, as the audiences are.
+- X509Cert::derToPem() writes lines of 64 characters, as RFC 7468
+  requires and OpenSSL writes, instead of 65: the PEM is now the one
+  OpenSSL writes for the same certificate. The library itself does not
+  call it.
 - The README documents the interoperability with other libraries (section
   "Interoperability"): the exact format of a token, and how to create and
   read one in Node.js with xml-crypto and xml-encryption, with what a

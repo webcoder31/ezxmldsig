@@ -41,6 +41,25 @@ class X509CertTest extends TestCase
         $this->assertTrue($future->isOutOfDate());
     }
 
+    /**
+     * derToPem() writes the PEM OpenSSL writes: lines of 64 characters, as
+     * RFC 7468 (section 2) requires.
+     */
+    public function testConvertsBetweenPemAndDerAsOpenSslDoes()
+    {
+        $files = glob(dirname(self::cert('sign.cert.pem')) . '/*.cert.pem');
+        $this->assertNotEmpty($files);
+        foreach ($files as $file)
+        {
+            $pem = file_get_contents($file);
+            $this->assertTrue(openssl_x509_export(openssl_x509_read($pem), $exported));
+            $this->assertSame($exported, $pem, basename($file) . ' is the PEM OpenSSL writes');
+
+            $der = X509Cert::pemToDer($pem);
+            $this->assertSame($pem, X509Cert::derToPem($der), basename($file));
+        }
+    }
+
     public function testValidatesEachLinkOfTheChain()
     {
         $root = file_get_contents(self::cert('root.cert.pem'));

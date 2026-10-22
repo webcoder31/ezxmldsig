@@ -441,6 +441,9 @@ class X509Cert
     /**
      * Convert DER encoded X.509 certificate to PEM encoding.
      *
+     * The base64 is written in lines of 64 characters (RFC 7468): the PEM is
+     * the one OpenSSL writes for the same certificate.
+     *
      * @param string $derCertificate DER encoded X.509 certificate.
      *
      * @return string|false PEM encoded X.509 certificate on success, 
@@ -456,7 +459,9 @@ class X509Cert
 
         $b64DerCert = base64_encode($derCertificate);
         $pem  = "-----BEGIN CERTIFICATE-----\n";
-        $pem .= implode("\n", str_split($b64DerCert, 65)) . "\n";
+        // Lines of 64 characters, as RFC 7468 (section 2) requires and
+        // OpenSSL writes.
+        $pem .= implode("\n", str_split($b64DerCert, 64)) . "\n";
         $pem .= "-----END CERTIFICATE-----\n";
 
         return $pem;
