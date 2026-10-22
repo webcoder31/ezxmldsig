@@ -4,7 +4,7 @@ Built on the library **xmlseclibs** developed by Rob Richards (https://github.co
 
 The library signs its own tokens only. It does not sign existing XML documents in place, parts of them, or external files: for these, use **xmlseclibs** directly, or a format designed for document signatures such as XAdES or PAdES.
 
-The tokens are standard XML digital signatures and, when encrypted, standard XML Encryption: other platforms can create and read them. In Node.js, **xml-crypto** and **xml-encryption** do, both ways, which has been checked: a single sign-on can mix PHP nodes, using **ezxmldsig**, and Node.js nodes, using these libraries. On the Node.js side, the receiver must make the checks **ezxmldsig** makes besides the signature (trust in the certificate, data read from the signed content, timestamp, expiry, audience, replay): see [Interoperability](#interoperability).
+The library exists for Node.js too: [**@webcoder31/ezxmldsig**](https://www.npmjs.com/package/@webcoder31/ezxmldsig) creates and verifies the same tokens, with the same options and the same checks, so that a single sign-on can mix PHP and Node.js nodes. Both read each other's tokens, signed or encrypted, which the tests of the Node.js library check against this one. The tokens being standard XML digital signatures and XML Encryption, other libraries can also create and read them, such as **xml-crypto** and **xml-encryption** for Node.js, provided the receiver makes the checks **ezxmldsig** makes besides the signature: see [Interoperability](#interoperability).
 
 The author of the **ezxmldsig** library is Thierry Thiers.
 
@@ -513,7 +513,15 @@ The token data are encrypted with a session key generated for each token, and th
 
 ### Interoperability
 
-A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check the exact format below. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways: their tokens are analyzed by this library, and they read its tokens.
+**In Node.js, use the Node.js version of this library**, [@webcoder31/ezxmldsig](https://www.npmjs.com/package/@webcoder31/ezxmldsig) (Node.js 22.12 or later), which makes every check this one makes:
+
+```sh
+npm install @webcoder31/ezxmldsig
+```
+
+See its [README](https://github.com/webcoder31/ezxmldsig-js#readme) and its [API documentation](https://webcoder31.github.io/ezxmldsig-js/). A token created by either library is valid for the other, signed or encrypted, with every algorithm and option both share. Its tests check it against this library under PHP 7.4 and 8.3, and replay the attack lab of the [demo](#demo): every forged token gets the same verdict from both. The few cases where they differ are listed in its README (section "Differences with the PHP library"); those that came from defects of version 1.2.0 of this library (keys that are not RSA keys, values holding ``&`` without base64, certificates dated from 2050 on) are fixed in 1.2.1.
+
+**With other libraries.** A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check the exact format below. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways: their tokens are analyzed by this library, and they read its tokens. The tests of the Node.js version of this library create and read tokens with them the way the two examples below do.
 
 **The format of a token.** An enveloping signature: ``ds:Signature`` is the document element, and its ``ds:Object Id="Token"`` holds the node ``Token``, referenced by ``URI="#Token"``. Inclusive canonicalization (http://www.w3.org/TR/2001/REC-xml-c14n-20010315) for ``ds:SignedInfo`` and as the only transform, RSA-SHA256 and an SHA-256 digest by default (see [Options](#options)), and the signing certificate in ``ds:KeyInfo/ds:X509Data/ds:X509Certificate``. The node ``Token`` holds, in this order:
 

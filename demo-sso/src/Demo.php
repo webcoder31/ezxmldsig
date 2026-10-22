@@ -163,6 +163,9 @@ final class Demo
         return (new Application($site, $sessions, $trace, $base, $this->varDir, $this->settings()))->handle($request) + ['site' => $site];
     }
 
+    /** The Node.js version of the library, linked from the home page. */
+    const NODE_PACKAGE = 'https://www.npmjs.com/package/@webcoder31/ezxmldsig';
+
     /** What the trace calls each setting. */
     const SETTING_LABELS = [
         'audience' => 'Protection "audience"',
@@ -198,7 +201,7 @@ final class Demo
         $content = '<section class="hero sso-hero" aria-labelledby="hero-title">
   <p class="eyebrow">Single sign-on · signed XML tokens · ezxmldsig</p>
   <h1 id="hero-title">Log in once.<br><span class="hero-accent">Watch every hop.</span></h1>
-  <p class="hero-lead">Three sites on three host names: <strong>IDP</strong>, the identity provider, which alone knows the passwords, and two applications, <strong>MAIL</strong> and <strong>CRM</strong>, which trust the tokens IDP signs with ezxmldsig. The trace on the right shows each hop, each token and each check.</p>
+  <p class="hero-lead">Three sites on three host names: <strong>IDP</strong>, the identity provider, which alone knows the passwords, and two applications, <strong>MAIL</strong> and <strong>CRM</strong>, which trust the tokens IDP signs with ezxmldsig. The trace on the right shows each hop, each token and each check. Here the three sites run PHP; with <a href="' . Html::e(self::NODE_PACKAGE) . '"><strong>@webcoder31/ezxmldsig</strong></a>, any of them could run Node.js and exchange the same tokens.</p>
   <ol class="sso-steps">
     <li>Open <a href="' . Html::e(Sites::origin('mail', $base) . '/') . '">' . Html::e($base->host('mail')) . '</a>: it has no session, so it sends you to IDP.</li>
     <li>Log in on IDP. IDP signs a token for MAIL, and your browser posts it to MAIL.</li>

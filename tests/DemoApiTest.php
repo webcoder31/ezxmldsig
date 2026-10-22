@@ -223,9 +223,10 @@ class DemoApiTest extends TestCase
     {
         foreach (['index.html', 'app.css', 'app.js', 'favicon.svg'] as $name)
         {
-            // The SVG namespace is a name, not a resource; the link to the
-            // repository is followed by a click, not loaded by the page.
-            $source = str_replace(['http://www.w3.org/2000/svg', 'href="https://github.com/webcoder31/ezxmldsig"'], '', self::publicFile($name));
+            // The SVG namespace is a name, not a resource; the links to the
+            // repository and to the Node.js package are followed by a click,
+            // not loaded by the page.
+            $source = str_replace(['http://www.w3.org/2000/svg', 'href="https://github.com/webcoder31/ezxmldsig"', 'href="https://www.npmjs.com/package/@webcoder31/ezxmldsig"'], '', self::publicFile($name));
             $this->assertDoesNotMatchRegularExpression('#https?://|//[a-z0-9.-]+\.[a-z]{2,}/|@import#i', $source, $name);
         }
 

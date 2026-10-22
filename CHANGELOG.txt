@@ -1,3 +1,11 @@
+Unreleased
+----------
+- The README points to the Node.js version of the library,
+  @webcoder31/ezxmldsig on npm, which creates and verifies the same tokens
+  with the same checks: in its introduction, as the way to mix PHP and
+  Node.js nodes, and at the head of the section "Interoperability". So do
+  the home pages of both demos, in one sentence.
+
 1.2.1 (2026-10-22)
 -------------------
 In short: five defects fixed, found while writing the Node.js version of the
