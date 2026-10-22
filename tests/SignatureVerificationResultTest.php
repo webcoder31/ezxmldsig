@@ -6,14 +6,16 @@ use DOMDocument;
 use DOMXPath;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use webcoder31\ezxmldsig\Demo\Forge;
 use webcoder31\ezxmldsig\XMLDSigToken;
 
 /**
  * The verification of "ds:SignatureValue" returns the value of
  * openssl_verify(): 1 (valid), 0 (invalid) or -1 (error). Only 1 makes the
  * signature valid: -1, which is TRUE in a boolean context, is returned when
- * the key of the certificate does not suit the signature algorithm, whatever
- * the signature value.
+ * an RSA signature is verified with an EC or DSA key, whatever the signature
+ * value. An ECDSA signature verified with the EC key gives 1: the signature
+ * algorithms being RSA ones, a key of another type is refused.
  */
 class SignatureVerificationResultTest extends TestCase
 {
@@ -144,5 +146,49 @@ class SignatureVerificationResultTest extends TestCase
         $this->assertFalse($token->isSignatureValueOk());
         $this->assertFalse($token->isSignatureValid());
         $this->assertNotEquals(self::FORGED_DATA, $token->getData());
+    }
+
+    /**
+     * Returns a signing certificate with an EC key (P-256), issued by the
+     * trusted intermediate: refused for its key, not for its trust.
+     */
+    private function ecSigner()
+    {
+        return $this->issueCertificate('ec-signer', 'sign', 'intermediate', 30, null, [], [
+            'private_key_type' => OPENSSL_KEYTYPE_EC,
+            'curve_name' => 'prime256v1',
+        ]);
+    }
+
+    public function testAnEcdsaSignatureUnderAnRsaAlgorithmIsRefused()
+    {
+        // Signed again with the EC key: xmlseclibs signs with OpenSSL, which
+        // signs in ECDSA with an EC key, under the declared rsa-sha256.
+        $ec = $this->ecSigner();
+        $forge = new Forge(self::createToken(self::sampleData())->getXML());
+        $forge->resign($ec['key'], null, $ec['cert']);
+        $doc = new DOMDocument();
+        $doc->loadXML($forge->xml());
+        $this->assertSame(XMLDSigToken::RSA_SHA256, (new DOMXPath($doc))->evaluate('string(//*[local-name()="SignatureMethod"]/@Algorithm)'));
+        // openssl_verify() accepts it.
+        $this->assertSame(1, $this->verificationResult($doc));
+
+        $token = XMLDSigToken::analyzeXMLToken($forge->xml(), self::trustAnchor());
+
+        $this->assertTrue($token->isDigestValueOk());
+        $this->assertFalse($token->isSignatureValueOk());
+        $this->assertFalse($token->isSignatureValid());
+        $this->assertStringContainsString('Token hash signature verification failed!', (string) $token->getError());
+        $this->assertNull($token->getData());
+    }
+
+    public function testAnEcKeyCannotSignAToken()
+    {
+        $ec = $this->ecSigner();
+
+        $token = self::createTokenWith($ec, self::sampleData());
+
+        $this->assertSame('The signing key is not an RSA key: the signature algorithms are RSA ones!', $token->getError());
+        $this->assertFalse($token->isSignatureValid());
     }
 }

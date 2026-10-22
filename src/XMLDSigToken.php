@@ -1899,6 +1899,16 @@ class XMLDSigToken
             throw new Exception("Failed loading private key to sign token data!");
         }
 
+        // The signature algorithms are RSA ones: OpenSSL would sign with an
+        // EC or DSA key all the same, with ECDSA or DSA, in a token declaring
+        // an RSA algorithm (see _readXML()).
+        $privateKeyDetails = openssl_pkey_get_details($privateKey->key);
+        if (!is_array($privateKeyDetails) || OPENSSL_KEYTYPE_RSA !== $privateKeyDetails['type'])
+        {
+            // ERROR: The signing key is not an RSA key!
+            throw new Exception("The signing key is not an RSA key: the signature algorithms are RSA ones!");
+        }
+
         // Add the X.509 certificate associated to the private key to the XML
         // Digital Signature. So, the recipient of the XML token will not need
         // to own it, in order to verify the signature. It will simply get it
@@ -2269,17 +2279,28 @@ class XMLDSigToken
         // "ds:Signature/ds:SignedInfo" using the key we've just built from the
         // X.509 certificate found in the XML Digital Signature.
         // The verification returns the value of openssl_verify(): 1 (valid),
-        // 0 (invalid) or -1 (error). -1 is returned, whatever the signature
-        // value, when the key of the certificate does not suit the signature
-        // algorithm (e.g. an EC or DSA key with an RSA algorithm), and it is
-        // TRUE in a boolean context: only a strict 1 makes the signature valid.
-        try
+        // 0 (invalid) or -1 (error), which is TRUE in a boolean context: only a
+        // strict 1 makes the signature valid.
+        //
+        // openssl_verify() takes the key of the certificate with the digest of
+        // the declared algorithm, whatever the type of the key: with an EC or
+        // DSA key, it verifies an ECDSA or DSA signature, and returns 1 for a
+        // token signed so under an RSA algorithm (it returns -1 for an RSA
+        // signature). The signature algorithms are RSA ones: the key must be
+        // an RSA key, or the signature is not verified.
+        $signatureVerification = false;
+        $publicKey = @openssl_pkey_get_public($this->x509Certificate->getPem());
+        $publicKeyDetails = false === $publicKey ? false : openssl_pkey_get_details($publicKey);
+        if (is_array($publicKeyDetails) && OPENSSL_KEYTYPE_RSA === $publicKeyDetails['type'])
         {
-            $signatureVerification = $XMLDSig->verify($objKeyX509);
-        }
-        catch (\Throwable $e)
-        {
-            $signatureVerification = false;
+            try
+            {
+                $signatureVerification = $XMLDSig->verify($objKeyX509);
+            }
+            catch (\Throwable $e)
+            {
+                $signatureVerification = false;
+            }
         }
 
         if (1 === $signatureVerification)

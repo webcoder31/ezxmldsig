@@ -615,7 +615,7 @@ The rest is left to the receiver, which ``isSignatureValid()`` does here: refuse
 
 ### Certificates and keys
 
-A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signature algorithms are RSA ones and the session key is encrypted with RSA-OAEP, so EC and DSA keys are not supported.
+A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signature algorithms are RSA ones and the session key is encrypted with RSA-OAEP, so EC and DSA keys are not supported. A signing key of another type is refused: at creation (``The signing key is not an RSA key``), and at analysis, where the signature of a certificate whose key is not an RSA key is not verified (``Token hash signature verification failed!``).
 
 | Certificate | Who holds the private key | Who needs the certificate | Required |
 |---|---|---|---|

@@ -13,6 +13,12 @@ Unreleased
   (and, from PHP 8.1, the deprecation) that xmlseclibs emitted while
   reading it. Anyone can send such a token, read before its signature is
   verified: the messages reached the response or the logs of the receiver.
+- A token signed with an EC or DSA key is refused, at creation and at
+  analysis. OpenSSL verified the signature with the key of the certificate
+  and the digest of the declared algorithm, whatever the type of the key: a
+  token signed in ECDSA under rsa-sha256, with the key of a certificate
+  issued by a trusted CA, was valid, while the signature algorithms are RSA
+  ones and the README says EC and DSA keys are not supported.
 - The README documents the interoperability with other libraries (section
   "Interoperability"): the exact format of a token, and how to create and
   read one in Node.js with xml-crypto and xml-encryption, with what a

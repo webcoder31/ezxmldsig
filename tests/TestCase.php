@@ -104,10 +104,13 @@ abstract class TestCase extends BaseTestCase
      * @param string|null $issuerKeyPassword Password of the issuer key.
      * @param array $subject Subject fields that replace or complete the
      *     default ones.
+     * @param array $keyConfig Configuration of the key, for
+     *     openssl_pkey_new(), that replaces the default one (RSA, 2048 bits),
+     *     e.g. an EC key.
      *
      * @return array ['cert' => path, 'key' => path, 'prefix' => path prefix]
      */
-    protected function issueCertificate($name, $profile, $issuer, $days = 30, $issuerKeyPassword = null, array $subject = [])
+    protected function issueCertificate($name, $profile, $issuer, $days = 30, $issuerKeyPassword = null, array $subject = [], array $keyConfig = [])
     {
         if (!is_file($this->tempDir() . '/openssl.cnf'))
         {
@@ -133,7 +136,10 @@ abstract class TestCase extends BaseTestCase
             'x509_extensions' => $profile . '_profile',
         ];
 
-        $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA] + $config);
+        // A key of another type is generated without the configuration file,
+        // which only serves the extensions of the certificate, and with which
+        // openssl_pkey_new() refuses an EC key.
+        $key = $keyConfig ? openssl_pkey_new($keyConfig) : openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA] + $config);
         if (is_null($issuer))
         {
             $issuerCert = null;
