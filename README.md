@@ -16,6 +16,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
 * [What's in the box?](#whats-in-the-box)
     * [XMLDSigToken class](#xmldsigtoken-class)
     * [X509Cert class](#x509cert-class)
+* [How does it work?](#how-does-it-work)
 * [How to use?](#how-to-use)
     * [Creating a signed XML token](#xmldsigtoken-creating-a-signed-xml-token)
     * [Creating a signed XML token with encrypted user data](#xmldsigtoken-creating-a-signed-xml-token-with-encrypted-user-data)
@@ -104,6 +105,50 @@ The class allows choosing the algorithms that should be used to perform data enc
 ### X509Cert class
 
 The ``X509Cert`` class provides a set of convenient methods for extracting essential information contained in an X.509 certificate and for performing some useful checks, all of them with OpenSSL: whether the certificate was issued by a given CA certificate (``isValidCA()``), whether OpenSSL verifies its chain up to trusted CA certificates (``isTrustedBy()``), whether its key usage allows signing (``canSign()``). This class is used internally by the ``XMLDSigToken`` class.
+
+
+## How does it work?
+
+A token works like a letter in an envelope sealed with wax and the seal of an authority: anyone may read the letter (unless it is encrypted), nobody can change it without breaking the seal, and a fake seal, however well made, does not fool a receiver who knows the real one.
+
+**Two linked keys.** The sender owns an RSA key pair: a **private key**, known to it alone, which signs, and a **public key**, which anyone may hold, which verifies. What the private key signs, the public key verifies; but the public key cannot sign. To produce a valid signature, one must hold the private key. The public key travels in an **X.509 certificate**, a kind of identity card that says "this public key belongs to this sender", itself signed by a certification authority (CA).
+
+**Creating a token.**
+
+1. The user data are written in the node ``Token``, with a timestamp, a random identifier and, as options, an expiry and the receivers the token is addressed to (its audience).
+2. A **digest** (SHA-256 by default) of this node is computed: it changes entirely if a single character of the node changes. It is written in ``ds:SignedInfo`` (``ds:DigestValue``).
+3. The sender **signs ``ds:SignedInfo``** with its private key, and writes the result in ``ds:SignatureValue``. Since ``ds:SignedInfo`` holds the digest of the data, signing the one seals the other.
+4. The **certificate** of the sender is added to the token (``ds:KeyInfo``), so that the receiver knows which public key to verify with.
+
+When the data are encrypted (see [Encryption](#encryption)), they are encrypted before being signed: the signature covers the encrypted data. Encryption protects their confidentiality; the authenticity of the token rests on the signature alone.
+
+**Verifying a token: three questions.**
+
+1. **Were the data changed?** The receiver computes the digest of the data again and compares it with ``ds:DigestValue``. If they differ, someone changed the content.
+2. **Is the seal intact?** With the public key of the certificate the token carries, the receiver verifies that ``ds:SignatureValue`` matches ``ds:SignedInfo``. Whoever changes the digest to match altered data breaks the signature.
+3. **Who sealed it?** This is the question that decides. An attacker can alter the data, then **sign everything again with a key of their own** and add **their own certificate**: questions 1 and 2 then pass, the digest and the signature being mathematically correct. But the seal is not the one of the sender. The receiver must therefore check that the certificate of the token is trusted: issued by a CA it chose to trust (``caCertPath``), or the very certificate it expects (``signerCertPath``), and, when it asks for it, with the subject it expects (``expectedSubject``). The certificate of the attacker meets none of these conditions: the token is rejected (see [Trust anchor](#trust-anchor)).
+
+**A valid signature proves nothing until one knows who made it**: the authenticity of a token is its signature, plus the trust in the key that made it.
+
+**What else is checked.** An authentic token can still be misused. The receiver also checks:
+
+* the **algorithms**: only those it expects, not a weak one chosen by an attacker;
+* the **audience**: the token is addressed to this receiver; a token signed for one application must not open another (see [Audience and expiry](#audience-and-expiry));
+* the **freshness** and the **expiry**: a token too old is rejected;
+* the **replay**: the identifier of each token accepted is stored, and a token already accepted is rejected (see [Replay](#replay)).
+
+The first two are made by ``isSignatureValid()``; freshness, expiry and replay are up to the receiver (see [Checking an XML token](#xmldsigtoken-checking-an-xml-token)).
+
+Lastly, the data must be read **only from the node the signature covers**, never from elsewhere in the document: otherwise, a forged ``Token`` placed beside the signed one would be read (signature wrapping). The library rejects documents built this way, and ``getData()`` reads the node the digest was computed on.
+
+| Question | Mechanism | What it prevents |
+|---|---|---|
+| Are the data intact? | Digest of the node ``Token`` | Altering the data |
+| Is the seal intact? | Signature of ``ds:SignedInfo`` | Altering the digest |
+| Is it the expected sender? | Trust in the certificate (CA, pinned certificate, subject) | Signing again with another key |
+| Right receiver, right time, first use? | Audience, freshness, expiry, replay | Reusing a genuine token where or when it should not be |
+
+The [demo](#demo) plays these checks out on real tokens, and replays the attacks the library rejects.
 
 
 ## How to use?
@@ -807,7 +852,7 @@ bin/demo 9000     # another port (or DEMO_PORT=9000)
 
 The script first brings `vendor/` in line with `composer.json` with `bin/deps` (as `bin/test` does, see [Tests](#tests)), runs the PHP built-in web server in the official `php:8.3-cli` image, publishes it on `127.0.0.1` only, and opens the page in the browser when it can (`DEMO_NO_BROWSER=1` skips it). Ctrl-C stops it.
 
-![The demo: the issuer, the annotated token and the receiver's pipeline of checks](demo/screenshot.png)
+![The demo: its animated illustration of a token verified and accepted, the issuer, and the annotated token with the block SignedInfo selected](demo/screenshot.png)
 
 Every token of the demo is created and analyzed by the library, in PHP; the page only displays them:
 
@@ -846,7 +891,7 @@ bin/demo-sso 9090     # another port (or DEMO_SSO_PORT=9090)
 3. MAIL verifies the token: the checks of the library (`isSignatureValid()`: signature, trust in the certificate of IDP, audience), then its own (freshness, replay). It opens its own session.
 4. Open `http://crm.localhost:8090/`: IDP recognizes the user by its own session cookie and signs a token for CRM, without asking for the password again. That is single sign-on.
 
-![The single sign-on demo: CRM, entered without a new login, and the trace of the flow between the browser, IDP, MAIL and CRM](demo-sso/screenshot.png)
+![The single sign-on demo: its home page, with its animated illustration of the flow, and the trace of a login on MAIL then of CRM entered without a new login](demo-sso/screenshot.png)
 
 The pages show what the library checks and what each application checks itself, the cookies of each site (each site has its own: a cookie is sent to the host that set it), and the trace of the flow: each hop between the browser, IDP, MAIL and CRM, with each token and each check.
 
