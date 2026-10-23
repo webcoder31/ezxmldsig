@@ -163,6 +163,36 @@ final class Demo
         return (new Application($site, $sessions, $trace, $base, $this->varDir, $this->settings()))->handle($request) + ['site' => $site];
     }
 
+    /**
+     * The illustration of the home page: the user opens MAIL, which has no
+     * session and asks IDP; IDP does not know them yet, so they log in on
+     * IDP, which signs a token for MAIL, and carry it to MAIL, which accepts
+     * it and opens its session. They open CRM, which asks IDP; IDP knows
+     * them now, asks for no password, and returns a token for CRM, which CRM
+     * accepts. Animated by the .sso-art rules of sso.css.
+     */
+    const HERO_ART = '<svg class="sso-art" viewBox="0 0 360 210" focusable="false">'
+        . '<path class="sa-link" d="M180 56L56 140M180 56L304 140"/>'
+        . '<g class="sa-site sa-idp"><rect x="140" y="12" width="80" height="44" rx="9"/><text x="180" y="38">IDP</text></g>'
+        . '<g class="sa-site sa-mail"><rect x="16" y="140" width="80" height="44" rx="9"/><text x="56" y="166">MAIL</text></g>'
+        . '<g class="sa-site sa-crm"><rect x="264" y="140" width="80" height="44" rx="9"/><text x="304" y="166">CRM</text></g>'
+        . '<g class="sa-session sa-idp-session"><rect x="82" y="26" width="50" height="16" rx="8"/><text x="107" y="37">session</text></g>'
+        . '<g class="sa-session sa-mail-session"><rect x="31" y="190" width="50" height="16" rx="8"/><text x="56" y="201">session</text></g>'
+        . '<g class="sa-session sa-crm-session"><rect x="279" y="190" width="50" height="16" rx="8"/><text x="304" y="201">session</text></g>'
+        . '<g class="sa-panel sa-login"><rect x="230" y="14" width="112" height="40" rx="7"/><text class="sa-caption" x="240" y="29">password</text><rect class="sa-field" x="240" y="34" width="92" height="14" rx="3"/><circle class="sa-d1" cx="250" cy="41" r="2.4"/><circle class="sa-d2" cx="259" cy="41" r="2.4"/><circle class="sa-d3" cx="268" cy="41" r="2.4"/><circle class="sa-d4" cx="277" cy="41" r="2.4"/><circle class="sa-d5" cx="286" cy="41" r="2.4"/></g>'
+        . '<g class="sa-panel sa-sso"><rect x="230" y="14" width="112" height="40" rx="7"/><text x="286" y="30">already logged in</text><text class="sa-caption" x="286" y="44">no password asked</text></g>'
+        . '<g class="sa-badge sa-ask sa-mail-ask"><circle cx="92" cy="140" r="9"/><text x="92" y="144">?</text></g>'
+        . '<g class="sa-badge sa-ask sa-crm-ask"><circle cx="340" cy="140" r="9"/><text x="340" y="144">?</text></g>'
+        . '<g class="sa-badge sa-ok sa-mail-ok"><circle cx="92" cy="140" r="9"/><path d="M88 140l3 3 6-6"/></g>'
+        . '<g class="sa-badge sa-ok sa-crm-ok"><circle cx="340" cy="140" r="9"/><path d="M336 140l3 3 6-6"/></g>'
+        . '<g class="sa-user"><circle cx="0" cy="-7" r="5"/><path d="M-8 7a8 7 0 0 1 16 0z"/></g>'
+        . '<g class="sa-token sa-tok-mail"><rect x="-17" y="-9" width="34" height="18" rx="4"/><text x="-4" y="3">MAIL</text><circle cx="11" cy="0" r="3"/></g>'
+        . '<g class="sa-request sa-req-mail"><rect x="-11" y="-9" width="22" height="18" rx="4"/><text x="0" y="4">?</text></g>'
+        . '<g class="sa-request sa-reply"><rect x="-11" y="-9" width="22" height="18" rx="4"/><text x="0" y="4">x</text></g>'
+        . '<g class="sa-request sa-req-crm"><rect x="-11" y="-9" width="22" height="18" rx="4"/><text x="0" y="4">?</text></g>'
+        . '<g class="sa-token sa-tok-crm"><rect x="-17" y="-9" width="34" height="18" rx="4"/><text x="-4" y="3">CRM</text><circle cx="11" cy="0" r="3"/></g>'
+        . '</svg>';
+
     /** The library, and its Node.js version, linked from the home page. */
     const PHP_PACKAGE = 'https://packagist.org/packages/webcoder31/ezxmldsig';
     const NODE_PACKAGE = 'https://www.npmjs.com/package/@webcoder31/ezxmldsig';
@@ -200,8 +230,13 @@ final class Demo
     private function home(array $request, Base $base)
     {
         $content = '<section class="hero sso-hero" aria-labelledby="hero-title">
-  <p class="eyebrow">Single sign-on · signed XML tokens · ezxmldsig</p>
-  <h1 id="hero-title">Log in once.<br><span class="hero-accent">Watch every hop.</span></h1>
+  <div class="sso-hero-head">
+    <div>
+      <p class="eyebrow">Single sign-on · signed XML tokens · ezxmldsig</p>
+      <h1 id="hero-title">Log in once.<br><span class="hero-accent">Watch every hop.</span></h1>
+    </div>
+    <div class="hero-art" aria-hidden="true">' . self::HERO_ART . '</div>
+  </div>
   <p class="hero-lead">Three sites on three host names: <strong>IDP</strong>, the identity provider, which alone knows the passwords, and two applications, <strong>MAIL</strong> and <strong>CRM</strong>, which trust the tokens IDP signs with <a href="' . Html::e(self::PHP_PACKAGE) . '"><strong>ezxmldsig</strong></a>. The trace on the right shows each hop, each token and each check. Here the three sites run PHP; any of them could run Node.js instead, with the npm package <a href="' . Html::e(self::NODE_PACKAGE) . '"><strong>@webcoder31/ezxmldsig</strong></a>, which creates and verifies the same tokens.</p>
   <ol class="sso-steps">
     <li>Open <a href="' . Html::e(Sites::origin('mail', $base) . '/') . '">' . Html::e($base->host('mail')) . '</a>: it has no session, so it sends you to IDP.</li>

@@ -5,6 +5,16 @@ Unreleased
   with the same checks: in its introduction, as the way to mix PHP and
   Node.js nodes, and at the head of the section "Interoperability". So do
   the home pages of both demos, in one sentence.
+- The home pages of both demos have an animated illustration, right of
+  their title: in the token demo, a token signed, verified and accepted,
+  then altered and signed again with the key and certificate of an
+  attacker, and refused at the trust in its certificate; in the single
+  sign-on demo, MAIL asking IDP, which does not know the user yet, the
+  user logging in on IDP and carrying the token IDP signs to MAIL; then
+  CRM asking IDP, which knows them now and returns a token for CRM without
+  a new login. Inline SVG animated by CSS, decorative (hidden from
+  screen readers), still when the system asks for reduced motion, and hidden
+  where the page leaves it no room.
 
 1.2.1 (2026-10-22)
 -------------------

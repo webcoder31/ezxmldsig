@@ -368,7 +368,8 @@ input[type="checkbox"]:not([role="switch"]):checked::after { transform: rotate(-
 
 main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; outline: none; }
 
-.hero { padding: 48px 0 28px; max-width: 860px; }
+.hero { padding: 48px 0 28px; }
+.hero-text { max-width: 860px; min-width: 0; }
 .eyebrow {
   display: flex; align-items: center; gap: 10px; margin: 0 0 12px;
   color: var(--accent); font: 600 12px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase;
@@ -389,6 +390,165 @@ main { display: block; max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; 
   background: var(--warn-soft); color: var(--text); font-size: 13.5px;
 }
 .notice svg { margin-top: 2px; color: var(--warn); }
+
+/* ---------- Hero illustration ----------
+   A token signed, verified and accepted; then its data altered and signed
+   again with the key and certificate of an attacker: digest and signature
+   pass, the trust in the certificate fails, and the token is refused. A loop
+   of 10 s. Every animated element states its value at
+   each step; outside the animation (reduced motion, see below), the base
+   values show the token signed and accepted. */
+
+.hero-art { display: none; }
+@media (min-width: 1100px) {
+  .hero-split { display: grid; grid-template-columns: minmax(0, 860px) minmax(300px, 420px); gap: 40px; align-items: center; justify-content: space-between; }
+  .hero-split .hero-art { display: block; }
+}
+.hero-art svg.tk { display: block; width: 100%; height: auto; overflow: visible; }
+
+.tk text { font: 600 12px var(--mono); fill: var(--muted); }
+.tk-card { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1.5; }
+.tk .tk-root { fill: var(--x-tag); font-size: 13px; }
+.tk-block rect { fill: var(--surface-2); stroke: var(--border); }
+.tk-block text { fill: var(--text); }
+.tk .tk-line { fill: var(--x-text); opacity: 0.55; stroke: none; }
+.tk-clear rect { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1.5; }
+.tk-clear .tk-under { fill: var(--surface-2); stroke: none; }
+.tk-clear text { fill: var(--x-text); }
+.tk-clear text:first-of-type { fill: var(--ok); }
+.tk-clear .tk-key { fill: var(--muted); }
+.tk-tamper { opacity: 0; }
+.tk-tamper rect { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 1.5; }
+.tk-tamper .tk-under { fill: var(--surface-2); stroke: none; }
+.tk-tamper text { fill: var(--bad); }
+.tk-tamper .tk-kept { fill: var(--x-text); }
+.tk-tamper .tk-key { fill: var(--muted); }
+.tk-scan { fill: var(--accent); opacity: 0; }
+.tk-seal circle { fill: var(--info-soft); stroke: var(--x-tag); stroke-width: 2; }
+.tk-seal path { fill: none; stroke: var(--x-tag); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tk-seal { transform-box: fill-box; transform-origin: center; }
+.tk-check circle { fill: var(--ok); stroke: none; }
+.tk-check text { fill: var(--text); }
+.tk-verdict text { font-size: 13px; text-anchor: middle; letter-spacing: 0.04em; }
+.tk-ok rect { fill: var(--ok-soft); stroke: var(--ok); }
+.tk-ok text { fill: var(--ok); }
+.tk-ko { opacity: 0; }
+.tk-ko rect { fill: var(--bad-soft); stroke: var(--bad); }
+.tk-ko text { fill: var(--bad); }
+
+.tk-seal { animation: tk-seal 10s infinite; }
+.tk-scan { animation: tk-scan 10s infinite linear; }
+.tk-c1 circle { animation: tk-c1 10s infinite; }
+.tk-c2 circle { animation: tk-c2 10s infinite; }
+.tk-c3 circle { animation: tk-c3 10s infinite; }
+.tk-c4 circle { animation: tk-c4 10s infinite; }
+.tk-ok { animation: tk-ok 10s infinite; }
+.tk-ko { animation: tk-ko 10s infinite; }
+.tk-clear { animation: tk-clear 10s infinite; }
+.tk-tamper-key { animation: tk-tamper-key 10s infinite; }
+.tk-pulse { animation: tk-pulse 10s infinite; }
+.tk-tamper-object { animation: tk-tamper-object 10s infinite; }
+
+/* Signed at 12 %; lifted when the attack begins (55 %), and signed again,
+   with the key of the attacker, at 61 %; faded out at the end of the loop. */
+@keyframes tk-seal {
+  0%, 6% { opacity: 0; transform: scale(1.7); }
+  12%, 53% { opacity: 1; transform: scale(1); }
+  55% { opacity: 0; transform: scale(1); }
+  55.5%, 57% { opacity: 0; transform: scale(1.7); }
+  61%, 92% { opacity: 1; transform: scale(1); }
+  98%, 100% { opacity: 0; transform: scale(1); }
+}
+/* Read twice: 16-36 % (accepted), 62-74 % (refused at the trust). */
+@keyframes tk-scan {
+  0%, 15% { opacity: 0; transform: translateY(0); }
+  16% { opacity: 1; transform: translateY(0); }
+  36% { opacity: 1; transform: translateY(206px); }
+  37%, 61% { opacity: 0; transform: translateY(0); }
+  62% { opacity: 1; transform: translateY(0); }
+  74% { opacity: 1; transform: translateY(206px); }
+  75%, 100% { opacity: 0; transform: translateY(0); }
+}
+/* Second reading: the scan line crosses SignedInfo and SignatureValue
+   (digest, signature) at 63-66 %, and reaches KeyInfo, the certificate, at
+   67 % (trust). */
+@keyframes tk-c1 {
+  0%, 19% { fill: var(--border-strong); }
+  20%, 59% { fill: var(--ok); }
+  60%, 63% { fill: var(--border-strong); }
+  64%, 93% { fill: var(--ok); }
+  95%, 100% { fill: var(--border-strong); }
+}
+@keyframes tk-c2 {
+  0%, 25% { fill: var(--border-strong); }
+  26%, 59% { fill: var(--ok); }
+  60%, 65% { fill: var(--border-strong); }
+  66%, 93% { fill: var(--ok); }
+  95%, 100% { fill: var(--border-strong); }
+}
+@keyframes tk-c3 {
+  0%, 31% { fill: var(--border-strong); }
+  32%, 59% { fill: var(--ok); }
+  60%, 66% { fill: var(--border-strong); }
+  67%, 93% { fill: var(--bad); }
+  95%, 100% { fill: var(--border-strong); }
+}
+@keyframes tk-c4 {
+  0%, 37% { fill: var(--border-strong); }
+  38%, 59% { fill: var(--ok); }
+  60%, 100% { fill: var(--border-strong); }
+}
+@keyframes tk-ok {
+  0%, 39% { opacity: 0; }
+  41%, 56% { opacity: 1; }
+  58%, 100% { opacity: 0; }
+}
+/* The data verified, shown in clear in a green block once the scan line
+   reaches the object (28.5 %), until the attack begins. */
+@keyframes tk-clear {
+  0%, 28% { opacity: 0; }
+  29.5%, 55% { opacity: 1; }
+  58%, 100% { opacity: 0; }
+}
+/* The certificate replaced at 57 %, after the token was accepted; it
+   blinks from the moment the scan line reaches it (67 %) until it fades
+   out. The altered data show from then on, their altered value blinking
+   with it. */
+@keyframes tk-tamper-key {
+  0%, 55% { opacity: 0; }
+  58%, 93% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes tk-pulse {
+  0%, 67% { opacity: 1; }
+  69% { opacity: 0.3; }
+  71% { opacity: 1; }
+  73% { opacity: 0.3; }
+  75% { opacity: 1; }
+  77% { opacity: 0.3; }
+  79% { opacity: 1; }
+  81% { opacity: 0.3; }
+  83% { opacity: 1; }
+  85% { opacity: 0.3; }
+  87% { opacity: 1; }
+  89% { opacity: 0.3; }
+  91% { opacity: 1; }
+  93% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+@keyframes tk-tamper-object {
+  0%, 66% { opacity: 0; }
+  68%, 93% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes tk-ko {
+  0%, 73% { opacity: 0; }
+  75%, 93% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tk * { animation: none !important; }
+}
 
 .workbench {
   display: grid; gap: 20px;

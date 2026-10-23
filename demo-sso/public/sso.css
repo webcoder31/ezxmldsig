@@ -47,6 +47,205 @@ html[data-site="home"] { --site: var(--accent); }
 .sso-page { display: grid; gap: 20px; min-width: 0; }
 .sso-page .panel-num { border-color: color-mix(in srgb, var(--site) 45%, var(--border)); background: color-mix(in srgb, var(--site) 14%, transparent); color: var(--site); }
 .sso-hero { padding-top: 0; }
+
+/* The illustration of the home page, right of the title: the user (the
+   browser) goes from site to site. They open MAIL, which has no session
+   and asks IDP; IDP does not know them yet, so they log in on IDP, then
+   carry the token IDP signs for MAIL to MAIL, which accepts it and opens
+   its session. They open CRM, which asks IDP; IDP knows them now, asks for
+   no password, and returns a token for CRM, which CRM accepts. A loop of
+   16 s; outside the animation (reduced motion), the base values show the end:
+   the user on CRM, the three sessions open, both tokens accepted. Shown
+   where the column leaves it room. */
+.sso-hero-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+.sso-hero-head .hero-art { display: none; }
+@media (min-width: 1320px), (min-width: 820px) and (max-width: 1080px) {
+  .sso-hero-head .hero-art { display: block; }
+}
+.hero-art svg.sso-art { display: block; width: 360px; height: auto; overflow: visible; }
+
+.sso-art text { font: 600 9px var(--mono); text-anchor: middle; }
+.sso-art .sa-link { fill: none; stroke: var(--border-strong); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.sso-art .sa-site rect { fill: var(--surface); stroke-width: 2; }
+.sso-art .sa-site text { font-size: 13px; font-weight: 700; }
+.sso-art .sa-idp rect { stroke: var(--site-idp); }
+.sso-art .sa-idp text { fill: var(--site-idp); }
+.sso-art .sa-mail rect { stroke: var(--site-mail); }
+.sso-art .sa-mail text { fill: var(--site-mail); }
+.sso-art .sa-crm rect { stroke: var(--site-crm); }
+.sso-art .sa-crm text { fill: var(--site-crm); }
+.sso-art .sa-session rect { fill: var(--accent-soft); stroke: var(--accent); }
+.sso-art .sa-session text { fill: var(--accent); }
+.sso-art .sa-idp-session { transform-box: fill-box; transform-origin: center; }
+.sso-art .sa-panel { opacity: 0; }
+.sso-art .sa-panel rect { fill: var(--surface-2); stroke: var(--site-idp); }
+.sso-art .sa-panel text { fill: var(--text); }
+.sso-art .sa-panel .sa-caption { fill: var(--muted); }
+.sso-art .sa-login .sa-caption { text-anchor: start; }
+.sso-art .sa-login .sa-field { fill: var(--surface); stroke: var(--border-strong); }
+.sso-art .sa-login circle { fill: var(--text); }
+.sso-art .sa-badge path { fill: none; stroke: var(--bg); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sso-art .sa-badge text { font-size: 11px; font-weight: 700; fill: var(--bg); }
+.sso-art .sa-ok circle { fill: var(--ok); }
+.sso-art .sa-ask { opacity: 0; }
+.sso-art .sa-ask circle { fill: var(--site-browser); }
+.sso-art .sa-user { fill: var(--text); transform: translate(244px, 165px); }
+.sso-art .sa-token, .sso-art .sa-request { opacity: 0; }
+.sso-art .sa-request rect { fill: var(--surface-2); stroke-width: 1.5; }
+.sso-art .sa-request text { font-size: 11px; font-weight: 700; }
+.sso-art .sa-req-mail rect { stroke: var(--site-mail); }
+.sso-art .sa-req-mail text { fill: var(--site-mail); }
+.sso-art .sa-req-crm rect { stroke: var(--site-crm); }
+.sso-art .sa-req-crm text { fill: var(--site-crm); }
+.sso-art .sa-reply rect { fill: var(--bad-soft); stroke: var(--bad); }
+.sso-art .sa-reply text { fill: var(--bad); }
+.sso-art .sa-token rect { fill: var(--surface-2); stroke: var(--accent); stroke-width: 1.5; }
+.sso-art .sa-token circle { fill: var(--accent); }
+.sso-art .sa-token text { font-size: 8px; font-weight: 700; }
+.sso-art .sa-tok-mail text { fill: var(--site-mail); }
+.sso-art .sa-tok-crm text { fill: var(--site-crm); }
+
+.sso-art .sa-user { animation: sa-user 16s infinite ease-in-out; }
+.sso-art .sa-mail-ask { animation: sa-mail-ask 16s infinite; }
+.sso-art .sa-crm-ask { animation: sa-crm-ask 16s infinite; }
+.sso-art .sa-req-mail { animation: sa-req-mail 16s infinite ease-in-out; }
+.sso-art .sa-reply { animation: sa-reply 16s infinite ease-in-out; }
+.sso-art .sa-req-crm { animation: sa-req-crm 16s infinite ease-in-out; }
+.sso-art .sa-login { animation: sa-login 16s infinite; }
+.sso-art .sa-d1 { animation: sa-d1 16s infinite; }
+.sso-art .sa-d2 { animation: sa-d2 16s infinite; }
+.sso-art .sa-d3 { animation: sa-d3 16s infinite; }
+.sso-art .sa-d4 { animation: sa-d4 16s infinite; }
+.sso-art .sa-d5 { animation: sa-d5 16s infinite; }
+.sso-art .sa-idp-session { animation: sa-idp-session 16s infinite; }
+.sso-art .sa-sso { animation: sa-sso 16s infinite; }
+.sso-art .sa-tok-mail { animation: sa-tok-mail 16s infinite ease-in-out; }
+.sso-art .sa-tok-crm { animation: sa-tok-crm 16s infinite ease-in-out; }
+.sso-art .sa-mail-ok { animation: sa-mail-ok 16s infinite; }
+.sso-art .sa-mail-session { animation: sa-mail-session 16s infinite; }
+.sso-art .sa-crm-ok { animation: sa-crm-ok 16s infinite; }
+.sso-art .sa-crm-session { animation: sa-crm-session 16s infinite; }
+
+/* The user: to MAIL (1.7 s), sent to IDP to log in (5.3 s), back to MAIL
+   with the token (8.6 s), then to CRM (10.4 s), where they stay. */
+@keyframes sa-user {
+  0% { opacity: 0; transform: translate(180px, 175px); }
+  2.5%, 4.38% { opacity: 1; transform: translate(180px, 175px); }
+  10.62%, 26.88% { transform: translate(116px, 165px); }
+  33.12%, 46.25% { transform: translate(180px, 80px); }
+  53.75%, 58.75% { transform: translate(116px, 165px); }
+  65%, 93.75% { opacity: 1; transform: translate(244px, 165px); }
+  97.5%, 100% { opacity: 0; transform: translate(244px, 165px); }
+}
+/* No session: each application shows it until the token from IDP arrives. */
+@keyframes sa-mail-ask {
+  0%, 10.62% { opacity: 0; }
+  11.25%, 55.62% { opacity: 1; }
+  56.25%, 100% { opacity: 0; }
+}
+@keyframes sa-crm-ask {
+  0%, 65% { opacity: 0; }
+  65.62%, 82.5% { opacity: 1; }
+  83.12%, 100% { opacity: 0; }
+}
+/* Each application asks IDP: MAIL at 1.9 s, which IDP answers with a
+   refusal, no session, so that the user goes to log in; CRM at 10.6 s,
+   which IDP answers with a token. */
+@keyframes sa-req-mail {
+  0%, 11.25% { opacity: 0; transform: translate(76px, 136px); }
+  11.88% { opacity: 1; transform: translate(76px, 136px); }
+  17.5% { opacity: 1; transform: translate(164px, 64px); }
+  18.75%, 100% { opacity: 0; transform: translate(170px, 58px); }
+}
+@keyframes sa-reply {
+  0%, 18.75% { opacity: 0; transform: translate(164px, 64px); }
+  19.38% { opacity: 1; transform: translate(164px, 64px); }
+  25% { opacity: 1; transform: translate(76px, 136px); }
+  26.25%, 100% { opacity: 0; transform: translate(70px, 142px); }
+}
+@keyframes sa-req-crm {
+  0%, 65.62% { opacity: 0; transform: translate(284px, 136px); }
+  66.25% { opacity: 1; transform: translate(284px, 136px); }
+  71.88% { opacity: 1; transform: translate(196px, 64px); }
+  73.12%, 100% { opacity: 0; transform: translate(190px, 58px); }
+}
+/* The login on IDP, 5.4-7.0 s: the password typed, one dot at a time. */
+@keyframes sa-login {
+  0%, 33.12% { opacity: 0; }
+  34.38%, 43.75% { opacity: 1; }
+  45%, 100% { opacity: 0; }
+}
+@keyframes sa-d1 {
+  0%, 36.25% { opacity: 0; }
+  36.56%, 100% { opacity: 1; }
+}
+@keyframes sa-d2 {
+  0%, 37.5% { opacity: 0; }
+  37.81%, 100% { opacity: 1; }
+}
+@keyframes sa-d3 {
+  0%, 38.75% { opacity: 0; }
+  39.06%, 100% { opacity: 1; }
+}
+@keyframes sa-d4 {
+  0%, 40% { opacity: 0; }
+  40.31%, 100% { opacity: 1; }
+}
+@keyframes sa-d5 {
+  0%, 41.25% { opacity: 0; }
+  41.56%, 100% { opacity: 1; }
+}
+/* The session of IDP, opened by the login; it signs the token for CRM
+   without a new one (11.7 s). */
+@keyframes sa-idp-session {
+  0%, 43.12% { opacity: 0; transform: scale(1); }
+  43.75%, 73.12% { opacity: 1; transform: scale(1); }
+  74.38% { transform: scale(1.18); }
+  75.62%, 93.75% { opacity: 1; transform: scale(1); }
+  97.5%, 100% { opacity: 0; transform: scale(1); }
+}
+@keyframes sa-sso {
+  0%, 72.5% { opacity: 0; }
+  73.12%, 78.75% { opacity: 1; }
+  80.62%, 100% { opacity: 0; }
+}
+/* The token for MAIL, carried by the user; the one for CRM, returned by
+   IDP to CRM. */
+@keyframes sa-tok-mail {
+  0%, 43.75% { opacity: 0; transform: translate(202px, 68px) scale(0.4); }
+  45.62%, 46.25% { opacity: 1; transform: translate(202px, 68px) scale(1); }
+  53.75% { opacity: 1; transform: translate(138px, 153px) scale(1); }
+  56.25%, 100% { opacity: 0; transform: translate(56px, 162px) scale(0.6); }
+}
+@keyframes sa-tok-crm {
+  0%, 75% { opacity: 0; transform: translate(196px, 64px) scale(0.4); }
+  76.88% { opacity: 1; transform: translate(196px, 64px) scale(1); }
+  81.88% { opacity: 1; transform: translate(296px, 146px) scale(1); }
+  83.75%, 100% { opacity: 0; transform: translate(304px, 162px) scale(0.6); }
+}
+@keyframes sa-mail-ok {
+  0%, 55.62% { opacity: 0; }
+  56.25%, 93.75% { opacity: 1; }
+  97.5%, 100% { opacity: 0; }
+}
+@keyframes sa-mail-session {
+  0%, 56.25% { opacity: 0; }
+  57.5%, 93.75% { opacity: 1; }
+  97.5%, 100% { opacity: 0; }
+}
+@keyframes sa-crm-ok {
+  0%, 82.5% { opacity: 0; }
+  83.12%, 93.75% { opacity: 1; }
+  97.5%, 100% { opacity: 0; }
+}
+@keyframes sa-crm-session {
+  0%, 83.12% { opacity: 0; }
+  84.38%, 93.75% { opacity: 1; }
+  97.5%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sso-art * { animation: none !important; }
+}
 .sso-steps { margin: 18px 0 0; padding-left: 20px; color: var(--text); }
 .sso-steps li { margin: 4px 0; }
 
