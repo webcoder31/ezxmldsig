@@ -275,7 +275,17 @@ a.btn-ghost, a.btn-ghost:hover { color: var(--text); }
 .facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 12px; }
 .facts dt { color: var(--muted); font-size: 13px; }
 .facts dd { margin: 0; overflow-wrap: anywhere; }
-.login-form { display: grid; gap: 12px; max-width: 420px; }
+/* The login form: its fields, then the demo accounts, right of the fields
+   where the panel leaves them room. */
+.login-panel { container-type: inline-size; }
+.login-form { display: grid; gap: 20px; }
+.login-fields { display: grid; gap: 12px; max-width: 420px; }
+.login-accounts { display: grid; gap: 12px; align-content: start; }
+.login-accounts .hint { margin: 0; }
+@container (min-width: 720px) {
+  .login-form { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px; }
+  .login-accounts { padding-left: 32px; border-left: 1px solid var(--border); }
+}
 .login-form input {
   min-height: 36px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 8px;
   background: var(--surface-2); color: var(--text-strong); font: inherit;

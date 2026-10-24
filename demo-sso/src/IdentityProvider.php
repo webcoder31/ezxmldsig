@@ -277,16 +277,18 @@ final class IdentityProvider
             $accounts .= '<li><button type="button" class="btn btn-ghost btn-xs" data-username="' . Html::e($name) . '" data-password="' . Html::e($account['password']) . '" aria-label="Fill in the form with ' . Html::e($name) . '">Use</button>'
                 . '<span><code>' . Html::e($name) . '</code> / <code>' . Html::e($account['password']) . '</code> <span class="muted">(' . Html::e($account['name']) . ', ' . Html::e($account['role']) . '; may enter ' . Html::e(implode(' and ', $account['apps'])) . ')</span></span></li>';
         }
-        $content = '<section class="panel" aria-labelledby="login-title">
+        $content = '<section class="panel login-panel" aria-labelledby="login-title">
   <header class="panel-head"><span class="panel-num">IDP</span><div><h2 id="login-title">Log in to continue to ' . Html::e(Sites::name($app)) . '</h2><p class="panel-sub">' . Html::e($this->base->host($app)) . ' sent you here: it has no password of its own.</p></div></header>
   <form class="panel-body login-form" method="post" action="/login">
     <input type="hidden" name="app" value="' . Html::e($app) . '">
     <input type="hidden" name="return" value="' . Html::e($return) . '">
-    ' . (is_null($error) ? '' : '<div class="form-error" role="alert">' . Html::e($error) . '</div>') . '
-    <label class="field"><span class="field-label">User name</span><input type="text" name="username" value="ragnar" autocomplete="username" required></label>
-    <label class="field"><span class="field-label">Password</span><input type="password" name="password" value="kattegat" autocomplete="current-password" required></label>
-    <div class="actions"><button type="submit" class="btn btn-primary">Log in</button></div>
-    <p class="hint">Demo accounts:</p><ul class="hint accounts">' . $accounts . '</ul>
+    <div class="login-fields">
+      ' . (is_null($error) ? '' : '<div class="form-error" role="alert">' . Html::e($error) . '</div>') . '
+      <label class="field"><span class="field-label">User name</span><input type="text" name="username" value="ragnar" autocomplete="username" required></label>
+      <label class="field"><span class="field-label">Password</span><input type="password" name="password" value="kattegat" autocomplete="current-password" required></label>
+      <div class="actions"><button type="submit" class="btn btn-primary">Log in</button></div>
+    </div>
+    <div class="login-accounts"><p class="hint">Demo accounts:</p><ul class="hint accounts">' . $accounts . '</ul></div>
   </form>
 </section>';
 
