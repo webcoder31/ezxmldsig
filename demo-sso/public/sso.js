@@ -134,6 +134,34 @@
     return pre;
   }
 
+  /* ---------- Theme ---------- */
+
+  const THEMES = ['auto', 'dark', 'light'];
+  const THEME_LABELS = { auto: 'automatic', dark: 'dark', light: 'light' };
+
+  /**
+   * The theme button goes through the themes as in the token demo. The
+   * server keeps the choice for the visitor, and writes it in the pages of
+   * all the sites: a cookie could not carry it from one host name to
+   * another on localhost.
+   */
+  function initTheme() {
+    const button = document.getElementById('theme-toggle');
+    if (!button) return;
+    button.addEventListener('click', function () {
+      const current = THEMES.indexOf(button.dataset.choice);
+      const theme = THEMES[(current + 1) % THEMES.length];
+      if (theme === 'auto') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', theme);
+      button.dataset.choice = theme;
+      button.setAttribute('aria-label', 'Color theme: ' + THEME_LABELS[theme] + '. Change it.');
+      button.title = 'Theme: ' + THEME_LABELS[theme];
+      fetch('/theme', { method: 'POST', body: new URLSearchParams({ theme: theme }) }).catch(function () {
+        // The server is gone: the choice holds on this page only.
+      });
+    });
+  }
+
   /** The row that draws a hop between two lanes. */
   function hop(event) {
     const from = LANES.indexOf(event.from);
@@ -222,6 +250,7 @@
   }
 
   function init() {
+    initTheme();
     // The tokens a page shows, written as they were signed.
     document.querySelectorAll('pre[data-xml]').forEach(function (pre) { showXml(pre, pre.textContent); });
     // The code that verified the token.

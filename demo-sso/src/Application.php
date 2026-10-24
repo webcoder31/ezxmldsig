@@ -235,7 +235,7 @@ final class Application
   </div>
 </section>';
 
-        return Http::html(Html::page($this->app, $this->base, $info['title'], $content, $request['cookies']));
+        return Http::html(Html::page($this->app, $this->base, $info['title'], $content, $request));
     }
 
     /**
@@ -305,7 +305,7 @@ final class Application
   <div class="panel-body"><div class="form-error" role="alert">The role ' . Html::e($user['role']) . ' may not delete customers: only ' . Html::e(implode(', ', Sites::CRM_DELETE_ROLES)) . ' may.</div>
     <div class="actions"><a class="btn btn-ghost" href="/">Back to CRM</a></div></div></section>';
 
-            return Http::html(Html::page($this->app, $this->base, 'Not allowed', $content, $request['cookies']), 403);
+            return Http::html(Html::page($this->app, $this->base, 'Not allowed', $content, $request), 403);
         }
 
         $session['deleted'] = array_values(array_unique(array_merge(isset($session['deleted']) ? $session['deleted'] : [], [$id])));
@@ -329,7 +329,7 @@ final class Application
   <div class="panel-body"><div class="form-error" role="alert">' . Html::e($message) . '</div>' . (is_null($result) ? '' : self::stepList($result['steps'])) . '</div>
 </section>';
 
-        return Http::html(Html::page($this->app, $this->base, 'Token refused', $content, $request['cookies']), 403);
+        return Http::html(Html::page($this->app, $this->base, 'Token refused', $content, $request), 403);
     }
 
     /**
@@ -363,6 +363,6 @@ final class Application
         $content = '<section class="panel"><header class="panel-head"><div><h2>Logged out of ' . Html::e(Sites::name($this->app)) . '</h2><p class="panel-sub">' . Html::e(Sites::name($this->app)) . ' closed its session. IDP did not.</p></div></header>
   <div class="panel-body"><div class="actions"><a class="btn btn-primary" href="/">Open ' . Html::e(Sites::name($this->app)) . ' again</a></div></div></section>';
 
-        return Http::html(Html::page($this->app, $this->base, 'Logged out', $content, $request['cookies']));
+        return Http::html(Html::page($this->app, $this->base, 'Logged out', $content, $request));
     }
 }

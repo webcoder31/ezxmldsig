@@ -4,11 +4,13 @@
  * of a page and its trace, and the trace itself.
  */
 
+/* The colours of the sites, those of the token demo, so that they follow
+   its themes: darker on the light theme, to stay readable on white. */
 :root {
-  --site-idp: #c49bff;
-  --site-mail: #7aa7ff;
-  --site-crm: #f5b84d;
-  --site-browser: #8794a6;
+  --site-idp: var(--x-attr);
+  --site-mail: var(--info);
+  --site-crm: var(--warn);
+  --site-browser: var(--muted);
 }
 html[data-site="idp"] { --site: var(--site-idp); }
 html[data-site="mail"] { --site: var(--site-mail); }
@@ -435,5 +437,10 @@ a.btn-ghost, a.btn-ghost:hover { color: var(--text); }
 
 .site-nav .home-link { gap: 6px; }
 .github-icon { fill: currentColor; }
+/* The theme button shows the icon of the theme in force (data-choice). */
+.theme-icon { display: none; }
+.theme-toggle[data-choice="auto"] [data-theme-icon="auto"],
+.theme-toggle[data-choice="dark"] [data-theme-icon="dark"],
+.theme-toggle[data-choice="light"] [data-theme-icon="light"] { display: block; }
 .home-icon { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .site-nav .home-link[aria-current="page"] { color: var(--text-strong); background: var(--surface-2); }

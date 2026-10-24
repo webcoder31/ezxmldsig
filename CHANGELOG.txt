@@ -15,6 +15,12 @@ Unreleased
   a new login. Inline SVG animated by CSS, decorative (hidden from
   screen readers), still when the system asks for reduced motion, and hidden
   where the page leaves it no room.
+- The single sign-on demo has the theme button of the token demo
+  (automatic, dark, light). The choice made on one site holds on the
+  others: the server keeps it for the visitor, since a browser does not
+  share a cookie between the host names of localhost. The colours of the
+  sites follow the theme, darker on the light one, and the applications
+  colour the PHP code that verified the token.
 
 1.2.1 (2026-10-22)
 -------------------

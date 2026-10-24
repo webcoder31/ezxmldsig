@@ -54,6 +54,21 @@ final class Demo
     }
 
     /**
+     * Returns the colour theme the visitor chose on one of the sites, kept
+     * in $varDir/theme.json: the browser could not share it between the
+     * host names of the demo (a cookie set on localhost is refused).
+     *
+     * @return string One of Html::THEMES, 'auto' by default.
+     */
+    public function theme()
+    {
+        $path = $this->varDir . '/theme.json';
+        $theme = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+
+        return in_array($theme, Html::THEMES, true) ? $theme : 'auto';
+    }
+
+    /**
      * Handles a request.
      *
      * @param array $request See Http::request().
@@ -70,6 +85,8 @@ final class Demo
         }
         $site = $parsed['site'];
         $base = $parsed['base'];
+        // The colour theme the visitor chose, the same on every site.
+        $request['theme'] = $this->theme();
         $trace = new Trace($this->varDir . '/trace.json');
         $sessions = new SessionStore($this->varDir . '/sessions');
         $route = $request['method'] . ' ' . $request['path'];
@@ -133,6 +150,25 @@ final class Demo
             }
 
             return Http::json(['settings' => $settings->all()]) + ['site' => $site];
+        }
+        if ('POST /theme' === $route)
+        {
+            if (!$isOwnPage)
+            {
+                return Http::text('Cross-origin request refused.', 403) + ['site' => $site];
+            }
+            $theme = isset($request['post']['theme']) ? $request['post']['theme'] : null;
+            if (!in_array($theme, Html::THEMES, true))
+            {
+                return Http::json(['error' => 'Unknown theme.'], 400) + ['site' => $site];
+            }
+            if (!is_dir($this->varDir))
+            {
+                mkdir($this->varDir, 0700, true);
+            }
+            file_put_contents($this->varDir . '/theme.json', json_encode($theme), LOCK_EX);
+
+            return Http::json(['theme' => $theme]) + ['site' => $site];
         }
         if ('POST /trace/reset' === $route)
         {
@@ -260,6 +296,6 @@ final class Demo
   <div class="panel-body lab-cards" id="lab-cards"></div>
 </section>';
 
-        return Http::html(Html::page(Sites::HOME, $base, 'Single sign-on demo', $content, $request['cookies'], ['/lab.js']));
+        return Http::html(Html::page(Sites::HOME, $base, 'Single sign-on demo', $content, $request, ['/lab.js']));
     }
 }

@@ -184,7 +184,7 @@ final class IdentityProvider
     <div class="actions"><a class="btn btn-ghost" href="' . Html::e(Sites::origin($account['apps'][0], $this->base) . '/') . '">Open ' . Html::e($this->base->host($account['apps'][0])) . '</a></div></div>
 </section>';
 
-            return Http::html(Html::page(Sites::IDP, $this->base, 'No access', $content, $request['cookies']), 403);
+            return Http::html(Html::page(Sites::IDP, $this->base, 'No access', $content, $request), 403);
         }
 
         $data = ['user' => $user, 'name' => $account['name'], 'role' => $account['role'], 'email' => $account['email']];
@@ -241,7 +241,7 @@ final class IdentityProvider
   </div>
 </section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->base, 'Sending you back', $content, $request['cookies'], ['/post.js']));
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Sending you back', $content, $request, ['/post.js']));
     }
 
     /**
@@ -263,7 +263,7 @@ final class IdentityProvider
   <div class="panel-body">' . $state . '</div>
 </section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->base, 'Identity provider', $content, $request['cookies']));
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Identity provider', $content, $request));
     }
 
     /**
@@ -290,7 +290,7 @@ final class IdentityProvider
   </form>
 </section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->base, 'Log in', $content, $request['cookies'], ['/login.js']));
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Log in', $content, $request, ['/login.js']));
     }
 
     /**
@@ -300,7 +300,7 @@ final class IdentityProvider
     {
         $content = '<section class="panel"><div class="panel-body"><div class="form-error" role="alert">' . Html::e($message) . '</div></div></section>';
 
-        return Http::html(Html::page(Sites::IDP, $this->base, 'Error', $content, $request['cookies']), 400);
+        return Http::html(Html::page(Sites::IDP, $this->base, 'Error', $content, $request), 400);
     }
 
     /**

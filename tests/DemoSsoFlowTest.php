@@ -251,6 +251,36 @@ class DemoSsoFlowTest extends TestCase
         $this->assertTrue($this->demo->settings()->on('audience'), 'The other settings are kept.');
     }
 
+    public function testTheThemeChosenOnOneSiteIsWrittenInThePagesOfAll()
+    {
+        $page = $this->browse('GET', self::url('idp'))['body'];
+        $this->assertStringContainsString('data-choice="auto"', $page);
+        $this->assertStringNotContainsString('data-theme=', $page, 'The system theme by default.');
+
+        $refused = $this->browse('POST', self::url('mail', '/theme'), ['theme' => 'light'], 'http://attacker.example');
+        $this->assertSame(403, $refused['status']);
+        $unknown = $this->browse('POST', self::url('mail', '/theme'), ['theme' => 'pink'], self::url('mail', ''));
+        $this->assertSame(400, $unknown['status']);
+        $this->assertSame('auto', $this->demo->theme());
+
+        $this->browse('POST', self::url('mail', '/theme'), ['theme' => 'light'], self::url('mail', ''));
+        // The theme was chosen on mail.localhost; an application shows its
+        // pages once logged in.
+        $this->logInThroughMail();
+        foreach (['idp', 'mail'] as $site)
+        {
+            $page = $this->browse('GET', self::url($site))['body'];
+            $this->assertStringContainsString('<html lang="en" data-site="' . $site . '"', $page);
+            $this->assertMatchesRegularExpression('/<html [^>]*data-theme="light">/', $page, $site);
+            $this->assertStringContainsString('data-choice="light"', $page, $site);
+        }
+        $this->assertMatchesRegularExpression('/<html [^>]*data-theme="light">/', $this->browse('GET', 'http://localhost:' . self::PORT . '/')['body']);
+
+        // A reset of the demo keeps it: it is not part of the flow.
+        $this->browse('POST', self::url('mail', '/trace/reset'), [], self::url('mail', ''));
+        $this->assertSame('light', $this->demo->theme());
+    }
+
     /**
      * Logs in as a user through an application, and posts the token idp
      * signs, if it signs one.

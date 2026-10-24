@@ -18,6 +18,17 @@ final class Html
         'home' => ['label' => 'SSO demo', 'mark' => 'SSO'],
     ];
 
+    /** The colour themes the theme button goes through, in its order, as
+    in the token demo: automatic follows the system. */
+    const THEMES = ['auto', 'dark', 'light'];
+
+    /** The icons of the theme button, those of the token demo. */
+    const THEME_ICONS = [
+        'auto' => '<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/>',
+        'dark' => '<path d="M13 9.6A5.5 5.5 0 0 1 6.4 3a5.5 5.5 0 1 0 6.6 6.6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+        'light' => '<circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+    ];
+
     /** The repository of the library, linked from the top bar. */
     const REPOSITORY = 'https://github.com/webcoder31/ezxmldsig';
 
@@ -57,13 +68,16 @@ final class Html
      * @param Base $base Where the sites live.
      * @param string $title
      * @param string $content The HTML of the page content.
-     * @param array $cookies The cookies the browser sent to this site.
+     * @param array $request See Http::request(): the cookies the browser
+     *     sent to this site, and 'theme', the colour theme the visitor
+     *     chose (one of THEMES; 'auto' if missing).
      * @param array $scripts Extra scripts of this server, e.g. ['/post.js'].
      *
      * @return string
      */
-    public static function page($site, Base $base, $title, $content, array $cookies, array $scripts = [])
+    public static function page($site, Base $base, $title, $content, array $request, array $scripts = [])
     {
+        $theme = isset($request['theme']) && in_array($request['theme'], self::THEMES, true) ? $request['theme'] : 'auto';
         $identity = self::IDENTITY[$site];
         $nav = '<a href="' . self::e(Sites::origin(Sites::HOME, $base) . '/') . '"' . (Sites::HOME === $site ? ' aria-current="page"' : '') . ' data-site="home" class="home-link">'
             . '<svg class="home-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 7.5L8 3l5.5 4.5M4 6.5V13h3V9.5h2V13h3V6.5"/></svg>Home</a>';
@@ -79,7 +93,7 @@ final class Html
         }
 
         return '<!doctype html>
-<html lang="en" data-site="' . self::e($site) . '" data-home="' . self::e(Sites::origin(Sites::HOME, $base) . '/') . '">
+<html lang="en" data-site="' . self::e($site) . '" data-home="' . self::e(Sites::origin(Sites::HOME, $base) . '/') . '"' . ('auto' === $theme ? '' : ' data-theme="' . self::e($theme) . '"') . '>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -105,13 +119,14 @@ final class Html
       <a class="icon-btn" href="' . self::e(self::REPOSITORY) . '" title="Source code on GitHub" aria-label="Source code of ezxmldsig on GitHub">
         <svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
       </a>
+' . self::themeButton($theme) . '
     </div>
   </div>
 </header>
 <main id="main" tabindex="-1" class="sso-layout">
   <div class="sso-page">
 ' . (Sites::HOME === $site ? '' : self::banner($site, $base)) . $content . '
-' . (Sites::HOME === $site ? '' : self::cookiePanel($site, $base, $cookies)) . '
+' . (Sites::HOME === $site ? '' : self::cookiePanel($site, $base, isset($request['cookies']) ? $request['cookies'] : [])) . '
   </div>
   <aside class="panel trace-panel" aria-labelledby="trace-title">
     <header class="panel-head">
@@ -130,6 +145,29 @@ final class Html
 </body>
 </html>
 ';
+    }
+
+    /**
+     * Returns the theme button: it shows the icon of the theme in force,
+     * and sso.js makes it go to the next one (see THEMES).
+     */
+    private static function themeButton($theme)
+    {
+        $icons = '';
+        foreach (self::THEME_ICONS as $name => $icon)
+        {
+            $icons .= '<svg class="theme-icon" data-theme-icon="' . self::e($name) . '" viewBox="0 0 16 16" aria-hidden="true" focusable="false">' . $icon . '</svg>';
+        }
+
+        return '      <button type="button" class="icon-btn theme-toggle" id="theme-toggle" data-choice="' . self::e($theme) . '" title="Theme: ' . self::e(self::themeLabel($theme)) . '" aria-label="Color theme: ' . self::e(self::themeLabel($theme)) . '. Change it.">' . $icons . '</button>';
+    }
+
+    /**
+     * Returns the name of a theme as the theme button says it.
+     */
+    private static function themeLabel($theme)
+    {
+        return 'auto' === $theme ? 'automatic' : $theme;
     }
 
     /**
