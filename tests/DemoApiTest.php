@@ -203,6 +203,11 @@ class DemoApiTest extends TestCase
 
         $code = Receiver::fromArray(['audience' => false])->phpCode();
         $this->assertStringNotContainsString('expectedAudience', $code);
+
+        // A decryption key without password, as in the SSO demo: null,
+        // written as in PHP code, not as var_export() writes it (NULL).
+        $code = Receiver::fromArray(['decrypt' => true])->withCryptKey('/keys/crm.crypt.key.pem', null)->phpCode();
+        $this->assertStringContainsString("'certs/crm.crypt.key.pem', null, \$options", $code);
     }
 
     /**

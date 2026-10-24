@@ -646,7 +646,7 @@ final class Receiver
         $lines[] = '';
         if ($this->config['decrypt'])
         {
-            $lines[] = "\$token = XMLDSigToken::analyzeSecureXMLToken(\$xml, " . var_export('certs/' . basename($this->cryptKeyPath), true) . ', ' . var_export($this->cryptKeyPassword, true) . ', $options);';
+            $lines[] = "\$token = XMLDSigToken::analyzeSecureXMLToken(\$xml, " . var_export('certs/' . basename($this->cryptKeyPath), true) . ', ' . (is_null($this->cryptKeyPassword) ? 'null' : var_export($this->cryptKeyPassword, true)) . ', $options);';
         }
         else
         {

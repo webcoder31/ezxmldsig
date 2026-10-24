@@ -231,7 +231,7 @@ final class Application
       <form method="post" action="/logout"><button type="submit" class="btn btn-ghost">Log out of ' . Html::e(Sites::name($this->app)) . '</button></form>
     </div>
     <details class="code-details"><summary>How ' . Html::e(Sites::name($this->app)) . ' verified the token</summary>' . self::stepList($session['verified']) . '
-      <div class="code-block"><pre class="code">' . Html::e($this->receiver()->phpCode()) . '</pre></div></details>
+      <div class="code-block"><pre class="code" data-php>' . Html::e($this->receiver()->phpCode()) . '</pre></div></details>
   </div>
 </section>';
 

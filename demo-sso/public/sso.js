@@ -114,6 +114,26 @@
     return pre;
   }
 
+  /* ---------- PHP ---------- */
+
+  const PHP_RE = /(\/\/[^\n]*)|('(?:[^'\\]|\\.)*')|(\$[A-Za-z_][A-Za-z0-9_]*)|\b(require|use|new|if|null|true|false|throw|return)\b|\b(XMLDSigToken|RuntimeException)\b|(<\?php)/g;
+
+  /** Fills a <pre> with PHP code, coloured as in the token demo. */
+  function showPhp(pre, code) {
+    pre.textContent = '';
+    let last = 0;
+    let match;
+    PHP_RE.lastIndex = 0;
+    while ((match = PHP_RE.exec(code)) !== null) {
+      if (match.index > last) pre.appendChild(document.createTextNode(code.slice(last, match.index)));
+      const cls = match[1] ? 'php-com' : match[2] ? 'php-str' : match[3] ? 'php-var' : match[4] || match[6] ? 'php-kw' : 'php-cls';
+      pre.appendChild(el('span', { class: cls, text: match[0] }));
+      last = match.index + match[0].length;
+    }
+    if (last < code.length) pre.appendChild(document.createTextNode(code.slice(last)));
+    return pre;
+  }
+
   /** The row that draws a hop between two lanes. */
   function hop(event) {
     const from = LANES.indexOf(event.from);
@@ -204,6 +224,8 @@
   function init() {
     // The tokens a page shows, written as they were signed.
     document.querySelectorAll('pre[data-xml]').forEach(function (pre) { showXml(pre, pre.textContent); });
+    // The code that verified the token.
+    document.querySelectorAll('pre[data-php]').forEach(function (pre) { showPhp(pre, pre.textContent); });
     const reset = document.getElementById('trace-reset');
     if (reset) {
       reset.addEventListener('click', async function () {
