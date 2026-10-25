@@ -6,6 +6,8 @@ The library signs its own tokens only. It does not sign existing XML documents i
 
 The library exists for Node.js too: [**@webcoder31/ezxmldsig**](https://www.npmjs.com/package/@webcoder31/ezxmldsig) creates and verifies the same tokens, with the same options and the same checks, so that a single sign-on can mix PHP and Node.js nodes. Both read each other's tokens, signed or encrypted, which the tests of the Node.js library check against this one. The tokens being standard XML digital signatures and XML Encryption, other libraries can also create and read them, such as **xml-crypto** and **xml-encryption** for Node.js, provided the receiver makes the checks **ezxmldsig** makes besides the signature: see [Interoperability](#interoperability).
 
+The concepts common to both libraries are explained on the **documentation site**, https://webcoder31.github.io/ezxmldsig-doc/: why they exist, how a token works, a single sign-on, the duties of the receiver, encryption, certificates and keys, interoperability. This README keeps what is particular to the PHP library.
+
 The author of the **ezxmldsig** library is Thierry Thiers.
 
 
@@ -14,8 +16,6 @@ The author of the **ezxmldsig** library is Thierry Thiers.
 * [Requirements](#requirements)
 * [How to Install?](#how-to-install)
 * [What's in the box?](#whats-in-the-box)
-    * [XMLDSigToken class](#xmldsigtoken-class)
-    * [X509Cert class](#x509cert-class)
 * [Why?](#why)
 * [How does it work?](#how-does-it-work)
 * [How to use?](#how-to-use)
@@ -66,109 +66,37 @@ You can also clone it (or download it as a ZIP archive) from its [GitHub reposit
 
 ## What's in the box?
 
-### XMLDSigToken class
+**``XMLDSigToken``** creates and analyzes XML tokens:
 
-The ``XMLDSigToken`` class allows creating and analyzing enveloping XML Digital Signature containing timestamped user data that may also be encrypted, also called XML token. With such tokens, you may create your own Single Sign On solution. You can secure access to your Web Services, as with JSON Web Token. You can transmit data whose integrity and origin, and also confidentiality when they are encrypted, are protected by the token itself, whatever the connection that carries it. Or anything you can think of that requires such kind of features.
+1. It builds a token from user data (a flat or multidimensional associative array) and reads them back the same way.
+2. It lets you choose the algorithms of the signature (see [Options](#options)). By default: inclusive canonicalization (http://www.w3.org/TR/2001/REC-xml-c14n-20010315), RSA-SHA256 and an SHA-256 digest; the values of the data are encoded in Base64.
+3. It encrypts and decrypts the token data, so that only the recipient can read them, even when the token travels over an unencrypted connection: AES-256-GCM for the data and RSA-OAEP for the session key by default. Only the token data are encrypted: this protects neither the rest of the request nor the response, does not authenticate the server, and does not prevent an intercepted token from being submitted again (see [Replay](#replay)).
+4. It guarantees the integrity and the origin of the data by verifying that the signature has the structure of a token, that its algorithms are the expected ones, that the token has not been altered, and that the X.509 certificate of the token is trusted (see [Trust anchor](#trust-anchor)).
+5. Each token holds a signed timestamp and a signed random identifier, so that the receiver can refuse a token that is too old or already accepted (see [Replay](#replay)). These two checks are up to the receiver: ``isSignatureValid()`` makes neither.
+6. It gives access to the information of the certificate of the token: subject, issuer, validity dates.
+7. It refuses, before parsing them, the XML documents that have a document type declaration (see [XML parsing](#xml-parsing)), and its HTML output (``getHTMLDump()``) escapes every value it shows and loads no external resource.
+
+**``X509Cert``** reads an X.509 certificate (subject, issuer, Distinguished Name, validity dates, fingerprint) and makes the checks the analysis needs, all of them with OpenSSL: its key usage (``canSign()``), its chain up to trusted CA certificates (``isTrustedBy()``), whether a given CA certificate issued it (``isValidCA()``).
 
 The token protects its own content only: not the request that carries it (URL, headers, other fields), nor the response, nor the identity of the server it is sent to. Use an HTTPS connection for these.
-
-**The ``XMLDSigToken`` class offers the following features:**
-
-1) It builds an XML token from a flat or multidimensional associative array representing the user data and retrieves it in the same way.
-
-2) It allows choosing the various algorithms that should be used to build the XML Digital Signature (see [Options](#options)). The ones used by default are the following:
-    * Algorithm used to canonicalize data before signing is: http://www.w3.org/TR/2001/REC-xml-c14n-20010315.
-    * Algorithm used to generate the signature is: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256.
-    * Algorithm used to compute the hash of contained data is: http://www.w3.org/2001/04/xmlenc#sha256.
-    * Algorithm used to encode user data values is: Base64.
-
-3) It is also capable of encrypting / decrypting token data, so that only the recipient can read them, even when the token travels over an unencrypted HTTP connection. Only the token data are encrypted: unlike an SSL/TLS connection, this protects neither the rest of the request nor the response, does not authenticate the server, and does not prevent an intercepted token from being submitted again (see [Replay](#replay)).
-The class allows choosing the algorithms that should be used to perform data encryption. By default it uses the following ones:
-    * Algorithm used to encrypt data is: http://www.w3.org/2009/xmlenc11#aes256-gcm (authenticated symmetric ciphering).
-    * Algorithm used to encrypt the session key that will be used to encrypt data is: http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p (asymmetric ciphering).
-
-4) It guarantees the integrity and the origin of the user data stored in the XMLDSig token by verifying that:
-    * The XML digital signature has the structure of an XML token: an enveloping signature whose single reference covers the token it holds. The library checks the elements of this fixed structure, not every rule of the XMLDSIG specification.
-    * The algorithms used to construct the XML digital signature are those expected.
-    * The token contained in the XML digital signature has not been altered.
-    * The X.509 certificate included in the XML digital signature is trusted: it is valid at the current date, OpenSSL verifies its chain up to the CA certificates you trust and/or it is the very certificate you pinned, and its subject is the one you expect, if you ask for it (see [Trust anchor](#trust-anchor)).
-
-5) It is also able to verify with confidence that the token is not out of date because the token timestamp is signed too. Each token also holds a signed random identifier, which lets the receiver refuse a token it has already accepted (see [Replay](#replay)). These two checks are up to the receiver: ``isSignatureValid()`` makes neither (see [Checking an XML token](#xmldsigtoken-checking-an-xml-token)).
-
-6) It gives access to the information of the X.509 certificate included in the XML Digital Signature (subject, issuer, validity dates), and keeps individual checks on it:
-    * Ensure that the certificate is not out of date.
-    * Check the issuer names of the certificate.
-    * Verify that the certificate was issued by a given CA certificate.
-
-7) It refuses, before parsing them, the XML documents that have a document type declaration (see [XML parsing](#xml-parsing)), and its HTML output (``getHTMLDump()``) escapes every value it shows and loads no external resource.
-
-
-### X509Cert class
-
-The ``X509Cert`` class provides a set of convenient methods for extracting essential information contained in an X.509 certificate and for performing some useful checks, all of them with OpenSSL: whether the certificate was issued by a given CA certificate (``isValidCA()``), whether OpenSSL verifies its chain up to trusted CA certificates (``isTrustedBy()``), whether its key usage allows signing (``canSign()``). This class is used internally by the ``XMLDSigToken`` class.
 
 
 ## Why?
 
-A signature guarantees that the data of a token were not changed. What matters most, though, is to know **who issued the token**: it is only worth the trust one has in its sender.
+A signature proves that the data of a token were not changed; what matters most is to prove **who issued it**. A receiver accepts a token only if its signing certificate descends, through a chain of trust, from the CA certificates it declares and, when it asks for it, has the subject it expects or is the very certificate it pinned (see [Trust anchor](#trust-anchor)).
 
-**The chain of trust.** This trust rests on X.509 certificates linked into a chain. A certification authority (CA) owns a root certificate, often valid for some twenty years and kept offline. With it, the CA signs the certificates of intermediate CAs, which in turn sign end certificates: shorter-lived, each dedicated to one use (HTTPS server, signature, encryption…). Each certificate is signed with the private key of its issuer and verified with the public key of this issuer, so that the lineage of any certificate can be traced back to the root.
+**Revocation is not checked**: the library consults neither certificate revocation lists (CRL) nor OCSP responders, so a revoked certificate is accepted until it expires. To stop trusting a compromised CA, remove it from ``caCertPath``; to stop trusting a compromised signing certificate, remove its issuing CA as well, or pin the certificate that replaces it with ``signerCertPath``.
 
-The intermediate CAs shield the root. If one of them is compromised, it is revoked and replaced without touching the root, which remains the anchor of trust.
-
-**A root of one's own.** The root can be the one of a public CA, as for HTTPS certificates. It can also be the one of a company: for an internal single sign-on, the company creates its own root, then an intermediate CA, then the certificate that signs the login tokens of its applications (intranet, CRM, back office…).
-
-**What the library checks.** The receiver declares the CA certificates it trusts, the root and the intermediates, and a token is accepted only if its signing certificate descends from them. The receiver can also require a given subject, or one given certificate. A token signed with any other certificate is rejected, even though its signature is mathematically correct: that signature proves that the data did not change since it was made, not who made it (see [How does it work?](#how-does-it-work) and [Trust anchor](#trust-anchor)).
-
-**Revocation is not checked.** The library consults neither certificate revocation lists (CRL) nor OCSP responders: a revoked certificate is accepted until it expires. To stop trusting a compromised CA, remove it from the files of ``caCertPath``. To stop trusting a compromised signing certificate, remove its issuing CA as well, or pin the certificate that replaces it with ``signerCertPath``.
-
-**Beyond single sign-on.** Single sign-on is the most telling use, not the only one: the same tokens carry any data whose origin the receiver must be sure of, between applications or organizations.
-
-**Why this library?** None of this is new. What ezxmldsig adds is simplicity: a few lines to create a signed login token, encrypted if need be, and a few lines to check it, its chain of certification included. The author found no library doing so, in PHP or in Node.js, and wrote two. They follow the W3C standards XML Signature and XML Encryption and read each other's tokens, so that a single sign-on can span applications written in PHP and in Node.js.
+The chain of trust, a root of a company's own for an internal single sign-on, and why this library exists: see [Why?](https://webcoder31.github.io/ezxmldsig-doc/why/) on the documentation site.
 
 
 ## How does it work?
 
-A token works like a letter in an envelope sealed with wax and the seal of an authority: anyone may read the letter (unless it is encrypted), nobody can change it without breaking the seal, and a fake seal, however well made, does not fool a receiver who knows the real one.
+A token is an enveloping XML digital signature: the node ``Token`` holds the user data, a timestamp and a random identifier; its digest is written in ``ds:SignedInfo``, which the sender signs with its private key; its certificate travels in ``ds:KeyInfo``. The receiver answers three questions: were the data changed (the digest), is the seal intact (the signature), and who sealed it (the trust in the certificate). The last one decides: an attacker who alters the data and signs them again with a key of their own passes the first two.
 
-**Two linked keys.** The sender owns an RSA key pair: a **private key**, known to it alone, which signs, and a **public key**, which anyone may hold, which verifies. What the private key signs, the public key verifies; but the public key cannot sign. To produce a valid signature, one must hold the private key. The public key travels in an **X.509 certificate**, a kind of identity card that says "this public key belongs to this sender", itself signed by a certification authority (CA).
+``isSignatureValid()`` also checks the algorithms and the audience; **the freshness, the expiry and the replay are up to the receiver** (see [Checking an XML token](#xmldsigtoken-checking-an-xml-token)).
 
-**Creating a token.**
-
-1. The user data are written in the node ``Token``, with a timestamp, a random identifier and, as options, an expiry and the receivers the token is addressed to (its audience).
-2. A **digest** (SHA-256 by default) of this node is computed: it changes entirely if a single character of the node changes. It is written in ``ds:SignedInfo`` (``ds:DigestValue``).
-3. The sender **signs ``ds:SignedInfo``** with its private key, and writes the result in ``ds:SignatureValue``. Since ``ds:SignedInfo`` holds the digest of the data, signing the one seals the other.
-4. The **certificate** of the sender is added to the token (``ds:KeyInfo``), so that the receiver knows which public key to verify with.
-
-When the data are encrypted (see [Encryption](#encryption)), they are encrypted before being signed: the signature covers the encrypted data. Encryption protects their confidentiality; the authenticity of the token rests on the signature alone.
-
-**Verifying a token: three questions.**
-
-1. **Were the data changed?** The receiver computes the digest of the data again and compares it with ``ds:DigestValue``. If they differ, someone changed the content.
-2. **Is the seal intact?** With the public key of the certificate the token carries, the receiver verifies that ``ds:SignatureValue`` matches ``ds:SignedInfo``. Whoever changes the digest to match altered data breaks the signature.
-3. **Who sealed it?** This is the question that decides. An attacker can alter the data, then **sign everything again with a key of their own** and add **their own certificate**: questions 1 and 2 then pass, the digest and the signature being mathematically correct. But the seal is not the one of the sender. The receiver must therefore check that the certificate of the token is trusted: issued by a CA it chose to trust (``caCertPath``), or the very certificate it expects (``signerCertPath``), and, when it asks for it, with the subject it expects (``expectedSubject``). The certificate of the attacker meets none of these conditions: the token is rejected (see [Trust anchor](#trust-anchor)).
-
-**A valid signature proves nothing until one knows who made it**: the authenticity of a token is its signature, plus the trust in the key that made it.
-
-**What else is checked.** An authentic token can still be misused. The receiver also checks:
-
-* the **algorithms**: only those it expects, not a weak one chosen by an attacker;
-* the **audience**: the token is addressed to this receiver; a token signed for one application must not open another (see [Audience and expiry](#audience-and-expiry));
-* the **freshness** and the **expiry**: a token too old is rejected;
-* the **replay**: the identifier of each token accepted is stored, and a token already accepted is rejected (see [Replay](#replay)).
-
-The first two are made by ``isSignatureValid()``; freshness, expiry and replay are up to the receiver (see [Checking an XML token](#xmldsigtoken-checking-an-xml-token)).
-
-Lastly, the data must be read **only from the node the signature covers**, never from elsewhere in the document: otherwise, a forged ``Token`` placed beside the signed one would be read (signature wrapping). The library rejects documents built this way, and ``getData()`` reads the node the digest was computed on.
-
-| Question | Mechanism | What it prevents |
-|---|---|---|
-| Are the data intact? | Digest of the node ``Token`` | Altering the data |
-| Is the seal intact? | Signature of ``ds:SignedInfo`` | Altering the digest |
-| Is it the expected sender? | Trust in the certificate (CA, pinned certificate, subject) | Signing again with another key |
-| Right receiver, right time, first use? | Audience, freshness, expiry, replay | Reusing a genuine token where or when it should not be |
-
-The [demo](#demo) plays these checks out on real tokens, and replays the attacks the library rejects.
+A token block by block, each check and the attack it stops: see [How does it work?](https://webcoder31.github.io/ezxmldsig-doc/how-it-works/) on the documentation site. The [demo](#demo) plays these checks out on real tokens, and replays the attacks the library rejects.
 
 
 ## How to use?
@@ -471,6 +399,8 @@ Each token holds an identifier of 128 random bits (``random_bytes()``), written 
 
 A token without identifier, as created by the 0.x versions, is rejected (``Token identifier is missing!``): the receiver could not tell it from a replayed one. So is a token whose identifier is not 32 lowercase hexadecimal characters (``Token identifier is malformed!``).
 
+Why a receiver must check freshness, expiry, replay and audience, and the mistakes to avoid when storing the identifiers: see [The receiver's duties](https://webcoder31.github.io/ezxmldsig-doc/receiver/) on the documentation site.
+
 
 ### Audience and expiry
 
@@ -562,10 +492,10 @@ The token data are encrypted with a session key generated for each token, and th
 
 * **Default algorithms.** The data are encrypted with AES-256-GCM (``AES256_GCM``) and the session key with RSA-OAEP (``RSA_OAEP_MGF1P``, http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p). AES-GCM checks an authentication tag before returning any data: altered data are rejected as a whole. A 256-bit key costs no more than a 128-bit one for data of this size.
 * **Type of the encrypted data.** Since version 1.2, the node ``xenc:EncryptedData`` replaces the node ``Token`` and declares the type http://www.w3.org/2001/04/xmlenc#Element: an element is encrypted, as other XML Encryption libraries declare it (xml-encryption for Node.js among them). The analysis reads both types XML Encryption 1.1 defines for an XML plaintext, ``Element`` and ``Content``, as the standard requires, and refuses any other. The plaintext is read as an XML fragment whatever its type, so that it cannot hold a document type declaration (see [XML parsing](#xml-parsing)). Versions up to 1.1 declared ``Content`` (the content of ``ds:Object``) for the same encrypted bytes, and refuse ``Element`` (``Encrypted data is malformed!``): upgrade the receivers before the senders.
-* **Decryption after verification.** A token is only decrypted once its digest, its signature, the trust in its certificate (see [Trust anchor](#trust-anchor)) and its algorithms have been verified. A token that fails one of these checks is never decrypted.
-* **One error for every decryption failure.** Whatever fails once the decryption starts (session key, data, parsing of the decrypted XML), ``getError()`` returns ``Token decryption failed!``, with no reason, no anomaly and no PHP warning. A distinct message per failure would let someone who can submit altered tokens tell which step failed, which is what padding oracle attacks need. Failures that do not depend on the encrypted content keep their own message (no decryption key, a key that cannot be loaded, a malformed ``xenc:EncryptedData``).
-* **RSA 1.5 is refused.** The key transport algorithm http://www.w3.org/2001/04/xmlenc#rsa-1_5 (PKCS #1 v1.5 padding) is accepted neither at creation nor at analysis, and no option allows it: whether the padding of a submitted session key is valid can be told from its decryption (Bleichenbacher's attack), depending on the OpenSSL version PHP is built with. ezxmldsig always used RSA-OAEP by default; tokens created with RSA 1.5 on purpose must be created again with RSA-OAEP.
-* **CBC is accepted only when declared.** AES-CBC and Triple DES CBC (``AES128_CBC``, ``AES192_CBC``, ``AES256_CBC``, ``TRIPLEDES_CBC``) have no integrity: altered data are decrypted all the same, and how the decrypted content fails can tell what the data hold (Jager and Somorovsky's attack on XML Encryption). Only the signature protects them, so that the decryption is the only obstacle left to a signer you trust who can submit altered tokens. An analysis decrypts a CBC token only if its option ``sessionKeyCipheringAlgorithm`` names this very algorithm, even when ``checkCryptingAlgorithms`` is ``FALSE``. Declare it only to read tokens of peers that cannot use AES-GCM yet:
+* **Decryption after verification.** A token is only decrypted once its digest, its signature, the trust in its certificate (see [Trust anchor](#trust-anchor)) and its algorithms have been verified.
+* **One error for every decryption failure.** Whatever fails once the decryption starts (session key, data, parsing of the decrypted XML), ``getError()`` returns ``Token decryption failed!``, with no reason, no anomaly and no PHP warning. Failures that do not depend on the encrypted content keep their own message (no decryption key, a key that cannot be loaded, a malformed ``xenc:EncryptedData``).
+* **RSA 1.5 is refused.** The key transport algorithm http://www.w3.org/2001/04/xmlenc#rsa-1_5 is accepted neither at creation nor at analysis, and no option allows it. ezxmldsig always used RSA-OAEP by default; tokens created with RSA 1.5 on purpose must be created again with RSA-OAEP.
+* **CBC is accepted only when declared.** AES-CBC and Triple DES CBC (``AES128_CBC``, ``AES192_CBC``, ``AES256_CBC``, ``TRIPLEDES_CBC``) have no integrity. An analysis decrypts a CBC token only if its option ``sessionKeyCipheringAlgorithm`` names this very algorithm, even when ``checkCryptingAlgorithms`` is ``FALSE``. Declare it only to read tokens of peers that cannot use AES-GCM yet:
 
   ```php
   $options = [
@@ -574,6 +504,8 @@ The token data are encrypted with a session key generated for each token, and th
   ];
   $token = XMLDSigToken::analyzeSecureXMLToken($sig, $cryptKey, $cryptKeyPassword, $options);
   ```
+
+What encryption protects and what it does not, and the attacks these choices stop (padding oracles, Bleichenbacher's attack on RSA 1.5, Jager and Somorovsky's attack on CBC): see [Encryption](https://webcoder31.github.io/ezxmldsig-doc/encryption/) on the documentation site.
 
 
 ### Interoperability
@@ -586,198 +518,20 @@ npm install @webcoder31/ezxmldsig
 
 See its [README](https://github.com/webcoder31/ezxmldsig-js#readme) and its [API documentation](https://webcoder31.github.io/ezxmldsig-js/). A token created by either library is valid for the other, signed or encrypted, with every algorithm and option both share. Its tests check it against this library under PHP 7.4 and 8.3, and replay the attack lab of the [demo](#demo): every forged token gets the same verdict from both. The few cases where they differ are listed in its README (section "Differences with the PHP library"); those that came from defects of version 1.2.0 of this library (keys that are not RSA keys, values holding ``&`` without base64, certificates dated from 2050 on) are fixed in 1.2.1.
 
-**With other libraries.** A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check the exact format below. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways: their tokens are analyzed by this library, and they read its tokens. The tests of the Node.js version of this library create and read tokens with them the way the two examples below do.
+**With other libraries.** A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check its exact format. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways. The format of a token, element by element, and the code that creates and reads one with these libraries: see [Interoperability](https://webcoder31.github.io/ezxmldsig-doc/interoperability/) on the documentation site.
 
-**The format of a token.** An enveloping signature: ``ds:Signature`` is the document element, and its ``ds:Object Id="Token"`` holds the node ``Token``, referenced by ``URI="#Token"``. Inclusive canonicalization (http://www.w3.org/TR/2001/REC-xml-c14n-20010315) for ``ds:SignedInfo`` and as the only transform, RSA-SHA256 and an SHA-256 digest by default (see [Options](#options)), and the signing certificate in ``ds:KeyInfo/ds:X509Data/ds:X509Certificate``. The node ``Token`` holds, in this order:
+These libraries only verify a signature, with the key they are given, and only decrypt: a receiver that uses them directly must make all the other checks of ``isSignatureValid()`` itself.
 
-* ``TokenTimestamp``: the date of creation, in UTC, as ``2026-10-21T18:30:07Z``;
-* ``TokenId``: 16 random bytes, in 32 lowercase hexadecimal characters;
-* ``TokenExpiry`` (optional): the date after which the token is out of date, in the same format;
-* ``TokenAudience`` (optional): one node per audience;
-* ``TokenData``: the data, a node per key, nested for nested arrays, each value encoded in Base64 and marked ``Algorithm="base64"``.
-
-Encrypted, the node ``Token`` is replaced by an ``xenc:EncryptedData`` of type http://www.w3.org/2001/04/xmlenc#Element (``Content`` is read as well, see [Encryption](#encryption)), encrypted with AES-256-GCM, its session key encrypted with RSA-OAEP (http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p) and held in its ``ds:KeyInfo``.
-
-**Creating a token in Node.js.** xml-crypto places a signature inside an existing document: sign in a throwaway root, then keep the signature alone, as the document element.
-
-```js
-import fs from 'node:fs';
-import crypto from 'node:crypto';
-import { SignedXml } from 'xml-crypto';
-import xmlenc from 'xml-encryption';
-import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
-
-const C14N = 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
-const date = (d) => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
-const b64 = (s) => Buffer.from(s, 'utf8').toString('base64');
-
-const now = new Date();
-let token = '<Token>'
-  + '<TokenTimestamp>' + date(now) + '</TokenTimestamp>'
-  + '<TokenId>' + crypto.randomBytes(16).toString('hex') + '</TokenId>'
-  + '<TokenExpiry>' + date(new Date(now.getTime() + 300e3)) + '</TokenExpiry>'
-  + '<TokenAudience>receiver</TokenAudience>'
-  + '<TokenData><name Algorithm="base64">' + b64('Ragnar Lothbrok') + '</name></TokenData>'
-  + '</Token>';
-
-// Optional: encrypt it for the recipient.
-token = await new Promise((resolve, reject) => xmlenc.encrypt(token, {
-  rsa_pub: fs.readFileSync('crypt.cert.pem'),
-  pem: fs.readFileSync('crypt.cert.pem'),
-  encryptionAlgorithm: 'http://www.w3.org/2009/xmlenc11#aes256-gcm',
-  keyEncryptionAlgorithm: 'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p',
-}, (err, result) => err ? reject(err) : resolve(result)));
-
-const sig = new SignedXml({
-  privateKey: fs.readFileSync('sign.key.pem'), // without password
-  publicCert: fs.readFileSync('sign.cert.pem'),
-  canonicalizationAlgorithm: C14N,
-  signatureAlgorithm: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
-  objects: [{ content: token, attributes: { Id: 'Token' } }],
-});
-sig.addReference({
-  xpath: "//*[@Id='Token']",
-  digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
-  transforms: [C14N],
-});
-sig.computeSignature('<root/>', { prefix: 'ds' });
-
-const doc = new DOMParser().parseFromString(sig.getSignedXml(), 'text/xml');
-const xml = '<?xml version="1.0"?>\n' + new XMLSerializer().serializeToString(doc.documentElement.firstChild);
-```
-
-``analyzeXMLToken($xml, $options)`` (or ``analyzeSecureXMLToken()``) then checks it as any token of this library.
-
-**Reading a token in Node.js.** xml-crypto only verifies the signature, with the key it is given, and xml-encryption only decrypts. Read the data from the content the signature covers, never from the document received, or a forged ``Token`` placed elsewhere in it would be read (signature wrapping):
-
-```js
-import fs from 'node:fs';
-import { SignedXml } from 'xml-crypto';
-import xmlenc from 'xml-encryption';
-import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
-
-// The first child element of a node: whitespace may come before it.
-const firstElement = (node) => {
-  for (let child = node.firstChild; child; child = child.nextSibling) {
-    if (child.nodeType === 1) return child;
-  }
-  return null;
-};
-
-const doc = new DOMParser().parseFromString(xml, 'text/xml');
-const sig = new SignedXml({ publicCert: fs.readFileSync('sign.cert.pem') });
-sig.loadSignature(doc.documentElement);
-if (!sig.checkSignature(xml)) {
-  throw new Error('Invalid signature');
-}
-const [signed] = sig.getSignedReferences(); // the canonical ds:Object
-let content = firstElement(new DOMParser().parseFromString(signed, 'text/xml').documentElement);
-
-// An encrypted token: decrypt the xenc:EncryptedData the signature covers.
-if (content.localName === 'EncryptedData') {
-  const plain = await new Promise((resolve, reject) => xmlenc.decrypt(
-    new XMLSerializer().serializeToString(content),
-    { key: fs.readFileSync('crypt.key.pem') }, // without password
-    (err, result) => err ? reject(err) : resolve(result)));
-  content = new DOMParser().parseFromString(plain, 'text/xml').documentElement;
-}
-// content is the node Token.
-```
-
-The rest is left to the receiver, which ``isSignatureValid()`` does here: refuse a document type declaration; check the algorithms; trust the signing certificate (its chain up to your CA, its validity, its subject), not only the key it holds; check the structure of ``Token``, the format of ``TokenTimestamp`` and ``TokenId``, and the audience against its own; then, as with this library, the time to live, the expiry and the replay of the identifier (see [Replay](#replay) and [Audience and expiry](#audience-and-expiry)).
 
 ### Certificates and keys
 
-A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signature algorithms are RSA ones and the session key is encrypted with RSA-OAEP, so EC and DSA keys are not supported. A signing key of another type is refused: at creation (``The signing key is not an RSA key``), and at analysis, where the signature of a certificate whose key is not an RSA key is not verified (``Token hash signature verification failed!``).
+A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signing certificate of the sender, the CA certificates the recipient trusts (``caCertPath``), and, for encrypted tokens, the encryption certificate of the recipient. EC and DSA keys are not supported. A signing key of another type is refused: at creation (``The signing key is not an RSA key``), and at analysis, where the signature of a certificate whose key is not an RSA key is not verified (``Token hash signature verification failed!``).
 
-| Certificate | Who holds the private key | Who needs the certificate | Required |
-|---|---|---|---|
-| Signing certificate | The sender, to sign | The sender (it is copied into each token); the recipient when it pins it (``signerCertPath``) | Always |
-| CA certificates | The CA that issues the signing certificate | The recipient (``caCertPath``) | Unless the signing certificate is pinned |
-| Encryption certificate | The recipient, to decrypt | The sender, to encrypt | For encrypted tokens only |
+The signing certificate must be valid at the current date and, if it has a ``keyUsage`` extension, allow ``digitalSignature`` or ``nonRepudiation``. With ``caCertPath``, OpenSSL also checks every certificate of the chain: validity dates, signature, and, for each issuer, ``basicConstraints`` with ``CA:TRUE`` and a ``keyUsage`` that allows ``keyCertSign`` (see [Trust anchor](#trust-anchor)).
 
-**What the library checks.** The signing certificate must be valid at the current date and, if it has a ``keyUsage`` extension, allow ``digitalSignature`` or ``nonRepudiation``. With ``caCertPath``, OpenSSL also checks every certificate of the chain: validity dates, signature, and, for each issuer, ``basicConstraints`` with ``CA:TRUE`` and a ``keyUsage`` that allows ``keyCertSign`` (see [Trust anchor](#trust-anchor)). The encryption certificate is not checked: give it a ``keyUsage`` that allows ``keyEncipherment`` all the same. Use keys of 2048 bits at least; the library does not enforce a size.
+``expectedSubject`` takes the fields of the subject as an array, ``['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']``; a field repeated in the subject (two ``OU``, for instance) is an array of its values in ``getCertSubject()``. A private key protected by a password is read with that password (``$signKeyPassword``, ``$cryptKeyPassword``). ``bin/gen-test-certs`` creates the certificates of the tests and of the demo.
 
-**The subject fields.** The subject of a certificate is a Distinguished Name made of fields. The library requires none of them, but the recipient can only tell the expected sender from the other holders of certificates of the same CA by these fields, with ``expectedSubject``:
-
-| Field | Name | Usual content |
-|---|---|---|
-| ``C`` | Country | Two-letter country code (``DK``) |
-| ``ST`` | State or province | Region (``Jylland``) |
-| ``L`` | Locality | City (``Kattegat``) |
-| ``O`` | Organization | Legal name of the organization (``Lothbrok Ltd``) |
-| ``OU`` | Organizational unit | Department or service within the organization (``Signature Dept``) |
-| ``CN`` | Common name | Name of the certificate holder: a person, a service or a host name (``www.lothbrok.dk``) |
-| ``emailAddress`` | Email address | Contact address (``ivar@lothbrok.dk``) |
-
-``O`` and ``OU`` are the fields the recipient usually checks: ``['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']`` accepts the certificates of this department of this organization, and those only. Give each sender a subject that sets it apart from the other holders of certificates of the same CA (a distinct ``OU`` or ``CN``), and use the same values, character case included, in the certificate and in ``expectedSubject``. A field repeated in the subject (two ``OU``, for instance) is an array of its values in ``getCertSubject()``.
-
-**Creating them with OpenSSL.** The commands below create a root CA, an intermediate CA issued by the root, a signing certificate and an encryption certificate issued by the intermediate CA, valid for 2 years. Adapt the subjects and the durations, and keep the private keys out of any repository. The extensions go into a file, here ``ext.cnf``:
-
-```ini
-[root]
-basicConstraints = critical, CA:TRUE
-keyUsage = critical, keyCertSign, cRLSign
-subjectKeyIdentifier = hash
-
-[intermediate]
-basicConstraints = critical, CA:TRUE, pathlen:0
-keyUsage = critical, keyCertSign, cRLSign
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid
-
-[sign]
-basicConstraints = CA:FALSE
-keyUsage = critical, digitalSignature, nonRepudiation
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid
-
-[crypt]
-basicConstraints = CA:FALSE
-keyUsage = critical, keyEncipherment, dataEncipherment
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid
-```
-
-```sh
-# Root CA: a self-signed certificate.
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out root.key.pem
-openssl req -new -x509 -sha256 -days 730 -key root.key.pem \
-    -subj "/C=DK/O=Lothbrok Ltd/CN=Lothbrok Root CA" \
-    -config ext.cnf -extensions root -out root.cert.pem
-
-# Intermediate CA, issued by the root.
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out intermediate.key.pem
-openssl req -new -key intermediate.key.pem \
-    -subj "/C=DK/O=Lothbrok Ltd/CN=Lothbrok Intermediate CA" -out intermediate.csr
-openssl x509 -req -in intermediate.csr -sha256 -days 730 \
-    -CA root.cert.pem -CAkey root.key.pem -CAcreateserial \
-    -extfile ext.cnf -extensions intermediate -out intermediate.cert.pem
-
-# Signing certificate of the sender, with a key protected by a password
-# (the $signKeyPassword argument of the library).
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 \
-    -aes-256-cbc -pass pass:signKeyPassword -out sign.key.pem
-openssl req -new -key sign.key.pem -passin pass:signKeyPassword \
-    -subj "/C=DK/O=Lothbrok Ltd/OU=Signature Dept/CN=www.lothbrok.dk" -out sign.csr
-openssl x509 -req -in sign.csr -sha256 -days 730 \
-    -CA intermediate.cert.pem -CAkey intermediate.key.pem -CAcreateserial \
-    -extfile ext.cnf -extensions sign -out sign.cert.pem
-
-# Encryption certificate of the recipient.
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 \
-    -aes-256-cbc -pass pass:cryptKeyPassword -out crypt.key.pem
-openssl req -new -key crypt.key.pem -passin pass:cryptKeyPassword \
-    -subj "/C=DK/O=Lothbrok Ltd/OU=Cryptography Dept/CN=www.lothbrok.dk" -out crypt.csr
-openssl x509 -req -in crypt.csr -sha256 -days 730 \
-    -CA intermediate.cert.pem -CAkey intermediate.key.pem -CAcreateserial \
-    -extfile ext.cnf -extensions crypt -out crypt.cert.pem
-
-# Check the chains.
-openssl verify -CAfile root.cert.pem -untrusted intermediate.cert.pem sign.cert.pem crypt.cert.pem
-```
-
-The recipient then trusts the sender with ``'caCertPath' => ['intermediate.cert.pem', 'root.cert.pem']`` and ``'expectedSubject' => ['O' => 'Lothbrok Ltd', 'OU' => 'Signature Dept']``. Without a CA, a self-signed signing certificate pinned by the recipient (``signerCertPath``) is enough: create it like the root above, with the extensions of ``[sign]``. ``bin/gen-test-certs`` creates the certificates of the tests and of the demo the same way.
+Who holds which key, what is checked, the fields of a subject, and the OpenSSL commands that create a root CA, an intermediate CA, a signing and an encryption certificate: see [Certificates and keys](https://webcoder31.github.io/ezxmldsig-doc/certificates/) on the documentation site.
 
 
 ### Options

@@ -1,5 +1,13 @@
 Unreleased
 ----------
+- The concepts common to the PHP and Node.js libraries move to the
+  documentation site, https://webcoder31.github.io/ezxmldsig-doc/: why
+  they exist, how a token works, a single sign-on, the duties of the
+  receiver, encryption, certificates and keys, interoperability. The
+  README keeps what is particular to the PHP library, a summary of each
+  moved section and the warnings a receiver needs: the trust anchor
+  restricted to the sender, freshness and replay left to the receiver,
+  revocation not checked.
 - The repository is renamed ezxmldsig-php, beside ezxmldsig-js:
   https://github.com/webcoder31/ezxmldsig-php. The Composer package keeps
   its name, webcoder31/ezxmldsig, and GitHub redirects the former address.
