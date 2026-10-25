@@ -4,7 +4,7 @@
 
 Report a vulnerability privately, never in a public issue, pull request or discussion: until a fix is published, a public report lets anyone exploit it.
 
-Use the private vulnerability reporting of GitHub on the repository [webcoder31/ezxmldsig](https://github.com/webcoder31/ezxmldsig): open the tab **Security**, then **Report a vulnerability** ([direct link](https://github.com/webcoder31/ezxmldsig/security/advisories/new)). Only the maintainers of the repository see the report.
+Use the private vulnerability reporting of GitHub on the repository [webcoder31/ezxmldsig-php](https://github.com/webcoder31/ezxmldsig-php): open the tab **Security**, then **Report a vulnerability** ([direct link](https://github.com/webcoder31/ezxmldsig-php/security/advisories/new)). Only the maintainers of the repository see the report.
 
 Describe in the report:
 

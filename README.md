@@ -61,7 +61,7 @@ To stay on the 1.x versions (no backward-incompatible change), pin the major ver
 php composer.phar require "webcoder31/ezxmldsig:^1.0"
 ```
 
-You can also clone it (or download it as a ZIP archive) from its [GitHub repository](https://github.com/webcoder31/ezxmldsig.git) and load it the way you want in your project. In this case, you will have to do the same from the [**xmlseclibs** GitHub repository](https://github.com/robrichards/xmlseclibs) of Rob Richards.
+You can also clone it (or download it as a ZIP archive) from its [GitHub repository](https://github.com/webcoder31/ezxmldsig-php.git) and load it the way you want in your project. In this case, you will have to do the same from the [**xmlseclibs** GitHub repository](https://github.com/robrichards/xmlseclibs) of Rob Richards.
 
 
 ## What's in the box?
@@ -864,7 +864,7 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 An interactive demo is online at **https://ezxmldsig.wbcdr.dev/**: nothing to install, and each visitor has a replay memory of their own. It also runs on your machine, which requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
 
 ```
-git clone https://github.com/webcoder31/ezxmldsig.git
+git clone https://github.com/webcoder31/ezxmldsig-php.git
 cd ezxmldsig
 bin/demo          # http://127.0.0.1:8080/
 bin/demo 9000     # another port (or DEMO_PORT=9000)
@@ -900,7 +900,7 @@ The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `
 A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **IDP**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **MAIL** and **CRM**, which have no password and trust the tokens of IDP. It is online at **https://sso.wbcdr.dev/**, each visitor with sessions, a trace and protections of their own. It also runs on your machine, with the same requirements as the [demo](#demo); browsers resolve `*.localhost` to the local machine.
 
 ```
-git clone https://github.com/webcoder31/ezxmldsig.git
+git clone https://github.com/webcoder31/ezxmldsig-php.git
 cd ezxmldsig
 bin/demo-sso          # http://localhost:8090/
 bin/demo-sso 9090     # another port (or DEMO_SSO_PORT=9090)
@@ -951,7 +951,7 @@ The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, a
 
 ## Documentation
 
-Online documentation is available here: [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig/).
+Online documentation is available here: [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig-php/).
 
 This site is published by GitHub Pages from the `docs/` directory of the branch `master` (home page: `docs/index.html`). Its pages are generated from the docblocks of `src/` by [ApiGen](https://github.com/ApiGen/ApiGen), in Docker: run `bin/gen-docs` after changing a docblock, and commit `docs/` with the code.
 
@@ -969,5 +969,5 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md): report it privately, 
 
 ## How to Contribute?
 
-* [Open Issues](https://github.com/webcoder31/ezxmldsig/issues)
-* [Open Pull Requests](https://github.com/webcoder31/ezxmldsig/pulls)
+* [Open Issues](https://github.com/webcoder31/ezxmldsig-php/issues)
+* [Open Pull Requests](https://github.com/webcoder31/ezxmldsig-php/pulls)

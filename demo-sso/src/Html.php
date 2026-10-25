@@ -30,7 +30,7 @@ final class Html
     ];
 
     /** The repository of the library, linked from the top bar. */
-    const REPOSITORY = 'https://github.com/webcoder31/ezxmldsig';
+    const REPOSITORY = 'https://github.com/webcoder31/ezxmldsig-php';
 
     /** The banner of each site: its icon (inline SVG, drawn in the colour
     of the site), and what it is. */

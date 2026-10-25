@@ -13,7 +13,7 @@
     "xmldsig",
     "xmlseclibs"
   ],
-  "homepage": "https://github.com/webcoder31/ezxmldsig",
+  "homepage": "https://github.com/webcoder31/ezxmldsig-php",
   "authors": [
     {
       "name": "Thierry Thiers",

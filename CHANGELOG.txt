@@ -1,5 +1,10 @@
 Unreleased
 ----------
+- The repository is renamed ezxmldsig-php, beside ezxmldsig-js:
+  https://github.com/webcoder31/ezxmldsig-php. The Composer package keeps
+  its name, webcoder31/ezxmldsig, and GitHub redirects the former address.
+  The online API documentation moves to
+  https://webcoder31.github.io/ezxmldsig-php/.
 - The README points to the Node.js version of the library,
   @webcoder31/ezxmldsig on npm, which creates and verifies the same tokens
   with the same checks: in its introduction, as the way to mix PHP and

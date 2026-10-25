@@ -231,7 +231,7 @@ class DemoApiTest extends TestCase
             // The SVG namespace is a name, not a resource; the links to the
             // repository and to the packages are followed by a click, not
             // loaded by the page.
-            $source = str_replace(['http://www.w3.org/2000/svg', 'href="https://github.com/webcoder31/ezxmldsig"', 'href="https://packagist.org/packages/webcoder31/ezxmldsig"', 'href="https://www.npmjs.com/package/@webcoder31/ezxmldsig"'], '', self::publicFile($name));
+            $source = str_replace(['http://www.w3.org/2000/svg', 'href="https://github.com/webcoder31/ezxmldsig-php"', 'href="https://packagist.org/packages/webcoder31/ezxmldsig"', 'href="https://www.npmjs.com/package/@webcoder31/ezxmldsig"'], '', self::publicFile($name));
             $this->assertDoesNotMatchRegularExpression('#https?://|//[a-z0-9.-]+\.[a-z]{2,}/|@import#i', $source, $name);
         }
 

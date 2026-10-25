@@ -15,7 +15,7 @@ use webcoder31\ezxmldsig\XMLDSigToken;
  */
 final class AttackLab
 {
-    const ADVISORY_URL = 'https://github.com/webcoder31/ezxmldsig/security/advisories/';
+    const ADVISORY_URL = 'https://github.com/webcoder31/ezxmldsig-php/security/advisories/';
 
     /**
      * The attacks. Each one has:
