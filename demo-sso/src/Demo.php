@@ -200,31 +200,41 @@ final class Demo
     }
 
     /**
-     * The illustration of the home page: the user opens MAIL, which has no
-     * session and asks IDP; IDP does not know them yet, so they log in on
+     * The illustration of the home page, where every request and token
+     * goes through the browser (the user), as in the demo: no site calls
+     * another. The dashed links are the trust set up beforehand: each
+     * application trusts the certificate IDP signs with, and IDP knows the
+     * return address of each application. Each goes round the corner, so
+     * that the user does not seem to walk along it. The user opens MAIL, which has no session and sends them to
+     * IDP with its request; IDP does not know them yet, so they log in on
      * IDP, which signs a token for MAIL, and carry it to MAIL, which accepts
-     * it and opens its session. They open CRM, which asks IDP; IDP knows
-     * them now, asks for no password, and returns a token for CRM, which CRM
-     * accepts. Animated by the .sso-art rules of sso.css.
+     * it and opens its session. They open CRM, whose request the browser
+     * carries to IDP at once; IDP knows them now, asks for no password, and
+     * the browser carries the token for CRM back to CRM, which accepts it.
+     * IDP shows the password typed, then that it asks for none, in its own
+     * box, which widens to hold it. Animated by the .sso-art rules of
+     * sso.css.
      */
-    const HERO_ART = '<svg class="sso-art" viewBox="0 0 360 210" focusable="false">'
-        . '<path class="sa-link" d="M180 56L56 140M180 56L304 140"/>'
-        . '<g class="sa-site sa-idp"><rect x="140" y="12" width="80" height="44" rx="9"/><text x="180" y="38">IDP</text></g>'
-        . '<g class="sa-site sa-mail"><rect x="16" y="140" width="80" height="44" rx="9"/><text x="56" y="166">MAIL</text></g>'
-        . '<g class="sa-site sa-crm"><rect x="264" y="140" width="80" height="44" rx="9"/><text x="304" y="166">CRM</text></g>'
-        . '<g class="sa-session sa-idp-session"><rect x="82" y="26" width="50" height="16" rx="8"/><text x="107" y="37">session</text></g>'
-        . '<g class="sa-session sa-mail-session"><rect x="31" y="190" width="50" height="16" rx="8"/><text x="56" y="201">session</text></g>'
-        . '<g class="sa-session sa-crm-session"><rect x="279" y="190" width="50" height="16" rx="8"/><text x="304" y="201">session</text></g>'
-        . '<g class="sa-panel sa-login"><rect x="230" y="14" width="112" height="40" rx="7"/><text class="sa-caption" x="240" y="29">password</text><rect class="sa-field" x="240" y="34" width="92" height="14" rx="3"/><circle class="sa-d1" cx="250" cy="41" r="2.4"/><circle class="sa-d2" cx="259" cy="41" r="2.4"/><circle class="sa-d3" cx="268" cy="41" r="2.4"/><circle class="sa-d4" cx="277" cy="41" r="2.4"/><circle class="sa-d5" cx="286" cy="41" r="2.4"/></g>'
-        . '<g class="sa-panel sa-sso"><rect x="230" y="14" width="112" height="40" rx="7"/><text x="286" y="30">already logged in</text><text class="sa-caption" x="286" y="44">no password asked</text></g>'
-        . '<g class="sa-badge sa-ask sa-mail-ask"><circle cx="92" cy="140" r="9"/><text x="92" y="144">?</text></g>'
-        . '<g class="sa-badge sa-ask sa-crm-ask"><circle cx="340" cy="140" r="9"/><text x="340" y="144">?</text></g>'
-        . '<g class="sa-badge sa-ok sa-mail-ok"><circle cx="92" cy="140" r="9"/><path d="M88 140l3 3 6-6"/></g>'
-        . '<g class="sa-badge sa-ok sa-crm-ok"><circle cx="340" cy="140" r="9"/><path d="M336 140l3 3 6-6"/></g>'
+    const HERO_ART = '<svg class="sso-art" viewBox="0 -14 360 210" focusable="false">'
+        . '<path class="sa-link" d="M140 34H56V110M220 34H304V110"/>'
+        . '<g class="sa-trust" transform="translate(56 72)"><circle r="9"/><path d="M-2.2 -1v-1.8a2.2 2.2 0 0 1 4.4 0V-1"/><rect x="-3.6" y="-1" width="7.2" height="5.6" rx="1"/></g>'
+        . '<g class="sa-trust" transform="translate(304 72)"><circle r="9"/><path d="M-2.2 -1v-1.8a2.2 2.2 0 0 1 4.4 0V-1"/><rect x="-3.6" y="-1" width="7.2" height="5.6" rx="1"/></g>'
+        . '<g class="sa-legend"><path d="M69 190H87"/><text x="93" y="193">trust, set up beforehand via certificates</text></g>'
+        . '<g class="sa-site sa-idp"><rect class="sa-idp-box" x="140" y="12" width="80" height="44" rx="9" vector-effect="non-scaling-stroke"/><text class="sa-idp-name" x="180" y="38">IDP</text></g>'
+        . '<g class="sa-site sa-mail"><rect x="16" y="110" width="80" height="44" rx="9"/><text x="56" y="136">MAIL</text></g>'
+        . '<g class="sa-site sa-crm"><rect x="264" y="110" width="80" height="44" rx="9"/><text x="304" y="136">CRM</text></g>'
+        . '<g class="sa-session sa-idp-session"><rect x="155" y="-10" width="50" height="16" rx="8"/><text x="180" y="1">session</text></g>'
+        . '<g class="sa-session sa-mail-session"><rect x="31" y="160" width="50" height="16" rx="8"/><text x="56" y="171">session</text></g>'
+        . '<g class="sa-session sa-crm-session"><rect x="279" y="160" width="50" height="16" rx="8"/><text x="304" y="171">session</text></g>'
+        . '<g class="sa-panel sa-login"><text class="sa-caption" x="137" y="27">password</text><rect class="sa-field" x="137" y="32" width="86" height="14" rx="3"/><circle class="sa-d1" cx="147" cy="39" r="2.4"/><circle class="sa-d2" cx="156" cy="39" r="2.4"/><circle class="sa-d3" cx="165" cy="39" r="2.4"/><circle class="sa-d4" cx="174" cy="39" r="2.4"/><circle class="sa-d5" cx="183" cy="39" r="2.4"/></g>'
+        . '<g class="sa-panel sa-sso"><text x="180" y="31">already logged in</text><text class="sa-caption" x="180" y="45">no password asked</text></g>'
+        . '<g class="sa-badge sa-ask sa-mail-ask"><circle cx="92" cy="110" r="9"/><text x="92" y="114">?</text></g>'
+        . '<g class="sa-badge sa-ask sa-crm-ask"><circle cx="340" cy="110" r="9"/><text x="340" y="114">?</text></g>'
+        . '<g class="sa-badge sa-ok sa-mail-ok"><circle cx="92" cy="110" r="9"/><path d="M88 110l3 3 6-6"/></g>'
+        . '<g class="sa-badge sa-ok sa-crm-ok"><circle cx="340" cy="110" r="9"/><path d="M336 110l3 3 6-6"/></g>'
         . '<g class="sa-user"><circle cx="0" cy="-7" r="5"/><path d="M-8 7a8 7 0 0 1 16 0z"/></g>'
         . '<g class="sa-token sa-tok-mail"><rect x="-17" y="-9" width="34" height="18" rx="4"/><text x="-4" y="3">MAIL</text><circle cx="11" cy="0" r="3"/></g>'
         . '<g class="sa-request sa-req-mail"><rect x="-11" y="-9" width="22" height="18" rx="4"/><text x="0" y="4">?</text></g>'
-        . '<g class="sa-request sa-reply"><rect x="-11" y="-9" width="22" height="18" rx="4"/><text x="0" y="4">x</text></g>'
         . '<g class="sa-request sa-req-crm"><rect x="-11" y="-9" width="22" height="18" rx="4"/><text x="0" y="4">?</text></g>'
         . '<g class="sa-token sa-tok-crm"><rect x="-17" y="-9" width="34" height="18" rx="4"/><text x="-4" y="3">CRM</text><circle cx="11" cy="0" r="3"/></g>'
         . '</svg>';

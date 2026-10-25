@@ -9,10 +9,13 @@ Unreleased
   their title: in the token demo, a token signed, verified and accepted,
   then altered and signed again with the key and certificate of an
   attacker, and refused at the trust in its certificate; in the single
-  sign-on demo, MAIL asking IDP, which does not know the user yet, the
-  user logging in on IDP and carrying the token IDP signs to MAIL; then
-  CRM asking IDP, which knows them now and returns a token for CRM without
-  a new login. Inline SVG animated by CSS, decorative (hidden from
+  sign-on demo, MAIL sending the user to IDP with its request, the user
+  logging in on IDP and carrying the token IDP signs to MAIL; then the
+  browser carrying the request of CRM to IDP, which knows the user now, and
+  the token for CRM back to CRM, without a new login. Every request and
+  token goes through the browser, as in the demo; dashed links, with a
+  padlock and a legend, stand for the trust set up beforehand between IDP
+  and each application. Inline SVG animated by CSS, decorative (hidden from
   screen readers), still when the system asks for reduced motion, and hidden
   where the page leaves it no room.
 - The single sign-on demo has the theme button of the token demo
