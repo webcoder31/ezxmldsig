@@ -865,7 +865,7 @@ An interactive demo is online at **https://ezxmldsig.wbcdr.dev/**: nothing to in
 
 ```
 git clone https://github.com/webcoder31/ezxmldsig-php.git
-cd ezxmldsig
+cd ezxmldsig-php
 bin/demo          # http://127.0.0.1:8080/
 bin/demo 9000     # another port (or DEMO_PORT=9000)
 ```
@@ -901,7 +901,7 @@ A second demo plays a single sign-on with ezxmldsig tokens, between three sites 
 
 ```
 git clone https://github.com/webcoder31/ezxmldsig-php.git
-cd ezxmldsig
+cd ezxmldsig-php
 bin/demo-sso          # http://localhost:8090/
 bin/demo-sso 9090     # another port (or DEMO_SSO_PORT=9090)
 ```
