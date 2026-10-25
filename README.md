@@ -1,12 +1,14 @@
 # EZXMLDSIG: Signed and encrypted XML tokens for PHP
 
+> **Documentation: [webcoder31.github.io/ezxmldsig-doc](https://webcoder31.github.io/ezxmldsig-doc/)**
+>
+> Why ezxmldsig exists, how a token works, a single sign-on, the duties of the receiver, encryption, certificates and keys, interoperability: the concepts common to the PHP and Node.js libraries are explained there. This README covers what is particular to the PHP library.
+
 Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** creates and verifies XML tokens: enveloping XML digital signatures that carry timestamped user data (a PHP associative array), optionally encrypted. Use them for token based authentication, Single Sign On, or to transmit data whose integrity and origin, and confidentiality when they are encrypted, are protected by the token itself.
 
 The library signs its own tokens only. It does not sign existing XML documents in place, parts of them, or external files: for these, use **xmlseclibs** directly, or a format designed for document signatures such as XAdES or PAdES.
 
 The library exists for Node.js too: [**@webcoder31/ezxmldsig**](https://www.npmjs.com/package/@webcoder31/ezxmldsig) creates and verifies the same tokens, with the same options and the same checks, so that a single sign-on can mix PHP and Node.js nodes. Both read each other's tokens, signed or encrypted, which the tests of the Node.js library check against this one. The tokens being standard XML digital signatures and XML Encryption, other libraries can also create and read them, such as **xml-crypto** and **xml-encryption** for Node.js, provided the receiver makes the checks **ezxmldsig** makes besides the signature: see [Interoperability](#interoperability).
-
-The concepts common to both libraries are explained on the **documentation site**, https://webcoder31.github.io/ezxmldsig-doc/: why they exist, how a token works, a single sign-on, the duties of the receiver, encryption, certificates and keys, interoperability. This README keeps what is particular to the PHP library.
 
 The author of the **ezxmldsig** library is Thierry Thiers.
 
@@ -626,7 +628,7 @@ bin/demo 9000     # another port (or DEMO_PORT=9000)
 
 The script first brings `vendor/` in line with `composer.json` with `bin/deps` (as `bin/test` does, see [Tests](#tests)), runs the PHP built-in web server in the official `php:8.3-cli` image, publishes it on `127.0.0.1` only, and opens the page in the browser when it can (`DEMO_NO_BROWSER=1` skips it). Ctrl-C stops it.
 
-![The demo: its animated illustration of a token verified and accepted, the issuer, and the annotated token with the block SignedInfo selected](demo/screenshot.png)
+![The demo: its animated illustration of a token verified and accepted, the issuer, and the annotated token with the block SignedInfo selected](https://webcoder31.github.io/ezxmldsig-doc/assets/screenshots/token-lab.png)
 
 Every token of the demo is created and analyzed by the library, in PHP; the page only displays them:
 
@@ -665,7 +667,7 @@ bin/demo-sso 9090     # another port (or DEMO_SSO_PORT=9090)
 3. MAIL verifies the token: the checks of the library (`isSignatureValid()`: signature, trust in the certificate of IDP, audience), then its own (freshness, replay). It opens its own session.
 4. Open `http://crm.localhost:8090/`: IDP recognizes the user by its own session cookie and signs a token for CRM, without asking for the password again. That is single sign-on.
 
-![The single sign-on demo: its home page, with its animated illustration of the flow, and the trace of a login on MAIL then of CRM entered without a new login](demo-sso/screenshot.png)
+![The single sign-on demo: its home page, with its animated illustration of the flow, and the trace of a login on MAIL then of CRM entered without a new login](https://webcoder31.github.io/ezxmldsig-doc/assets/screenshots/single-sign-on.png)
 
 The pages show what the library checks and what each application checks itself, the cookies of each site (each site has its own: a cookie is sent to the host that set it), and the trace of the flow: each hop between the browser, IDP, MAIL and CRM, with each token and each check.
 

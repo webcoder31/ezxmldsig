@@ -7,8 +7,6 @@
 !demo/
 !demo-sso/
 demo/var
-demo/screenshot.png
 demo/Dockerfile
 demo-sso/var
-demo-sso/screenshot.png
 demo-sso/Dockerfile
