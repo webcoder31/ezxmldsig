@@ -709,7 +709,7 @@ The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, a
 
 Online documentation is available here: [EZXMLDSIG Documentation](https://webcoder31.github.io/ezxmldsig-php/).
 
-This site is published by GitHub Pages from the `docs/` directory of the branch `master` (home page: `docs/index.html`). Its pages are generated from the docblocks of `src/` by [ApiGen](https://github.com/ApiGen/ApiGen), in Docker: run `bin/gen-docs` after changing a docblock, and commit `docs/` with the code.
+This site is published by GitHub Pages from the `docs/` directory of the branch `main` (home page: `docs/index.html`). Its pages are generated from the docblocks of `src/` by [ApiGen](https://github.com/ApiGen/ApiGen), in Docker: run `bin/gen-docs` after changing a docblock, and commit `docs/` with the code.
 
 ```
 bin/gen-docs

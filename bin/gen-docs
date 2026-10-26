@@ -5,7 +5,7 @@
 # Usage:
 #   bin/gen-docs
 #
-# docs/ is the source of the GitHub Pages site of the project (branch master,
+# docs/ is the source of the GitHub Pages site of the project (branch main,
 # folder /docs): its home page is docs/index.html. It only holds generated
 # files: it is replaced as a whole, so that the pages of removed classes or
 # methods do not remain.
