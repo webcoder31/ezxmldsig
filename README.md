@@ -87,7 +87,7 @@ The token protects its own content only: not the request that carries it (URL, h
 
 A signature proves that the data of a token were not changed; what matters most is to prove **who issued it**. A receiver accepts a token only if its signing certificate descends, through a chain of trust, from the CA certificates it declares and, when it asks for it, has the subject it expects or is the very certificate it pinned (see [Trust anchor](#trust-anchor)).
 
-**Revocation is not checked**: the library consults neither certificate revocation lists (CRL) nor OCSP responders, so a revoked certificate is accepted until it expires. To stop trusting a compromised CA, remove it from ``caCertPath``; to stop trusting a compromised signing certificate, remove its issuing CA as well, or pin the certificate that replaces it with ``signerCertPath``.
+**Revocation is not checked**: the library consults neither certificate revocation lists (CRL) nor OCSP responders, so a revoked certificate is accepted until it expires. What to do when a key leaks, signing key, CA key or decryption key: see [When a key is compromised](https://webcoder31.github.io/ezxmldsig-doc/certificates/#when-a-key-is-compromised) on the documentation site.
 
 The chain of trust, a root of a company's own for an internal single sign-on, and why this library exists: see [Why?](https://webcoder31.github.io/ezxmldsig-doc/why/) on the documentation site.
 
