@@ -1,5 +1,9 @@
-Unreleased
-----------
+2.1.0 (2026-10-28)
+-------------------
+In short: the seals of files come to PHP, as experimental. They are those of
+the Node.js library 2.0.0, which each library verifies for the other. Nothing
+changes for the tokens, nor for the existing methods.
+
 - The seals of files, experimental: webcoder31\ezxmldsig\seal\Seal creates
   and verifies ASiC-E containers (ETSI EN 319 162-1) holding files and one
   detached XAdES baseline signature over them (ETSI EN 319 132-1), at
