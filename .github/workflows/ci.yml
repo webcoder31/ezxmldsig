@@ -1,0 +1,24 @@
+# The test suite under PHP 7.4 and 8.3, as bin/test runs it on a developer
+# machine: in the official php:<version>-cli images, with Docker, which the
+# runners have. A skipped test fails the run: a check that does not run
+# must not pass for one that does.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - run: bin/test ${{ matrix.php }} -- --fail-on-skipped

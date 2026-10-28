@@ -783,6 +783,8 @@ Before running anything, it calls `bin/deps`, which brings `vendor/` in line wit
 
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
 
+The continuous integration (`.github/workflows/ci.yml`) runs `bin/test` under PHP 7.4 and 8.3 on each push to `main` and each pull request, with `--fail-on-skipped`: there, a skipped test fails the run, so that a check that does not run never passes for one that does.
+
 The suite also runs each attack of the attack lab of the [signed token demo](#signed-token-demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
 
 The seals of `tests/fixtures/seal/containers/` are made by the Node.js library, and the tests check that this library gives the verdicts the Node.js library gave on them (`tests/fixtures/seal/verdicts.json`). Run `bin/gen-seal-fixtures` to make them again: it clones the Node.js library at a tag into `tests/.cache/`, and runs it in the `node` Docker image (see `tests/fixtures/seal/README.md`). The seals the tests make are time-stamped by the `openssl ts` command, and their CRLs and OCSP responses are issued by the `openssl ca` and `openssl ocsp` commands. The faults these commands cannot write (a delta CRL, an altered TSTInfo, a responder without the right extension, an ambiguous ZIP archive...) are built by the helpers of `tests/helpers/`, written apart from the library and ported from those of the Node.js library: a DER writer, a CRL issuer, an OCSP responder, a time-stamping authority and a ZIP builder. The tests ported from the Node.js library (`SealAttacksTest`, `SealOcspTest`, `SealRevocationTest`, `SealStructureTest`, `SealTimestampTest`, `SealValidationTest`, `ZipRawTest`) keep its cases.
@@ -802,12 +804,12 @@ Each check belongs in the tests of the library itself, and runs in its continuou
 
 | Check | Tokens of the PHP library | Tokens of the Node.js library | Seals of the PHP library | Seals of the Node.js library |
 |---|---|---|---|---|
-| 1. It verifies what it creates | tests of the PHP library | tests and continuous integration of the Node.js library | tests of the PHP library | tests and continuous integration of the Node.js library |
-| 2. The other library verifies what it creates | tests of the Node.js library, against the PHP library 2.0.0 | tests and continuous integration of the Node.js library, by the PHP library 2.0.0 | by hand | tests of the PHP library, on seals made by the Node.js library 2.0.0 |
+| 1. It verifies what it creates | tests and continuous integration of the PHP library | tests and continuous integration of the Node.js library | tests and continuous integration of the PHP library | tests and continuous integration of the Node.js library |
+| 2. The other library verifies what it creates | tests and continuous integration of the Node.js library, against the PHP library 2.0.0 | tests and continuous integration of the Node.js library, by the PHP library 2.0.0 | by hand | tests and continuous integration of the PHP library, on seals made by the Node.js library 2.0.0 |
 | 3. Third-party tools verify what it creates | by hand | tests and continuous integration of the Node.js library | by hand | tests and continuous integration of the Node.js library |
-| 4. It verifies what these tools create | by hand | tests and continuous integration of the Node.js library | tests of the PHP library, on a seal made by DSS | tests and continuous integration of the Node.js library, on a seal made by DSS |
+| 4. It verifies what these tools create | by hand | tests and continuous integration of the Node.js library | tests and continuous integration of the PHP library, on a seal made by DSS | tests and continuous integration of the Node.js library, on a seal made by DSS |
 
-The tests of the PHP library run with `bin/test`; the repository of the PHP library has no continuous integration. The Node.js library depends on xml-crypto, which canonicalizes its XML: for its tokens, xml-crypto is not a checker wholly apart from the code under test.
+The tests of the PHP library run with `bin/test`, on a developer machine and in its continuous integration. The Node.js library depends on xml-crypto, which canonicalizes its XML: for its tokens, xml-crypto is not a checker wholly apart from the code under test.
 
 
 ## Documentation
@@ -830,7 +832,7 @@ A version is published on Packagist by its tag: Packagist reads the tags of the 
 1. Set the version in the docblocks (``@version``) of ``ezxmldsig.php`` and of ``src/``, and describe it in ``CHANGELOG.txt``.
 2. Regenerate the documentation (``bin/gen-docs``): its pages show the version.
 3. Run ``bin/test``, under PHP 7.4 and 8.3, and make the checks that are made by hand (see [What is checked, and by whom](#what-is-checked-and-by-whom)).
-4. Commit and push to ``main``.
+4. Commit and push to ``main``, and wait for the continuous integration to pass.
 5. Tag the commit, with an annotated tag ``v`` followed by the version, push the tag, and publish the release on GitHub: ``git tag -a v1.2.3 -m "ezxmldsig 1.2.3"``, ``git push origin v1.2.3``, ``gh release create v1.2.3 --title 1.2.3 --notes-file <notes>``.
 
 
