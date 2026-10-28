@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Generates the seals of tests/fixtures/seal/ with the Node.js library
+# ezxmldsig-js, in Docker.
+#
+# Usage:
+#   bin/gen-seal-fixtures
+#
+# The seals of the tests of the PHP library are made by another creator: the
+# Node.js library, at the tag below, cloned into tests/.cache/ (ignored by
+# git), built and run in the official node image. Its test helpers make the
+# time-stamps, the CRLs and the OCSP responses (see
+# tests/fixtures/seal/generate.ts). The script writes
+# tests/fixtures/seal/containers/, tests/fixtures/seal/revocation/ and
+# tests/fixtures/seal/verdicts.json, the verdicts of the Node.js library on
+# each seal, which the PHP tests compare their own with.
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+JS_TAG=v2.0.0
+JS_REPO=https://github.com/webcoder31/ezxmldsig-js.git
+NODE_IMAGE=node:24-slim
+JS_DIR="$ROOT_DIR/tests/.cache/ezxmldsig-js-$JS_TAG"
+
+case "${1:-}" in
+    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+esac
+
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not reachable (with Colima: colima start)." >&2
+    exit 1
+fi
+
+if [ ! -d "$JS_DIR" ]; then
+    echo "Cloning ezxmldsig-js $JS_TAG into tests/.cache/." >&2
+    git clone --quiet --depth 1 --branch "$JS_TAG" "$JS_REPO" "$JS_DIR.tmp"
+    mv "$JS_DIR.tmp" "$JS_DIR"
+fi
+
+# The certificates of the clone are those of the PHP tests: the seals must
+# be made with the PKI the tests trust.
+if ! diff -r "$JS_DIR/test/fixtures/seal/certs" "$ROOT_DIR/tests/fixtures/seal/certs" -x README.md >/dev/null; then
+    echo "The certificates of ezxmldsig-js $JS_TAG differ from tests/fixtures/seal/certs/: copy them first." >&2
+    exit 1
+fi
+
+cp "$ROOT_DIR/tests/fixtures/seal/generate.ts" "$JS_DIR/generate-php-fixtures.ts"
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+    -v "$JS_DIR":/js -v "$ROOT_DIR/tests/fixtures/seal":/out -w /js "$NODE_IMAGE" \
+    sh -c 'npm ci --silent --no-audit --no-fund && npm run --silent build && node generate-php-fixtures.ts /out'
+rm -f "$JS_DIR/generate-php-fixtures.ts"

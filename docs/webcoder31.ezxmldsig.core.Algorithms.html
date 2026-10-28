@@ -26,6 +26,9 @@
 				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
 			</li>
 			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
 				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
 			</li>
 	</ul>
@@ -97,7 +100,7 @@
 them: canonicalization, digest and signature. The tokens and the seals
 take their identifiers from here; which ones each accepts is its own
 policy. <code>XMLDSigToken</code> has the same constants, with the algorithms of XML
-Encryption.</p>
+Encryption. RSA-PSS and ECDSA, of the seals, are those of RFC 6931.</p>
 </div>
 		</div>
 
@@ -452,6 +455,162 @@ Encryption.</p>
 			</td>
 		<td class="table-anchor">
 			<a href="#RSA_SHA512">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_PSS_SHA256" id="RSA_PSS_SHA256">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.Algorithms.html#84-85" title="Go to source code">RSA_PSS_SHA256</a> = <span class="php-str">'http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>RSASSA-PSS with SHA-256, MGF1 with the same digest, salt as long as the digest (RFC 6931, 2.3.10).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>RSASSA-PSS with SHA-256, MGF1 with the same digest, salt as long as the digest (RFC 6931, 2.3.10).</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_PSS_SHA256">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_PSS_SHA384" id="RSA_PSS_SHA384">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.Algorithms.html#86-87" title="Go to source code">RSA_PSS_SHA384</a> = <span class="php-str">'http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>RSASSA-PSS with SHA-384.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>RSASSA-PSS with SHA-384.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_PSS_SHA384">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="RSA_PSS_SHA512" id="RSA_PSS_SHA512">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.Algorithms.html#88-89" title="Go to source code">RSA_PSS_SHA512</a> = <span class="php-str">'http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>RSASSA-PSS with SHA-512.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>RSASSA-PSS with SHA-512.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#RSA_PSS_SHA512">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ECDSA_SHA256" id="ECDSA_SHA256">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.Algorithms.html#91-92" title="Go to source code">ECDSA_SHA256</a> = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>ECDSA with SHA-256, the value written as r || s (RFC 6931, 2.3.6; RFC 4050).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>ECDSA with SHA-256, the value written as r || s (RFC 6931, 2.3.6; RFC 4050).</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ECDSA_SHA256">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ECDSA_SHA384" id="ECDSA_SHA384">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.Algorithms.html#93-94" title="Go to source code">ECDSA_SHA384</a> = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>ECDSA with SHA-384.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>ECDSA with SHA-384.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ECDSA_SHA384">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ECDSA_SHA512" id="ECDSA_SHA512">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.Algorithms.html#95-96" title="Go to source code">ECDSA_SHA512</a> = <span class="php-str">'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>ECDSA with SHA-512.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>ECDSA with SHA-512.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ECDSA_SHA512">#</a>
 		</td>
 	</tr>
 		</table>

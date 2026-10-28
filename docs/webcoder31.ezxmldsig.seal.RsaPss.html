@@ -1,0 +1,325 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\RsaPss | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.RsaPss.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.RsaPss.html">RsaPss</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>RSASSA-PSS (RFC 8017, 8.1), the signature scheme of the seals for an RSA
+key, with MGF1 over the digest of the message (9.1, B.2.1).</p>
+<p><code>openssl_sign()</code> and <code>openssl_verify()</code> take no padding parameter: they
+sign and verify with PKCS#1 v1.5 only. The encoding EMSA-PSS is therefore
+written here, and the RSA operation itself is left to OpenSSL, without
+padding (<code>OPENSSL_NO_PADDING</code>): <code>openssl_private_encrypt()</code> computes the
+signature of the encoded message, <code>openssl_public_decrypt()</code> gives back the
+encoded message of a signature. The encoded message is one bit shorter than
+the modulus, its leftmost bits cleared: as a number, it is smaller than the
+modulus, which OpenSSL requires.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="sign" id="_sign">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>sign(<span>string <var>$data</var></span>, <span>resource|<a href="OpenSSLAsymmetricKey.html"><span title="OpenSSLAsymmetricKey">OpenSSLAsymmetricKey</span></a> <var>$privateKey</var></span>, <span>string <var>$hash</var></span>, <span>int|null <var>$saltLength</var> = <span class="php-kw">null</span></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Sign data.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Sign data.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$data</var>&nbsp;&nbsp;</td>
+										<td><p>The data, which is digested here.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$privateKey</var>&nbsp;&nbsp;</td>
+										<td><p>An RSA private key
+(openssl_pkey_get_private()).</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$hash</var>&nbsp;&nbsp;</td>
+										<td><p>The digest, as hash() names it: &quot;sha256&quot;, &quot;sha384&quot;
+or &quot;sha512&quot;. MGF1 uses it too.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$saltLength</var>&nbsp;&nbsp;</td>
+										<td><p>The length of the salt, in bytes; NULL for
+the length of the digest, as XML Signature takes it.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The signature, as long as the modulus.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the key is not an RSA key or is too short for
+the digest and the salt.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_sign">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="verify" id="_verify">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>verify(
+	<span>string <var>$data</var></span>,
+	<span>string <var>$signature</var></span>,
+	<span>resource|<a href="OpenSSLAsymmetricKey.html"><span title="OpenSSLAsymmetricKey">OpenSSLAsymmetricKey</span></a> <var>$publicKey</var></span>,
+	<span>string <var>$hash</var></span>,
+	<span>int|null <var>$saltLength</var> = <span class="php-kw">null</span></span>,
+): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Verify a signature.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Verify a signature.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$data</var>&nbsp;&nbsp;</td>
+										<td><p>The data, which is digested here.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$signature</var>&nbsp;&nbsp;</td>
+										<td><p>The signature.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$publicKey</var>&nbsp;&nbsp;</td>
+										<td><p>An RSA public key
+(openssl_pkey_get_public()).</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$hash</var>&nbsp;&nbsp;</td>
+										<td><p>The digest, as hash() names it. MGF1 uses it too.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$saltLength</var>&nbsp;&nbsp;</td>
+										<td><p>The length of the salt, in bytes; NULL for
+the length of the digest.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>TRUE if the signature is valid, FALSE otherwise.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the key is not an RSA key.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_verify">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="TRAILER" id="TRAILER">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>TRAILER = <span class="php-str">"\xbc"</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The trailer field of the encoded message (9.1.1, step 12).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The trailer field of the encoded message (9.1.1, step 12).</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#TRAILER">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

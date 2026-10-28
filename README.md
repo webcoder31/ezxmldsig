@@ -32,6 +32,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
     * [Interoperability](#interoperability)
     * [Certificates and keys](#certificates-and-keys)
     * [Options](#options)
+    * [Seals (experimental)](#seals-experimental)
     * [Upgrading from 1.x](#upgrading-from-1x)
     * [Upgrading from 0.x](#upgrading-from-0x)
 * [Demo](#demo)
@@ -69,7 +70,7 @@ You can also clone it (or download it as a ZIP archive) from its [GitHub reposit
 
 ## What's in the box?
 
-The library has two branches, each in its own namespace: the tokens, ``webcoder31\ezxmldsig\token`` (``XMLDSigToken``), and the core they are built on, ``webcoder31\ezxmldsig\core`` (``X509Cert``, and the identifiers of the algorithms of XML Signature in ``Algorithms``). The seals of files will be a third branch, ``webcoder31\ezxmldsig\seal``, beside the tokens. For now, only the [Node.js library](https://github.com/webcoder31/ezxmldsig-js#readme) seals files, from its version 2.0.0, as an experimental feature: detached XAdES signatures in an ASiC-E container, at levels B, T and LT. The classes of the core marked ``@internal`` serve the branches of the library only.
+The library has three branches, each in its own namespace: the tokens, ``webcoder31\ezxmldsig\token`` (``XMLDSigToken``); the seals of files, ``webcoder31\ezxmldsig\seal`` (``Seal``, **experimental**, see [Seals](#seals-experimental)); and the core they are built on, ``webcoder31\ezxmldsig\core`` (``X509Cert``, and the identifiers of the algorithms of XML Signature in ``Algorithms``). The classes marked ``@internal`` serve the branches of the library only.
 
 **``XMLDSigToken``** creates and analyzes XML tokens:
 
@@ -81,7 +82,9 @@ The library has two branches, each in its own namespace: the tokens, ``webcoder3
 6. It gives access to the information of the certificate of the token: subject, issuer, validity dates.
 7. It refuses, before parsing them, the XML documents that have a document type declaration (see [XML parsing](#xml-parsing)), and its HTML output (``getHTMLDump()``) escapes every value it shows and loads no external resource.
 
-**``X509Cert``** reads an X.509 certificate (subject, issuer, Distinguished Name, validity dates, fingerprint) and makes the checks the analysis needs, all of them with OpenSSL: its key usage (``canSign()``), its chain up to trusted CA certificates (``isTrustedBy()``), whether a given CA certificate issued it (``isValidCA()``).
+**``X509Cert``** reads an X.509 certificate (subject, issuer, Distinguished Name, validity dates, fingerprint) and makes the checks the analysis needs, all of them with OpenSSL: its key usage (``canSign()``), its chain up to trusted CA certificates (``isTrustedBy()``), whether a given CA certificate issued it (``isValidCA()``). For the seals, ``getTrustedChain()`` builds and verifies the chain at a given date, the time of a time-stamp, with the rules ``isTrustedBy()`` applies at the current date: OpenSSL verifies the signature of each link, and the chain is built from the certificates read in DER.
+
+**``Seal``** seals files and verifies seals: an ASiC-E container (ETSI EN 319 162-1) that holds the files and one detached XAdES baseline signature over them (ETSI EN 319 132-1), at level B, T (a signature time-stamp, RFC 3161) or LT (the certificates, CRLs and OCSP responses that validate it, embedded). The Node.js library makes and verifies the same seals, and DSS, the validator of the European Commission, validates them.
 
 The token protects its own content only: not the request that carries it (URL, headers, other fields), nor the response, nor the identity of the server it is sent to. Use an HTTPS connection for these.
 
@@ -587,6 +590,47 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 ```
 
 
+### Seals (experimental)
+
+A seal proves who sealed files, and that they have not changed since: contracts, PDF, text or Markdown files, any file. ``Seal::createSeal()`` writes an ASiC-E container (``.asice``, a ZIP archive) that holds the files, a manifest, and a XAdES signature of level B over them; ``Seal::verifySeal()`` verifies one. The seals are those of the Node.js library [@webcoder31/ezxmldsig](https://github.com/webcoder31/ezxmldsig-js#readme), whose design document, [design/seal.md](https://github.com/webcoder31/ezxmldsig-js/blob/main/design/seal.md), gives the structure and the rules followed. Each library verifies the seals of the other, and DSS validates the seals of both, at levels B, T and LT.
+
+The seals are an **experimental** feature of the 2.x versions: their API may change in a minor version.
+
+```php
+use webcoder31\ezxmldsig\seal\Seal;
+
+$container = Seal::createSeal(
+    [
+        ['name' => 'contract.pdf', 'content' => file_get_contents('contract.pdf')],
+        ['name' => 'annexes/prices.csv', 'content' => file_get_contents('prices.csv')],
+    ],
+    'path/to/signing/key.pem',
+    'path/to/signing/certificate.pem',
+    'key password',
+    ['chain' => ['path/to/intermediate/ca/certificate.pem']]
+);
+file_put_contents('contract.asice', $container);
+
+$verification = Seal::verifySeal(file_get_contents('contract.asice'), [
+    'caCertPath' => 'path/to/root/ca/certificate.pem',
+    'crls' => [$crlOfTheIntermediateCa, $crlOfTheRootCa],
+]);
+if (!$verification->isValid()) {
+    reject($verification->getError());
+}
+// $verification->getFiles(), getSigningCertificate(), getLevel(), getSigningTime()...
+```
+
+* **Algorithms.** An RSA key signs with RSA-PSS by default (SHA-256, the salt as long as the digest), an EC key with ECDSA on P-256, P-384 or P-521; RSA PKCS#1 v1.5 remains available (``'signatureAlgorithm'``), and accepted at verification. RSA keys of less than 2048 bits are refused, and so are SHA-1 and MD5. The OpenSSL extension of PHP signs with PKCS#1 v1.5 only: the encoding of RSA-PSS (RFC 8017, 9.1) is written by the library, over the raw RSA operation of OpenSSL, and its tests check it against the ``openssl`` command in both directions.
+* **Everything is covered.** A seal is valid only if every file of the container outside ``META-INF/`` is covered by its signature, so that a file added to a sealed container cannot pass for a sealed one. The container is read strictly: a ZIP archive that two readers could see differently, an element of the signature this library does not process (a signature policy, a transform), make the seal invalid.
+* **Trust.** ``'caCertPath'`` names the trusted CA certificates, as for the tokens. The signing certificate is trusted at the time of the signature time-stamp, if any, and at the current date otherwise: the time the signer claims (``getSigningTime()``) proves nothing.
+* **Revocation.** It is checked by default, with CRLs (``'crls'``, in DER or PEM) or OCSP responses (``'ocspResponses'``) for each certificate of the chain, its trust anchor excepted. The library sends no request: ``Seal::validationDataRequests()`` lists the CRLs to fetch and the OCSP requests to send. ``'revocation' => false`` verifies a seal without, which ``isRevocationChecked()`` then tells.
+* **Level T.** ``Seal::timestampRequest()`` gives the RFC 3161 request to send to a time-stamping authority of your choice (``application/timestamp-query``), and ``Seal::addSignatureTimestamp()`` checks its response and embeds the token; the verification then needs ``'tsaCertPath'``, the trusted certificates of the authority.
+* **Level LT.** ``Seal::addValidationData()`` embeds the certificates, CRLs and OCSP responses that validate a seal of level T, issued after its time-stamp: the seal can then be validated without reaching the CAs, as long as the certificate of the time-stamping authority is valid (it is checked at the current date: only a time-stamp over the time-stamp, level LTA, which this library does not make, would check it at an earlier one).
+
+The seals need the zlib extension of PHP besides OpenSSL; the ZIP extension is not used. Without the intl extension, two names of a container are compared as bytes rather than in Unicode normalization form C.
+
+
 ### Upgrading from 1.x
 
 * **Namespaces.** ``XMLDSigToken`` moves to ``webcoder31\ezxmldsig\token``, ``X509Cert`` to ``webcoder31\ezxmldsig\core``: replace ``use webcoder31\ezxmldsig\XMLDSigToken;`` with ``use webcoder31\ezxmldsig\token\XMLDSigToken;``, and ``use webcoder31\ezxmldsig\X509Cert;`` with ``use webcoder31\ezxmldsig\core\X509Cert;``. Nothing else changes: the same methods, constants, options, verdicts and error messages, and the same tokens.
@@ -709,6 +753,8 @@ Before running anything, it calls `bin/deps`, which brings `vendor/` in line wit
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
 
 The suite also runs each attack of the attack lab of the [demo](#demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
+
+The seals of `tests/fixtures/seal/containers/` are made by the Node.js library, and the tests check that this library gives the verdicts the Node.js library gave on them (`tests/fixtures/seal/verdicts.json`). Run `bin/gen-seal-fixtures` to make them again: it clones the Node.js library at a tag into `tests/.cache/`, and runs it in the `node` Docker image (see `tests/fixtures/seal/README.md`). The seals the tests make are time-stamped by the `openssl ts` command, and their CRLs and OCSP responses are issued by the `openssl ca` and `openssl ocsp` commands.
 
 The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, an intermediate CA, signing and encryption certificates issued by the intermediate, and a certificate signed by its own key that copies the subject and issuer names of the signing certificate. Run `bin/gen-test-certs` to generate them again (it runs OpenSSL in the `alpine:3.22` Docker image, whatever OpenSSL the host has). The tests of the trust anchor also issue certificates on the fly (expired, issued by another intermediate CA, issued by a certificate that is not a CA) in a temporary directory removed after each test.
 

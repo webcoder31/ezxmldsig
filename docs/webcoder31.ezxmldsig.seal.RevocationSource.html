@@ -1,0 +1,375 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\RevocationSource | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.RevocationSource.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.RevocationSource.html">RevocationSource</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>What tells the status of certificates: a CRL, or the answer of an OCSP
+response for one certificate (see Crl::source() and Ocsp::sources()).
+The times are UNIX times, in seconds.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="__construct" id="___construct">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>__construct(<span><var>$kind</var></span>, <span><var>$der</var></span>, <span><var>$thisUpdate</var></span>, <span><var>$nextUpdate</var></span>, <span><var>$keepsExpiredFrom</var></span>, <span><a href="Closure.html"><span title="Closure">Closure</span></a> <var>$covers</var></span>, <span><a href="Closure.html"><span title="Closure">Closure</span></a> <var>$revocationOf</var></span>)</code>
+
+
+
+	<div class="expandable-expandedView">
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#___construct">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="covers" id="_covers">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>covers(<span><a href="webcoder31.ezxmldsig.core.X509Cert.html"><span title="webcoder31\ezxmldsig\core\X509Cert">X509Cert</span></a> <var>$certificate</var></span>, <span><a href="webcoder31.ezxmldsig.core.X509Cert.html"><span title="webcoder31\ezxmldsig\core\X509Cert">X509Cert</span></a> <var>$issuer</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>NULL if the source tells the status of the certificate, which the
+issuer issued, or why it does not.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>NULL if the source tells the status of the certificate, which the
+issuer issued, or why it does not.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_covers">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="revocationOf" id="_revocationOf">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>revocationOf(<span><a href="webcoder31.ezxmldsig.core.X509Cert.html"><span title="webcoder31\ezxmldsig\core\X509Cert">X509Cert</span></a> <var>$certificate</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The revocation of the certificate ('date', a UNIX time, and 'reason',
+the reason code or NULL), or NULL if it is not revoked.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The revocation of the certificate ('date', a UNIX time, and 'reason',
+the reason code or NULL), or NULL if it is not revoked.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_revocationOf">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+
+		<table class="table" id="properties">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Properties</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="kind" id="$kind">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">string</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$kind</var></code>
+				
+	<div class="expandable-collapsedView">
+		<p>&quot;crl&quot; or &quot;ocsp&quot;.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>&quot;crl&quot; or &quot;ocsp&quot;.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$kind">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="der" id="$der">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">string</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$der</var></code>
+				
+	<div class="expandable-collapsedView">
+		<p>The DER encoding of the CRL or of the whole OCSP response.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The DER encoding of the CRL or of the whole OCSP response.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$der">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="thisUpdate" id="$thisUpdate">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">int|float</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$thisUpdate</var></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$thisUpdate">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="nextUpdate" id="$nextUpdate">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">int|float|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$nextUpdate</var></code>
+				
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$nextUpdate">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="keepsExpiredFrom" id="$keepsExpiredFrom">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell table-shrink">
+				<code class="nowrap">int|float|null</code>
+			</td>
+
+			<td class="table-cell">
+<code><var>$keepsExpiredFrom</var></code>
+				
+	<div class="expandable-collapsedView">
+		<p>The time from which it keeps the status of the expired certificates (ExpiredCertsOnCRL, archive cutoff).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The time from which it keeps the status of the expired certificates (ExpiredCertsOnCRL, archive cutoff).</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#$keepsExpiredFrom">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

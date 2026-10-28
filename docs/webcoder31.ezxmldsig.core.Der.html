@@ -1,0 +1,1203 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\core\Der | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.core.Algorithms.html">
+							Algorithms
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.core.X509Cert.html">
+							X509Cert
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.core.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.core.Der.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>\<a href="webcoder31.ezxmldsig.core.Der.html">Der</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>A minimal reader and writer of DER, the binary encoding of X.509
+certificates, CRLs, OCSP responses and time-stamp tokens (RFC 3161), for
+what the OpenSSL extension of PHP does not expose: the fields of names,
+the extensions and their criticality, the structures of the seals. Every
+malformation throws, and what is read is then refused. Only DER is read:
+an indefinite length is a malformation.</p>
+<p>An element is an array with two keys: 'tag', its identifier octet (class,
+constructed bit and tag number), and 'content', its content octets (a
+binary string).</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="readElements" id="_readElements">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>readElements(<span>string <var>$buffer</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Read the elements that follow each other in a binary string.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Read the elements that follow each other in a binary string.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$buffer</var>&nbsp;&nbsp;</td>
+										<td><p>The DER.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The elements.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the string is not a sequence of DER elements.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_readElements">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="readElement" id="_readElement">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>readElement(<span>string <var>$buffer</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Read the single element a binary string holds.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Read the single element a binary string holds.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$buffer</var>&nbsp;&nbsp;</td>
+										<td><p>The DER.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The element.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the string does not hold exactly one element.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_readElement">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="childrenOf" id="_childrenOf">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>childrenOf(<span>array <var>$element</var></span>, <span>int <var>$tag</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Read the elements of a constructed element of the given tag.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Read the elements of a constructed element of the given tag.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$tag</var>&nbsp;&nbsp;</td>
+										<td><p>The tag it must have.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The elements it holds.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element has another tag.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_childrenOf">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeOid" id="_decodeOid">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeOid(<span>array <var>$element</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode an object identifier into its dotted form.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode an object identifier into its dotted form.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The dotted form, such as &quot;1.2.840.113549.1.1.11&quot;.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not an object identifier.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeOid">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeBoolean" id="_decodeBoolean">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeBoolean(<span>array <var>$element</var></span>): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode a boolean.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode a boolean.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The value.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not a boolean.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeBoolean">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeSmallInteger" id="_decodeSmallInteger">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeSmallInteger(<span>array <var>$element</var></span>): int</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode a non-negative integer that fits in a PHP integer (6 bytes at
+most).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode a non-negative integer that fits in a PHP integer (6 bytes at
+most).</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The value.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not such an integer.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeSmallInteger">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeBits" id="_decodeBits">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeBits(<span>array <var>$element</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode a bit string into its bits, the first one (bit 0) first.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode a bit string into its bits, the first one (bit 0) first.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The bits, as booleans.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not a bit string.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeBits">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeBitStringBytes" id="_decodeBitStringBytes">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeBitStringBytes(<span>array <var>$element</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The bytes of a bit string with no unused bit, such as a signature or a
+public key.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The bytes of a bit string with no unused bit, such as a signature or a
+public key.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The bytes.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not such a bit string.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeBitStringBytes">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeGeneralizedTime" id="_decodeGeneralizedTime">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeGeneralizedTime(<span>array <var>$element</var></span>): float</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode a GeneralizedTime in UTC (<code>YYYYMMDDhhmmss[.f]Z</code>, RFC 5280
+4.1.2.5.2, RFC 3161 2.4.2).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode a GeneralizedTime in UTC (<code>YYYYMMDDhhmmss[.f]Z</code>, RFC 5280
+4.1.2.5.2, RFC 3161 2.4.2).</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The time, in seconds since the UNIX epoch, the fraction
+of a second kept to the millisecond.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not such a time.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeGeneralizedTime">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeTime" id="_decodeTime">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeTime(<span>array <var>$element</var></span>): float</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode a Time (RFC 5280, 4.1.2.5): UTCTime (years 1950 to 2049) or
+GeneralizedTime, in UTC.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode a Time (RFC 5280, 4.1.2.5): UTCTime (years 1950 to 2049) or
+GeneralizedTime, in UTC.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The time, in seconds since the UNIX epoch.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not such a time.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeTime">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="decodeUnsigned" id="_decodeUnsigned">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>decodeUnsigned(<span>array <var>$element</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Decode an integer into its unsigned big-endian bytes (a serial number,
+a nonce).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Decode an integer into its unsigned big-endian bytes (a serial number,
+a nonce).</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The bytes, without leading zero byte.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the element is not a non-negative integer.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_decodeUnsigned">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="encode" id="_encode">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>encode(<span>int <var>$tag</var></span>, <span>string ...<var>$content</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Encode an element: its identifier octet, its length (definite,
+minimal), its content.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Encode an element: its identifier octet, its length (definite,
+minimal), its content.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$tag</var>&nbsp;&nbsp;</td>
+										<td><p>The identifier octet.</p>
+</td>
+									</tr>
+									<tr>
+										<td>...<var>$content</var>&nbsp;&nbsp;</td>
+										<td><p>The content, in parts.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_encode">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="reencode" id="_reencode">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>reencode(<span>array <var>$element</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Encode an element read by readElements() again: DER has a single
+encoding.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Encode an element read by readElements() again: DER has a single
+encoding.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$element</var>&nbsp;&nbsp;</td>
+										<td><p>The element.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_reencode">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="encodeOid" id="_encodeOid">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>encodeOid(<span>string <var>$oid</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Encode an object identifier given in its dotted form.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Encode an object identifier given in its dotted form.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$oid</var>&nbsp;&nbsp;</td>
+										<td><p>The dotted form.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the identifier is not valid.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_encodeOid">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="encodeInteger" id="_encodeInteger">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>encodeInteger(<span>string|int <var>$value</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Encode a non-negative integer given as unsigned big-endian bytes, or as
+a PHP integer.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Encode a non-negative integer given as unsigned big-endian bytes, or as
+a PHP integer.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$value</var>&nbsp;&nbsp;</td>
+										<td><p>The value.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_encodeInteger">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="BOOLEAN" id="BOOLEAN">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>BOOLEAN = <span class="php-num">0x01</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>Universal tags.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Universal tags.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#BOOLEAN">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="INTEGER" id="INTEGER">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>INTEGER = <span class="php-num">0x02</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#INTEGER">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="BIT_STRING" id="BIT_STRING">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>BIT_STRING = <span class="php-num">0x03</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#BIT_STRING">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OCTET_STRING" id="OCTET_STRING">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OCTET_STRING = <span class="php-num">0x04</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OCTET_STRING">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="NULL" id="NULL">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>NULL = <span class="php-num">0x05</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#NULL">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID" id="OID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID = <span class="php-num">0x06</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ENUMERATED" id="ENUMERATED">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>ENUMERATED = <span class="php-num">0x0a</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ENUMERATED">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="UTF8_STRING" id="UTF8_STRING">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>UTF8_STRING = <span class="php-num">0x0c</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#UTF8_STRING">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="PRINTABLE_STRING" id="PRINTABLE_STRING">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>PRINTABLE_STRING = <span class="php-num">0x13</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#PRINTABLE_STRING">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="IA5_STRING" id="IA5_STRING">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>IA5_STRING = <span class="php-num">0x16</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#IA5_STRING">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="UTC_TIME" id="UTC_TIME">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>UTC_TIME = <span class="php-num">0x17</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#UTC_TIME">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="GENERALIZED_TIME" id="GENERALIZED_TIME">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>GENERALIZED_TIME = <span class="php-num">0x18</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#GENERALIZED_TIME">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SEQUENCE" id="SEQUENCE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SEQUENCE = <span class="php-num">0x30</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SEQUENCE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SET" id="SET">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SET = <span class="php-num">0x31</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SET">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

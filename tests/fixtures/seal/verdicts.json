@@ -1,0 +1,196 @@
+{
+  "b-rsa-pss-sha256": {
+    "valid": true,
+    "error": null,
+    "level": "B",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "b-rsa-sha256": {
+    "valid": true,
+    "error": null,
+    "level": "B",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "b-rsa2048-pss-sha512": {
+    "valid": true,
+    "error": null,
+    "level": "B",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 2048 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "b-ecdsa-p256": {
+    "valid": true,
+    "error": null,
+    "level": "B",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=P-256 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "b-ecdsa-p384": {
+    "valid": true,
+    "error": null,
+    "level": "B",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=P-384 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "b-revoked": {
+    "valid": false,
+    "error": "The certificate \"/C=DK/O=Lothbrok Ltd/OU=Revoked Seal Dept/CN=Lothbrok Seal Test\" is revoked since 2026-10-28T03:00:53.000Z. (the option revocation: false verifies the seal without revocation.)",
+    "level": null,
+    "files": [],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=Revoked Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "b-no-chain": {
+    "valid": false,
+    "error": "The signing certificate is not trusted: no valid chain up to a trusted CA certificate.",
+    "level": null,
+    "files": [],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "t-rsa-pss-sha256": {
+    "valid": true,
+    "error": null,
+    "level": "T",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": "2026-10-28T03:00:58.000Z",
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "lt-crl": {
+    "valid": true,
+    "error": null,
+    "level": "LT",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": "2026-10-28T03:00:58.000Z",
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
+  },
+  "lt-ocsp": {
+    "valid": true,
+    "error": null,
+    "level": "LT",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T03:00:48.000Z",
+    "timestampTime": "2026-10-28T03:00:58.000Z",
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
+  }
+}

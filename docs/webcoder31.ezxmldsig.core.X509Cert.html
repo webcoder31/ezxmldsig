@@ -26,6 +26,9 @@
 				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
 			</li>
 			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
 				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
 			</li>
 	</ul>
@@ -96,16 +99,19 @@
 	<div class="description"><p>Analyze an X.509 certificate.</p>
 <p>The <code>X509Cert</code> class provides a set of convenient methods for extracting
 essential information contained in an X.509 certificate and for performing
-some useful checks. Every cryptographic check (signature of the
-certificate, chain of trust, validity dates) is performed by OpenSSL. This
-class belongs to the core, shared by the tokens (<code>XMLDSigToken</code>) and the
-seals.</p>
+some useful checks. Every signature of a certificate is verified by
+OpenSSL. isTrustedBy() leaves the whole chain of trust to OpenSSL, at the
+current date; getTrustedChain(), which the seals use at the time of a
+time-stamp, builds the chain and checks the dates and the constraints of
+the CAs itself, from the DER of the certificates, with the rules of
+OpenSSL. This class belongs to the core, shared by the tokens
+(<code>XMLDSigToken</code>) and the seals.</p>
 </div>
 		</div>
 
 
 		<div class="classLikeSection">
-			<b>Located at</b> <a href="source-core.X509Cert.html#57" title="Go to source code">core/X509Cert.php</a><br>
+			<b>Located at</b> <a href="source-core.X509Cert.html#60" title="Go to source code">core/X509Cert.php</a><br>
 		</div>
 
 
@@ -126,7 +132,7 @@ seals.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#66-94" title="Go to source code">__construct</a>(<span>string <var>$cert</var></span>)</code>
+				<code><a href="source-core.X509Cert.html#138-166" title="Go to source code">__construct</a>(<span>string <var>$cert</var></span>)</code>
 
 
 	<div class="expandable-collapsedView">
@@ -173,7 +179,7 @@ seals.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#97-105" title="Go to source code">getPem</a>(): String</code>
+				<code><a href="source-core.X509Cert.html#169-177" title="Go to source code">getPem</a>(): String</code>
 
 
 	<div class="expandable-collapsedView">
@@ -208,7 +214,7 @@ seals.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#108-129" title="Go to source code">getFingerprint</a>(<span>string <var>$algorithm</var> = <span class="php-str">'sha256'</span></span>): string</code>
+				<code><a href="source-core.X509Cert.html#180-201" title="Go to source code">getFingerprint</a>(<span>string <var>$algorithm</var> = <span class="php-str">'sha256'</span></span>): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -260,7 +266,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#132-140" title="Go to source code">getIssuer</a>(): array</code>
+				<code><a href="source-core.X509Cert.html#204-212" title="Go to source code">getIssuer</a>(): array</code>
 
 
 	<div class="expandable-collapsedView">
@@ -295,7 +301,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#143-151" title="Go to source code">getSubject</a>(): array</code>
+				<code><a href="source-core.X509Cert.html#215-223" title="Go to source code">getSubject</a>(): array</code>
 
 
 	<div class="expandable-collapsedView">
@@ -330,7 +336,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#154-162" title="Go to source code">getDN</a>(): string</code>
+				<code><a href="source-core.X509Cert.html#226-234" title="Go to source code">getDN</a>(): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -365,7 +371,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#165-177" title="Go to source code">getValidFrom</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#237-249" title="Go to source code">getValidFrom</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -410,7 +416,7 @@ FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#180-192" title="Go to source code">getValidTo</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#252-264" title="Go to source code">getValidTo</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -455,7 +461,7 @@ FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#218-231" title="Go to source code">isOutOfDate</a>(): boolean</code>
+				<code><a href="source-core.X509Cert.html#290-303" title="Go to source code">isOutOfDate</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -491,7 +497,7 @@ FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#234-255" title="Go to source code">canSign</a>(): boolean</code>
+				<code><a href="source-core.X509Cert.html#306-327" title="Go to source code">canSign</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -531,7 +537,7 @@ extension is not restricted.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#258-319" title="Go to source code">isTrustedBy</a>(<span>string|array <var>$caCertPaths</var></span>): boolean</code>
+				<code><a href="source-core.X509Cert.html#330-391" title="Go to source code">isTrustedBy</a>(<span>string|array <var>$caCertPaths</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -596,7 +602,7 @@ FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#344-410" title="Go to source code">isValidCA</a>(<span>string <var>$caCert</var></span>): boolean</code>
+				<code><a href="source-core.X509Cert.html#416-482" title="Go to source code">isValidCA</a>(<span>string <var>$caCert</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -662,7 +668,7 @@ validated, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#413-439" title="Go to source code">pemToDer</a>(<span>string <var>$pemCertificate</var></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#485-511" title="Go to source code">pemToDer</a>(<span>string <var>$pemCertificate</var></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -706,7 +712,7 @@ FALSE on failure.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-core.X509Cert.html#442-469" title="Go to source code">derToPem</a>(<span>string <var>$derCertificate</var></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#514-541" title="Go to source code">derToPem</a>(<span>string <var>$derCertificate</var></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -741,10 +747,707 @@ FALSE on failure.</p>
 			<a href="#_derToPem">#</a>
 		</td>
 	</tr>
+	<tr class="expandable collapsed" data-order="getDer" id="_getDer">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#574-582" title="Go to source code">getDer</a>(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The DER encoding of the certificate.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The DER encoding of the certificate.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getDer">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getSerialNumber" id="_getSerialNumber">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#585-595" title="Go to source code">getSerialNumber</a>(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The serial number, as unsigned big-endian bytes.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The serial number, as unsigned big-endian bytes.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The bytes.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getSerialNumber">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getRawIssuer" id="_getRawIssuer">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#598-606" title="Go to source code">getRawIssuer</a>(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The DER encoding of the issuer name, as a CRL names its issuer.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The DER encoding of the issuer name, as a CRL names its issuer.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getRawIssuer">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getRawSubject" id="_getRawSubject">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#609-617" title="Go to source code">getRawSubject</a>(): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The DER encoding of the subject name.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The DER encoding of the subject name.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The DER.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getRawSubject">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getExtension" id="_getExtension">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#620-633" title="Go to source code">getExtension</a>(<span>string <var>$oid</var></span>): array|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>An extension, by its OID.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>An extension, by its OID.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$oid</var>&nbsp;&nbsp;</td>
+										<td><p>The OID, in its dotted form.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>'critical' (boolean) and 'value' (the DER of its
+value, the content of its OCTET STRING), or NULL.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getExtension">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="canSignCrls" id="_canSignCrls">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#636-647" title="Go to source code">canSignCrls</a>(): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Indicates whether the key usage of the certificate, if it has one,
+allows it to sign CRLs.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Indicates whether the key usage of the certificate, if it has one,
+allows it to sign CRLs.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>TRUE if it may sign CRLs.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_canSignCrls">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="isCA" id="_isCA">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#650-660" title="Go to source code">isCA</a>(): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Indicates whether the certificate is a CA by its basic constraints.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Indicates whether the certificate is a CA by its basic constraints.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>TRUE if it is a CA.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_isCA">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getTrustedChain" id="_getTrustedChain">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-core.X509Cert.html#663-743" title="Go to source code">getTrustedChain</a>(<span>string|array <var>$caCerts</var></span>, <span>array <var>$untrusted</var> = []</span>, <span>int|null <var>$at</var> = <span class="php-kw">null</span></span>): array|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The chain of the certificate, from it to its root, built and verified
+from the given CA certificates as OpenSSL does for <code>isTrustedBy()</code>, at
+the current date or at another one; NULL if the certificate is not
+trusted.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The chain of the certificate, from it to its root, built and verified
+from the given CA certificates as OpenSSL does for <code>isTrustedBy()</code>, at
+the current date or at another one; NULL if the certificate is not
+trusted.</p>
+<p>Every given certificate is trusted, and the chain is built from these
+certificates only (and the <code>$untrusted</code> ones), never from those of the
+system. A certificate is taken as the issuer of another one when its
+subject is the issuer of the other one (names compared in the canonical
+form of OpenSSL), when the authority key identifier of the other one
+matches it, and when its key suits the signature algorithm of the other
+one. Then:</p>
+<ul>
+<li>OpenSSL verifies the signature of each link (but the root's own);</li>
+<li>every certificate of the chain, the root included, is valid at the
+date of the verification;</li>
+<li>every issuer is a CA: basic constraints with &quot;CA:TRUE&quot; and, if it has
+a key usage, &quot;keyCertSign&quot;; the root may also be a CA by its key
+usage alone, or by being self-signed and of version 1;</li>
+<li>the path length of each CA is respected;</li>
+<li>no certificate has a critical extension the verification does not
+handle, nor a repeated or malformed extension.</li>
+</ul>
+<p>A chain that stops at an intermediate CA is rejected: the root must be
+one of the CA certificates. Name constraints are not enforced: a CA
+certificate that has them is rejected, where OpenSSL would enforce
+them.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$caCerts</var>&nbsp;&nbsp;</td>
+										<td><p>The CA certificates: paths of PEM files,
+or PEM contents, each of which may hold several certificates.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$untrusted</var>&nbsp;&nbsp;</td>
+										<td><p>Certificates (X509Cert) the chain may be built
+with, after the CA certificates, without being trusted: the
+intermediate CAs a signature embeds.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$at</var>&nbsp;&nbsp;</td>
+										<td><p>The UNIX time the certificates must be valid at;
+NULL for the current time.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The chain (X509Cert), or NULL.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If a CA certificate file cannot be read.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getTrustedChain">#</a>
+		</td>
+	</tr>
 		</table>
 
 
 
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="OID_KEY_USAGE" id="OID_KEY_USAGE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#71-72" title="Go to source code">OID_KEY_USAGE</a> = <span class="php-str">'2.5.29.15'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>Extensions, by OID.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Extensions, by OID.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_KEY_USAGE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_BASIC_CONSTRAINTS" id="OID_BASIC_CONSTRAINTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#73" title="Go to source code">OID_BASIC_CONSTRAINTS</a> = <span class="php-str">'2.5.29.19'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_BASIC_CONSTRAINTS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_NAME_CONSTRAINTS" id="OID_NAME_CONSTRAINTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#74" title="Go to source code">OID_NAME_CONSTRAINTS</a> = <span class="php-str">'2.5.29.30'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_NAME_CONSTRAINTS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_SUBJECT_KEY_ID" id="OID_SUBJECT_KEY_ID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#75" title="Go to source code">OID_SUBJECT_KEY_ID</a> = <span class="php-str">'2.5.29.14'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_SUBJECT_KEY_ID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_AUTHORITY_KEY_ID" id="OID_AUTHORITY_KEY_ID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#76" title="Go to source code">OID_AUTHORITY_KEY_ID</a> = <span class="php-str">'2.5.29.35'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_AUTHORITY_KEY_ID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="KEY_USAGE_DIGITAL_SIGNATURE" id="KEY_USAGE_DIGITAL_SIGNATURE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#78-79" title="Go to source code">KEY_USAGE_DIGITAL_SIGNATURE</a> = <span class="php-num">0</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The key usages, by their bit in the extension.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The key usages, by their bit in the extension.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#KEY_USAGE_DIGITAL_SIGNATURE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="KEY_USAGE_NON_REPUDIATION" id="KEY_USAGE_NON_REPUDIATION">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#80" title="Go to source code">KEY_USAGE_NON_REPUDIATION</a> = <span class="php-num">1</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#KEY_USAGE_NON_REPUDIATION">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="KEY_USAGE_KEY_CERT_SIGN" id="KEY_USAGE_KEY_CERT_SIGN">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#81" title="Go to source code">KEY_USAGE_KEY_CERT_SIGN</a> = <span class="php-num">5</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#KEY_USAGE_KEY_CERT_SIGN">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="KEY_USAGE_CRL_SIGN" id="KEY_USAGE_CRL_SIGN">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#82" title="Go to source code">KEY_USAGE_CRL_SIGN</a> = <span class="php-num">6</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#KEY_USAGE_CRL_SIGN">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="HANDLED_CRITICAL_EXTENSIONS" id="HANDLED_CRITICAL_EXTENSIONS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#84-104" title="Go to source code">HANDLED_CRITICAL_EXTENSIONS</a> = [
+	<span class="php-str">'2.16.840.1.113730.1.1'</span>,
+	<b><span class="active" title="webcoder31\ezxmldsig\core\X509Cert">self</span></b>::<a href="webcoder31.ezxmldsig.core.X509Cert.html#OID_KEY_USAGE">OID_KEY_USAGE</a>,
+	<span class="php-str">'2.5.29.17'</span>,
+	<b><span class="active" title="webcoder31\ezxmldsig\core\X509Cert">self</span></b>::<a href="webcoder31.ezxmldsig.core.X509Cert.html#OID_BASIC_CONSTRAINTS">OID_BASIC_CONSTRAINTS</a>,
+	<span class="php-str">'2.5.29.32'</span>,
+	<span class="php-str">'2.5.29.31'</span>,
+	<span class="php-str">'2.5.29.37'</span>,
+	<span class="php-str">'1.3.6.1.5.5.7.48.1.5'</span>,
+	<span class="php-str">'2.5.29.36'</span>,
+	<span class="php-str">'2.5.29.33'</span>,
+	<span class="php-str">'2.5.29.54'</span>,
+]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The extensions whose criticality the verification of a chain accepts.
+They are those OpenSSL handles (<code>X509_supported_extension()</code>), but name
+constraints, which it enforces and this library does not: a CA
+certificate that has them is refused (see getTrustedChain()), and the
+extensions of IP addresses and AS numbers (RFC 3779) and of proxy
+certificates, which it does not handle either.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The extensions whose criticality the verification of a chain accepts.
+They are those OpenSSL handles (<code>X509_supported_extension()</code>), but name
+constraints, which it enforces and this library does not: a CA
+certificate that has them is refused (see getTrustedChain()), and the
+extensions of IP addresses and AS numbers (RFC 3779) and of proxy
+certificates, which it does not handle either.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#HANDLED_CRITICAL_EXTENSIONS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SIGNATURE_KEY_TYPES" id="SIGNATURE_KEY_TYPES">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#106-127" title="Go to source code">SIGNATURE_KEY_TYPES</a> = [
+	<span class="php-str">'1.2.840.113549.1.1.4'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.113549.1.1.5'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.113549.1.1.11'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.113549.1.1.12'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.113549.1.1.13'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.113549.1.1.14'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.113549.1.1.10'</span> =&gt; [<span class="php-str">'rsa'</span>],
+	<span class="php-str">'1.2.840.10045.4.1'</span> =&gt; [<span class="php-str">'ec'</span>],
+	<span class="php-str">'1.2.840.10045.4.3.1'</span> =&gt; [<span class="php-str">'ec'</span>],
+	<span class="php-str">'1.2.840.10045.4.3.2'</span> =&gt; [<span class="php-str">'ec'</span>],
+	<span class="php-str">'1.2.840.10045.4.3.3'</span> =&gt; [<span class="php-str">'ec'</span>],
+	<span class="php-str">'1.2.840.10045.4.3.4'</span> =&gt; [<span class="php-str">'ec'</span>],
+	<span class="php-str">'1.2.840.10040.4.3'</span> =&gt; [<span class="php-str">'dsa'</span>],
+	<span class="php-str">'2.16.840.1.101.3.4.3.1'</span> =&gt; [<span class="php-str">'dsa'</span>],
+	<span class="php-str">'2.16.840.1.101.3.4.3.2'</span> =&gt; [<span class="php-str">'dsa'</span>],
+]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The key types that may sign with each signature algorithm. OpenSSL
+takes a certificate whose signature algorithm does not suit the key of
+a certificate as not issued by it.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The key types that may sign with each signature algorithm. OpenSSL
+takes a certificate whose signature algorithm does not suit the key of
+a certificate as not issued by it.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SIGNATURE_KEY_TYPES">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CANONICAL_STRING_TAGS" id="CANONICAL_STRING_TAGS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#129-132" title="Go to source code">CANONICAL_STRING_TAGS</a> = [<span class="php-num">0x0c</span>, <span class="php-num">0x1e</span>, <span class="php-num">0x1c</span>, <span class="php-num">0x13</span>, <span class="php-num">0x14</span>, <span class="php-num">0x16</span>, <span class="php-num">0x1a</span>]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The string types OpenSSL compares names by in canonical form
+(<code>ASN1_MASK_CANON</code>): UTF8String, BMPString, UniversalString,
+PrintableString, T61String, IA5String, VisibleString.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The string types OpenSSL compares names by in canonical form
+(<code>ASN1_MASK_CANON</code>): UTF8String, BMPString, UniversalString,
+PrintableString, T61String, IA5String, VisibleString.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CANONICAL_STRING_TAGS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MAX_CHAIN_LENGTH" id="MAX_CHAIN_LENGTH">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-core.X509Cert.html#134-135" title="Go to source code">MAX_CHAIN_LENGTH</a> = <span class="php-num">100</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The deepest chain OpenSSL builds by default.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The deepest chain OpenSSL builds by default.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MAX_CHAIN_LENGTH">#</a>
+		</td>
+	</tr>
+		</table>
 
 
 
