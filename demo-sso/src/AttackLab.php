@@ -4,7 +4,7 @@ namespace webcoder31\ezxmldsig\DemoSso;
 
 use webcoder31\ezxmldsig\Demo\Certs;
 use webcoder31\ezxmldsig\Demo\Forge;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The attack lab of the SSO demo.

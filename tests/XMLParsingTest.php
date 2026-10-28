@@ -2,7 +2,7 @@
 
 namespace webcoder31\ezxmldsig\Tests;
 
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Loading of XML documents (token analysis and alterXML()): a document type

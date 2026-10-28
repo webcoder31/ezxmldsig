@@ -32,6 +32,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
     * [Interoperability](#interoperability)
     * [Certificates and keys](#certificates-and-keys)
     * [Options](#options)
+    * [Upgrading from 1.x](#upgrading-from-1x)
     * [Upgrading from 0.x](#upgrading-from-0x)
 * [Demo](#demo)
 * [Single sign-on demo](#single-sign-on-demo)
@@ -67,6 +68,8 @@ You can also clone it (or download it as a ZIP archive) from its [GitHub reposit
 
 
 ## What's in the box?
+
+The library has two branches, each in its own namespace: the tokens, ``webcoder31\ezxmldsig\token`` (``XMLDSigToken``), and the core they are built on, ``webcoder31\ezxmldsig\core`` (``X509Cert``, and the identifiers of the algorithms of XML Signature in ``Algorithms``). The seals of files will be a third branch, ``webcoder31\ezxmldsig\seal``, beside the tokens. The classes of the core marked ``@internal`` serve the branches of the library only.
 
 **``XMLDSigToken``** creates and analyzes XML tokens:
 
@@ -129,7 +132,7 @@ To do so, the ``XMLDSigToken`` class requires an asymmetric cryptographic key pa
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 // Use statements.
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 // Asymmetric cryptographic key pair for signing (in PEM format).
 $signKey = 'path/to/signing/private/key';
@@ -213,7 +216,7 @@ When the sender does hold this private key (for instance, when it encrypts token
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 // Use statements.
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 // Asymmetric cryptographic key pair for signing (in PEM format).
 $signKey = 'path/to/signing/private/key';
@@ -313,7 +316,7 @@ The analysis requires a trust anchor, described below: without it, no token is v
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 // Use statements.
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 // Get the Base64 encoded XML Digital Signature and decode it.
 if (!isset($_POST['xmltoken']))
@@ -583,6 +586,11 @@ $token = XMLDSigToken::analyzeXMLToken($sig, [
 ]);
 ```
 
+
+### Upgrading from 1.x
+
+* **Namespaces.** ``XMLDSigToken`` moves to ``webcoder31\ezxmldsig\token``, ``X509Cert`` to ``webcoder31\ezxmldsig\core``: replace ``use webcoder31\ezxmldsig\XMLDSigToken;`` with ``use webcoder31\ezxmldsig\token\XMLDSigToken;``, and ``use webcoder31\ezxmldsig\X509Cert;`` with ``use webcoder31\ezxmldsig\core\X509Cert;``. Nothing else changes: the same methods, constants, options, verdicts and error messages, and the same tokens.
+* **Loading without Composer.** ``ezxmldsig.php`` loads the new files of ``src/core/`` and ``src/token/``; a loader of your own must require them too.
 
 ### Upgrading from 0.x
 

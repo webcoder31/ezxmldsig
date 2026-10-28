@@ -7,7 +7,7 @@ use DOMXPath;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use webcoder31\ezxmldsig\X509Cert;
+use webcoder31\ezxmldsig\core\X509Cert;
 
 /**
  * Alterations of a token for the attack lab: they edit the document in

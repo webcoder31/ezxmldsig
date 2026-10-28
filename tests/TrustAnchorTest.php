@@ -2,8 +2,8 @@
 
 namespace webcoder31\ezxmldsig\Tests;
 
-use webcoder31\ezxmldsig\X509Cert;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\core\X509Cert;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The signature of a token is verified with the certificate the token

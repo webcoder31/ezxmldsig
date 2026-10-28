@@ -6,7 +6,7 @@ use DOMDocument;
 use DOMXPath;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Identifier of the token: random, unique, signed, and only given for a

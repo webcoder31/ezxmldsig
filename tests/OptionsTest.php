@@ -6,7 +6,7 @@ use DOMDocument;
 use DOMXPath;
 use Exception;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Options of the four factories, algorithm lists and default algorithms.

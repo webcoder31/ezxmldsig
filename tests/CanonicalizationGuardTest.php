@@ -5,11 +5,10 @@ namespace webcoder31\ezxmldsig\Tests;
 use DOMDocument;
 use DOMXPath;
 use Exception;
-use ReflectionMethod;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\core\Canonicalization;
 
 /**
  * The verifier used to analyze tokens must reject a canonicalization that
@@ -22,10 +21,7 @@ class CanonicalizationGuardTest extends TestCase
      */
     private static function createVerifier()
     {
-        $method = new ReflectionMethod(XMLDSigToken::class, '_createVerifier');
-        $method->setAccessible(true);
-
-        return $method->invoke(null);
+        return Canonicalization::guardedVerifier();
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace webcoder31\ezxmldsig\Tests;
 
-use webcoder31\ezxmldsig\X509Cert;
+use webcoder31\ezxmldsig\core\X509Cert;
 
 /**
  * X509Cert on the test certificate chain.

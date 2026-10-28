@@ -32,10 +32,13 @@
  * @author    Thierry Thiers <webcoder31@gmail.com>
  * @copyright 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
- * @version   1.2.1
+ * @version   2.0.0
  */
 
 
 $ezxmldsig_srcdir = dirname(__FILE__) . '/src/';
-require $ezxmldsig_srcdir . '/XMLDSigToken.php';
-require $ezxmldsig_srcdir . '/X509Cert.php';
+require $ezxmldsig_srcdir . '/core/Algorithms.php';
+require $ezxmldsig_srcdir . '/core/Canonicalization.php';
+require $ezxmldsig_srcdir . '/core/X509Cert.php';
+require $ezxmldsig_srcdir . '/core/Xml.php';
+require $ezxmldsig_srcdir . '/token/XMLDSigToken.php';

@@ -32,12 +32,12 @@
  * @author    Thierry Thiers <webcoder31@gmail.com>
  * @copyright 2017-2026 - Thierry Thiers <webcoder31@gmail.com>
  * @license   http://www.cecill.info  CeCILL-C License
- * @version   1.2.1
+ * @version   2.0.0
  */
 
  
 // Namespace.
-namespace webcoder31\ezxmldsig;
+namespace webcoder31\ezxmldsig\core;
 
 // Use.
 use DateTime;
@@ -51,7 +51,8 @@ use Exception;
  * essential information contained in an X.509 certificate and for performing
  * some useful checks. Every cryptographic check (signature of the
  * certificate, chain of trust, validity dates) is performed by OpenSSL. This
- * class is used internally by the `XMLDSigToken` class.
+ * class belongs to the core, shared by the tokens (`XMLDSigToken`) and the
+ * seals.
  */
 class X509Cert
 {
@@ -465,5 +466,35 @@ class X509Cert
         $pem .= "-----END CERTIFICATE-----\n";
 
         return $pem;
+    }
+
+
+    /**
+     * Indicates whether a name (the subject or the issuer of a certificate,
+     * as returned by `openssl_x509_parse()`) holds the expected fields.
+     *
+     * Each expected field must be present with the very same value: character
+     * case is significant, and a field repeated in the name (e.g. two "OU")
+     * is an array of its values.
+     *
+     * @param array $name The name to check.
+     *
+     * @param array $expected The expected fields.
+     *
+     * @return boolean TRUE if every expected field matches, FALSE otherwise.
+     *
+     * @internal
+     */
+    public static function matchesName($name, $expected)
+    {
+        foreach ($expected as $key => $value)
+        {
+            if (!isset($name[$key]) || $name[$key] !== $value)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

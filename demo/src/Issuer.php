@@ -2,7 +2,7 @@
 
 namespace webcoder31\ezxmldsig\Demo;
 
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The sender of the demo: creates signed, possibly encrypted, tokens with
@@ -248,7 +248,7 @@ final class Issuer
             '<?php',
             "require 'vendor/autoload.php';",
             '',
-            'use webcoder31\ezxmldsig\XMLDSigToken;',
+            'use webcoder31\ezxmldsig\token\XMLDSigToken;',
             '',
             '$data = ' . self::exportArray($data, '') . ';',
             '',

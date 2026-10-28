@@ -7,7 +7,7 @@ use DateTimeZone;
 use DOMDocument;
 use DOMXPath;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Signature wrapping: xmlseclibs computes the digest of the first element of

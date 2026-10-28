@@ -2,7 +2,7 @@
 
 namespace webcoder31\ezxmldsig\Demo;
 
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The attack lab: each attack alters a legitimate token, and the receiver

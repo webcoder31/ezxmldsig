@@ -4,7 +4,7 @@ namespace webcoder31\ezxmldsig\Tests;
 
 use DOMDocument;
 use DOMXPath;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * getHTMLDump() and getPrettyXML(): what a token carries comes from its

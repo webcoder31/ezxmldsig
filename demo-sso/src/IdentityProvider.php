@@ -3,7 +3,7 @@
 namespace webcoder31\ezxmldsig\DemoSso;
 
 use webcoder31\ezxmldsig\Demo\Certs;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * idp.localhost: the identity provider.
