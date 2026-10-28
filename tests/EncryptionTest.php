@@ -8,7 +8,7 @@ use Exception;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Encryption of the token data: default algorithms, refused algorithms, and

@@ -10,7 +10,7 @@ use DOMXPath;
 use Exception;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Audience and expiry of the token: who it is addressed to, checked by

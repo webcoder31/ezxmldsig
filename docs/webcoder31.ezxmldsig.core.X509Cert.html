@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 
-	<title>Class webcoder31\ezxmldsig\X509Cert | EZXMLDSIG API</title>
+	<title>Class webcoder31\ezxmldsig\core\X509Cert | EZXMLDSIG API</title>
 	<link rel="stylesheet" href="assets/main.css">
 	<script src="assets/main.js" defer></script>
 </head>
@@ -21,6 +21,14 @@
 	<ul>
 			<li class="menuGroup-item active">
 				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
 			</li>
 	</ul>
 			</li>
@@ -30,14 +38,14 @@
 		<div class="menu-section">
 			<h3>Classes</h3>
 			<ul>
-					<li class="active">
-						<a href="webcoder31.ezxmldsig.X509Cert.html">
-							X509Cert
+					<li>
+						<a href="webcoder31.ezxmldsig.core.Algorithms.html">
+							Algorithms
 						</a>
 					</li>
-					<li>
-						<a href="webcoder31.ezxmldsig.XMLDSigToken.html">
-							XMLDSigToken
+					<li class="active">
+						<a href="webcoder31.ezxmldsig.core.X509Cert.html">
+							X509Cert
 						</a>
 					</li>
 			</ul>
@@ -55,10 +63,10 @@
 				</li>
 				<li>
 					
-						<a href="namespace-webcoder31.ezxmldsig.html">Namespace</a>
+						<a href="namespace-webcoder31.ezxmldsig.core.html">Namespace</a>
 					
 				</li>
-<li class="active"><a href="webcoder31.ezxmldsig.X509Cert.html">Class</a></li>				<li>
+<li class="active"><a href="webcoder31.ezxmldsig.core.X509Cert.html">Class</a></li>				<li>
 					<a href="tree.html">Tree</a>
 				</li>
 			</ul>
@@ -74,7 +82,7 @@
 
 		<div class="layout-content">
 		<h1>
-			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="webcoder31.ezxmldsig.X509Cert.html">X509Cert</a>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>\<a href="webcoder31.ezxmldsig.core.X509Cert.html">X509Cert</a>
 		</h1>
 
 
@@ -90,13 +98,14 @@
 essential information contained in an X.509 certificate and for performing
 some useful checks. Every cryptographic check (signature of the
 certificate, chain of trust, validity dates) is performed by OpenSSL. This
-class is used internally by the <code>XMLDSigToken</code> class.</p>
+class belongs to the core, shared by the tokens (<code>XMLDSigToken</code>) and the
+seals.</p>
 </div>
 		</div>
 
 
 		<div class="classLikeSection">
-			<b>Located at</b> <a href="source-X509Cert.html#56" title="Go to source code">X509Cert.php</a><br>
+			<b>Located at</b> <a href="source-core.X509Cert.html#57" title="Go to source code">core/X509Cert.php</a><br>
 		</div>
 
 
@@ -117,7 +126,7 @@ class is used internally by the <code>XMLDSigToken</code> class.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#65-93" title="Go to source code">__construct</a>(<span>string <var>$cert</var></span>)</code>
+				<code><a href="source-core.X509Cert.html#66-94" title="Go to source code">__construct</a>(<span>string <var>$cert</var></span>)</code>
 
 
 	<div class="expandable-collapsedView">
@@ -164,7 +173,7 @@ class is used internally by the <code>XMLDSigToken</code> class.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#96-104" title="Go to source code">getPem</a>(): String</code>
+				<code><a href="source-core.X509Cert.html#97-105" title="Go to source code">getPem</a>(): String</code>
 
 
 	<div class="expandable-collapsedView">
@@ -199,7 +208,7 @@ class is used internally by the <code>XMLDSigToken</code> class.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#107-128" title="Go to source code">getFingerprint</a>(<span>string <var>$algorithm</var> = <span class="php-str">'sha256'</span></span>): string</code>
+				<code><a href="source-core.X509Cert.html#108-129" title="Go to source code">getFingerprint</a>(<span>string <var>$algorithm</var> = <span class="php-str">'sha256'</span></span>): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -251,7 +260,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#131-139" title="Go to source code">getIssuer</a>(): array</code>
+				<code><a href="source-core.X509Cert.html#132-140" title="Go to source code">getIssuer</a>(): array</code>
 
 
 	<div class="expandable-collapsedView">
@@ -286,7 +295,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#142-150" title="Go to source code">getSubject</a>(): array</code>
+				<code><a href="source-core.X509Cert.html#143-151" title="Go to source code">getSubject</a>(): array</code>
 
 
 	<div class="expandable-collapsedView">
@@ -321,7 +330,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#153-161" title="Go to source code">getDN</a>(): string</code>
+				<code><a href="source-core.X509Cert.html#154-162" title="Go to source code">getDN</a>(): string</code>
 
 
 	<div class="expandable-collapsedView">
@@ -356,7 +365,7 @@ fingerprints are equal.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#164-176" title="Go to source code">getValidFrom</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#165-177" title="Go to source code">getValidFrom</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -401,7 +410,7 @@ FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#179-191" title="Go to source code">getValidTo</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#180-192" title="Go to source code">getValidTo</a>(<span>string <var>$dateFormat</var> = <span class="php-str">'ymdHise'</span></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -446,7 +455,7 @@ FALSE if $dateFormat is invalid.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#217-230" title="Go to source code">isOutOfDate</a>(): boolean</code>
+				<code><a href="source-core.X509Cert.html#218-231" title="Go to source code">isOutOfDate</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -482,7 +491,7 @@ FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#233-254" title="Go to source code">canSign</a>(): boolean</code>
+				<code><a href="source-core.X509Cert.html#234-255" title="Go to source code">canSign</a>(): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -522,7 +531,7 @@ extension is not restricted.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#257-318" title="Go to source code">isTrustedBy</a>(<span>string|array <var>$caCertPaths</var></span>): boolean</code>
+				<code><a href="source-core.X509Cert.html#258-319" title="Go to source code">isTrustedBy</a>(<span>string|array <var>$caCertPaths</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -587,7 +596,7 @@ FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#343-409" title="Go to source code">isValidCA</a>(<span>string <var>$caCert</var></span>): boolean</code>
+				<code><a href="source-core.X509Cert.html#344-410" title="Go to source code">isValidCA</a>(<span>string <var>$caCert</var></span>): boolean</code>
 
 
 	<div class="expandable-collapsedView">
@@ -653,7 +662,7 @@ validated, FALSE otherwise.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#412-438" title="Go to source code">pemToDer</a>(<span>string <var>$pemCertificate</var></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#413-439" title="Go to source code">pemToDer</a>(<span>string <var>$pemCertificate</var></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">
@@ -697,7 +706,7 @@ FALSE on failure.</p>
 			</td>
 
 			<td class="table-cell">
-				<code><a href="source-X509Cert.html#441-468" title="Go to source code">derToPem</a>(<span>string <var>$derCertificate</var></span>): string|false</code>
+				<code><a href="source-core.X509Cert.html#442-469" title="Go to source code">derToPem</a>(<span>string <var>$derCertificate</var></span>): string|false</code>
 
 
 	<div class="expandable-collapsedView">

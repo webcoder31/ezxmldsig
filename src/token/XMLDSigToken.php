@@ -37,7 +37,7 @@
 
 
 // Namespace.
-namespace webcoder31\ezxmldsig;
+namespace webcoder31\ezxmldsig\token;
 
 // Use.
 use DateTime;
@@ -50,6 +50,10 @@ use Exception;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
+use webcoder31\ezxmldsig\core\Algorithms;
+use webcoder31\ezxmldsig\core\Canonicalization;
+use webcoder31\ezxmldsig\core\X509Cert;
+use webcoder31\ezxmldsig\core\Xml;
 
 /**
  * Build or analyze an XML token.
@@ -180,7 +184,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * - Load the XML Digital Signature in a DOM document. A document with a
  *   document type declaration (DOCTYPE), or not encoded in UTF-8, is
  *   refused before it is parsed, and the parser never accesses the network
- *   (see `_loadXML()`).
+ *   (see `Xml::load()`).
  *
  * - Verify that the algorithms of the XML Digital Signature are the
  *   expected ones.
@@ -377,16 +381,16 @@ class XMLDSigToken
     const DESYNC_TOLERANCE = 30;
 
 
-    const C14N = XMLSecurityDSig::C14N;
-    const C14N_COMMENTS = XMLSecurityDSig::C14N_COMMENTS;
-    const EXC_C14N = XMLSecurityDSig::EXC_C14N;
-    const EXC_C14N_COMMENTS = XMLSecurityDSig::EXC_C14N_COMMENTS;
+    const C14N = Algorithms::C14N;
+    const C14N_COMMENTS = Algorithms::C14N_COMMENTS;
+    const EXC_C14N = Algorithms::EXC_C14N;
+    const EXC_C14N_COMMENTS = Algorithms::EXC_C14N_COMMENTS;
 
-    const SHA1 = XMLSecurityDSig::SHA1;
-    const SHA256 = XMLSecurityDSig::SHA256;
-    const SHA384 = XMLSecurityDSig::SHA384;
-    const SHA512 = XMLSecurityDSig::SHA512;
-    const RIPEMD160 = XMLSecurityDSig::RIPEMD160;
+    const SHA1 = Algorithms::SHA1;
+    const SHA256 = Algorithms::SHA256;
+    const SHA384 = Algorithms::SHA384;
+    const SHA512 = Algorithms::SHA512;
+    const RIPEMD160 = Algorithms::RIPEMD160;
 
     const TRIPLEDES_CBC = XMLSecurityKey::TRIPLEDES_CBC;
     const AES128_CBC = XMLSecurityKey::AES128_CBC;
@@ -397,10 +401,10 @@ class XMLDSigToken
     const AES256_GCM = XMLSecurityKey::AES256_GCM;
     const RSA_OAEP_MGF1P = XMLSecurityKey::RSA_OAEP_MGF1P;
     const DSA_SHA1 = XMLSecurityKey::DSA_SHA1;
-    const RSA_SHA1 = XMLSecurityKey::RSA_SHA1;
-    const RSA_SHA256 = XMLSecurityKey::RSA_SHA256;
-    const RSA_SHA384 = XMLSecurityKey::RSA_SHA384;
-    const RSA_SHA512 = XMLSecurityKey::RSA_SHA512;
+    const RSA_SHA1 = Algorithms::RSA_SHA1;
+    const RSA_SHA256 = Algorithms::RSA_SHA256;
+    const RSA_SHA384 = Algorithms::RSA_SHA384;
+    const RSA_SHA512 = Algorithms::RSA_SHA512;
     const HMAC_SHA1 = XMLSecurityKey::HMAC_SHA1;
 
     /** @const array The context each option applies to (see
@@ -1970,8 +1974,8 @@ class XMLDSigToken
 
         // Load the enveloping XML Digital Signature into a DOM document,
         // preserving its formatting. A document with a document type
-        // declaration is refused before it is parsed (see _loadXML()).
-        $xmlDoc = self::_loadXML($xml, "XML Digital Signature");
+        // declaration is refused before it is parsed (see Xml::load()).
+        $xmlDoc = Xml::load($xml, "XML Digital Signature");
 
         // Instantiate and store a DOMXpath object to navigate through the DOM
         // document that holds the XML Digital Signature.
@@ -2187,8 +2191,8 @@ class XMLDSigToken
         }
 
         // Create an XMLSecurityDSig object that rejects empty or failed
-        // canonicalizations (see _createVerifier()).
-        $XMLDSig = self::_createVerifier();
+        // canonicalizations (see Canonicalization::guardedVerifier()).
+        $XMLDSig = Canonicalization::guardedVerifier();
 
         // Locate the node "ds:Signature".
         $nodeSignature = $XMLDSig->locateSignature($xmlDoc);
@@ -2275,7 +2279,7 @@ class XMLDSigToken
 
         // Canonicalize the node "ds:Signature/ds:SignedInfo". The signature is
         // verified against this canonical form; the verifier throws an
-        // exception if it is empty (see _createVerifier()).
+        // exception if it is empty (see Canonicalization::guardedVerifier()).
         $XMLDSig->canonicalizeSignedInfo();
 
         // Verifies that the signature held in the node
@@ -2574,92 +2578,6 @@ class XMLDSigToken
 
 
     /**
-     * Load an XML document into a DOM document.
-     *
-     * A document type declaration (DOCTYPE) declares entities, which the
-     * parser expands where the document references them: nested internal
-     * entities make a small document expand into gigabytes ("billion
-     * laughs"), and external entities read files or URLs. An XML token never
-     * has one, so a document holding the bytes `<!DOCTYPE` is refused before
-     * it is parsed, whatever it declares. This check reads the raw bytes: it
-     * only holds for an encoding in which `<!DOCTYPE` can only be written as
-     * these very bytes, which is why a document is also refused, before it is
-     * parsed, when it is not in UTF-8, the encoding of the tokens: one that
-     * holds a NUL byte (UTF-16, UTF-32), that declares another encoding, or
-     * that does not start with `<` (EBCDIC, among others). The parsed document is refused too
-     * if it has a document type node, should the check above miss one.
-     *
-     * The document is parsed with `LIBXML_NONET`: the parser never accesses
-     * the network. Any libxml error refuses the document, and none is output.
-     * Whitespace is preserved: digests are computed over the document as it
-     * was signed.
-     *
-     * @param string $xml The XML document.
-     *
-     * @param string $what What the document is, for the error messages.
-     *
-     * @return DOMDocument The loaded document.
-     *
-     * @throws Exception If the document is refused.
-     */
-    static private function _loadXML($xml, $what)
-    {
-        if (!is_string($xml) || '' === $xml)
-        {
-            throw new Exception($what . " is not a valid XML document!");
-        }
-
-        $start = ltrim(preg_replace('/\A\xEF\xBB\xBF/', '', $xml), " \t\r\n");
-        if (false !== strpos($xml, "\0")
-            || (preg_match('/\A<\?xml\s[^>]*?\bencoding\s*=\s*(["\'])([^"\']*)\1/', $start, $matches)
-                && 0 !== strcasecmp($matches[2], 'UTF-8')))
-        {
-            throw new Exception($what . " must be encoded in UTF-8!");
-        }
-        if ('<' !== substr($start, 0, 1))
-        {
-            throw new Exception($what . " is not a valid XML document!");
-        }
-
-        if (false !== strpos($xml, '<!DOCTYPE'))
-        {
-            throw new Exception($what . " must not have a document type declaration (DOCTYPE)!");
-        }
-
-        $xmlDoc = new DOMDocument('1.0', 'UTF-8');
-        $xmlDoc->preserveWhiteSpace = true;
-
-        $prevState = libxml_use_internal_errors(true);
-        libxml_clear_errors();
-        try
-        {
-            $loaded = $xmlDoc->loadXML($xml, LIBXML_NONET);
-            $isValidXml = $loaded && 0 === count(libxml_get_errors());
-        }
-        finally
-        {
-            libxml_clear_errors();
-            libxml_use_internal_errors($prevState);
-        }
-
-        if (!$isValidXml)
-        {
-            throw new Exception($what . " is not a valid XML document!");
-        }
-
-        foreach ($xmlDoc->childNodes as $node)
-        {
-            if (XML_DOCUMENT_TYPE_NODE === $node->nodeType)
-            {
-                throw new Exception($what . " must not have a document type declaration (DOCTYPE)!");
-            }
-        }
-
-        return $xmlDoc;
-    }
-
-
-    /**
      * Decrypt the content of the node "ds:Object" in place.
      *
      * The failures that do not depend on the token content (no decryption
@@ -2752,7 +2670,7 @@ class XMLDSigToken
             // element is a valid content. XMLSecEnc would parse an Element
             // plaintext as a whole document instead, which may hold a
             // document type declaration (DOCTYPE) with its entities, refused
-            // everywhere else (see _loadXML()); a fragment cannot hold one.
+            // everywhere else (see Xml::load()); a fragment cannot hold one.
             $fragment = $encryptedDataNode->ownerDocument->createDocumentFragment();
             if (!is_string($plaintext) || '' === $plaintext || !$fragment->appendXML($plaintext))
             {
@@ -2854,7 +2772,7 @@ class XMLDSigToken
         {
             $matches = is_string($this->expectedSubject)
                 ? $cert->getDN() === $this->expectedSubject
-                : self::_matchesName($cert->getSubject(), $this->expectedSubject);
+                : X509Cert::matchesName($cert->getSubject(), $this->expectedSubject);
             if (!$matches)
             {
                 throw new Exception("Subject of the signing certificate is not the expected one! Subject: " . $cert->getDN() . ".");
@@ -2926,34 +2844,6 @@ class XMLDSigToken
         {
             throw new Exception("Token is not addressed to the expected audience! Expected: '" . $this->expectedAudience . "'. Token audience: '" . implode("', '", $audiences) . "'.");
         }
-    }
-
-
-    /**
-     * Indicates whether a name (the subject or the issuer of a certificate,
-     * as returned by `openssl_x509_parse()`) holds the expected fields.
-     *
-     * Each expected field must be present with the very same value: character
-     * case is significant, and a field repeated in the name (e.g. two "OU")
-     * is an array of its values.
-     *
-     * @param array $name The name to check.
-     *
-     * @param array $expected The expected fields.
-     *
-     * @return boolean TRUE if every expected field matches, FALSE otherwise.
-     */
-    static private function _matchesName($name, $expected)
-    {
-        foreach ($expected as $key => $value)
-        {
-            if (!isset($name[$key]) || $name[$key] !== $value)
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
 
@@ -3484,7 +3374,7 @@ class XMLDSigToken
             return false;
         }
 
-        return self::_matchesName($certIssuerInfo, $expectedIssuerInfo);
+        return X509Cert::matchesName($certIssuerInfo, $expectedIssuerInfo);
     }
 
 
@@ -3530,64 +3420,6 @@ class XMLDSigToken
         }
 
         return $this->x509Certificate->isValidCA($caCert);
-    }
-
-
-    /**
-     * Create the XMLSecurityDSig object used to verify an XML token.
-     *
-     * Digests and signatures are computed over canonicalized XML. If the
-     * canonicalization fails, `DOMNode::C14N()` returns FALSE (on PHP 8, some
-     * XPath failures throw an Error instead), and an XPath transform that
-     * selects nothing yields an empty string. Depending on its version,
-     * xmlseclibs then hashes an empty string: a forged reference only has to
-     * carry the digest of the empty string to validate, whatever the content
-     * of the referenced node. The returned object therefore makes the
-     * canonicalization of the node "ds:SignedInfo" and of each referenced node
-     * throw an exception unless it produces a non-empty string.
-     *
-     * This check is deliberately independent of the xmlseclibs version and
-     * must not be removed, even if xmlseclibs performs a similar check.
-     *
-     * @return XMLSecurityDSig The verifier.
-     */
-    static private function _createVerifier()
-    {
-        return new class() extends XMLSecurityDSig
-        {
-            public function canonicalizeSignedInfo()
-            {
-                return $this->guard(function () {
-                    return parent::canonicalizeSignedInfo();
-                }, "ds:SignedInfo");
-            }
-
-            public function processTransforms($refNode, $objData, $includeCommentNodes = true)
-            {
-                return $this->guard(function () use ($refNode, $objData, $includeCommentNodes) {
-                    return parent::processTransforms($refNode, $objData, $includeCommentNodes);
-                }, "referenced node");
-            }
-
-            private function guard(callable $canonicalize, $what)
-            {
-                try
-                {
-                    $data = $canonicalize();
-                }
-                catch (\Throwable $e)
-                {
-                    throw new Exception("Canonicalization of " . $what . " failed! Reason: " . $e->getMessage());
-                }
-
-                if (!is_string($data) || '' === $data)
-                {
-                    throw new Exception("Canonicalization of " . $what . " failed or is empty!");
-                }
-
-                return $data;
-            }
-        };
     }
 
 
@@ -3776,7 +3608,7 @@ class XMLDSigToken
      * The XML content is loaded as an XML token is: a document with a
      * document type declaration (DOCTYPE), or not encoded in UTF-8, is
      * refused before it is parsed, and the parser never accesses the network
-     * (see `_loadXML()`). A refused or invalid document is left unchanged and
+     * (see `Xml::load()`). A refused or invalid document is left unchanged and
      * the function returns FALSE.
      *
      * @param string $xml XML content, passed by reference.
@@ -3805,7 +3637,7 @@ class XMLDSigToken
         // Load the XML content into a DOM document.
         try
         {
-            $xmlDoc = self::_loadXML($xml, "XML content");
+            $xmlDoc = Xml::load($xml, "XML content");
         }
         catch (Exception $e)
         {

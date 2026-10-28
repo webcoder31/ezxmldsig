@@ -2,7 +2,7 @@
 
 namespace webcoder31\ezxmldsig\Demo;
 
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The algorithms the demo lets choose: those each option of XMLDSigToken

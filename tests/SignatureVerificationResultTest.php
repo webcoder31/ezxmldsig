@@ -7,7 +7,7 @@ use DOMXPath;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use webcoder31\ezxmldsig\Demo\Forge;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The verification of "ds:SignatureValue" returns the value of

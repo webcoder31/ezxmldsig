@@ -37,5 +37,8 @@
 
 
 $ezxmldsig_srcdir = dirname(__FILE__) . '/src/';
-require $ezxmldsig_srcdir . '/XMLDSigToken.php';
-require $ezxmldsig_srcdir . '/X509Cert.php';
+require $ezxmldsig_srcdir . '/core/Algorithms.php';
+require $ezxmldsig_srcdir . '/core/Canonicalization.php';
+require $ezxmldsig_srcdir . '/core/X509Cert.php';
+require $ezxmldsig_srcdir . '/core/Xml.php';
+require $ezxmldsig_srcdir . '/token/XMLDSigToken.php';

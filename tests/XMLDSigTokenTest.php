@@ -4,7 +4,7 @@ namespace webcoder31\ezxmldsig\Tests;
 
 use DateTime;
 use DateTimeZone;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * Legitimate uses of XMLDSigToken: create a token, then analyze it.

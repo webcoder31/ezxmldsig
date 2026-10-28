@@ -6,8 +6,8 @@ use webcoder31\ezxmldsig\Demo\Certs;
 use webcoder31\ezxmldsig\Demo\Issuer;
 use webcoder31\ezxmldsig\Demo\Receiver;
 use webcoder31\ezxmldsig\Demo\ReplayStore;
-use webcoder31\ezxmldsig\X509Cert;
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\core\X509Cert;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The certificates of demo/certs/ let the issuer of the demo create tokens

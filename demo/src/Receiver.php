@@ -2,7 +2,7 @@
 
 namespace webcoder31\ezxmldsig\Demo;
 
-use webcoder31\ezxmldsig\XMLDSigToken;
+use webcoder31\ezxmldsig\token\XMLDSigToken;
 
 /**
  * The receiver of the demo: analyzes a token with the library, then makes
@@ -635,7 +635,7 @@ final class Receiver
             '<?php',
             "require 'vendor/autoload.php';",
             '',
-            'use webcoder31\ezxmldsig\XMLDSigToken;',
+            'use webcoder31\ezxmldsig\token\XMLDSigToken;',
             '',
         ];
         if (!$this->config['ca'] && !$this->config['pin'])
