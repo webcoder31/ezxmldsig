@@ -1,5 +1,16 @@
-Unreleased
-----------
+2.0.0 (2026-10-28)
+-------------------
+In short: a major version for one change of names. XMLDSigToken and X509Cert
+move to namespaces of their own, webcoder31\ezxmldsig\token and
+webcoder31\ezxmldsig\core, beside the seals to come, as in the Node.js
+library: an application changes its use statements (and a loader of its own,
+its require lines), and nothing else. Their methods, constants and options
+are unchanged, and so are the tokens, which 1.2.1 and 2.0.0 exchange both
+ways. The README, in its section "Upgrading from 1.x", gives the old and the
+new names. The repository is renamed ezxmldsig-php, the concepts common to
+both libraries move to the documentation site, and the demos gain an
+animated illustration and, for the single sign-on demo, the theme button.
+
 - Breaking: the library is split into branches, each in its own namespace,
   as the Node.js library is. XMLDSigToken moves to
   webcoder31\ezxmldsig\token, X509Cert to webcoder31\ezxmldsig\core; their
