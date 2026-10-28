@@ -1,14 +1,14 @@
-# EZXMLDSIG: Signed and encrypted XML tokens for PHP
+# ezxmldsig for PHP: signed and encrypted XML tokens, and sealed files
 
 > **Documentation: [webcoder31.github.io/ezxmldsig-doc](https://webcoder31.github.io/ezxmldsig-doc/)**
 >
-> Why ezxmldsig exists, how a token works, a single sign-on, the duties of the receiver, encryption, certificates and keys, interoperability: the concepts common to the PHP and Node.js libraries are explained there. This README covers what is particular to the PHP library.
+> Why ezxmldsig exists, how a token works, a single sign-on, the duties of the receiver, encryption, certificates and keys, interoperability: the concepts of the tokens common to the PHP and Node.js libraries are explained there. The structure of the seals and the rules they follow are in their [design document](https://github.com/webcoder31/ezxmldsig-js/blob/main/design/seal.md). This README covers what is particular to the PHP library.
 
-Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** creates and verifies XML tokens: enveloping XML digital signatures that carry timestamped user data (a PHP associative array), optionally encrypted. Use them for token based authentication, Single Sign On, or to transmit data whose integrity and origin, and confidentiality when they are encrypted, are protected by the token itself.
+Built on the library **xmlseclibs** developed by Rob Richards (https://github.com/robrichards/xmlseclibs), the library **ezxmldsig** creates and verifies XML tokens: enveloping XML digital signatures that carry timestamped user data (a PHP associative array), optionally encrypted. Use them for token based authentication, Single Sign On, or to transmit data whose integrity and origin, and confidentiality when they are encrypted, are protected by the token itself. It also seals files, as an **experimental** feature: an ASiC-E container that holds the files and one XAdES signature over them proves who sealed them and that they have not changed since (see [Seals](#seals-experimental)).
 
-The library signs its own tokens only. It does not sign existing XML documents in place, parts of them, or external files: for these, use **xmlseclibs** directly, or a format designed for document signatures such as XAdES or PAdES.
+A token signs its own content only: the library does not sign existing XML documents in place, nor parts of them; for these, use **xmlseclibs** directly. Files of any kind are signed by the seals, in a container that holds them: to sign a PDF inside the PDF itself, use a PAdES library.
 
-The library exists for Node.js too: [**@webcoder31/ezxmldsig**](https://www.npmjs.com/package/@webcoder31/ezxmldsig) creates and verifies the same tokens, with the same options and the same checks, so that a single sign-on can mix PHP and Node.js nodes. Both read each other's tokens, signed or encrypted, which the tests of the Node.js library check against this one. The tokens being standard XML digital signatures and XML Encryption, other libraries can also create and read them, such as **xml-crypto** and **xml-encryption** for Node.js, provided the receiver makes the checks **ezxmldsig** makes besides the signature: see [Interoperability](#interoperability).
+The library exists for Node.js too: [**@webcoder31/ezxmldsig**](https://www.npmjs.com/package/@webcoder31/ezxmldsig) creates and verifies the same tokens and the same seals, with the same options and the same checks, so that a single sign-on can mix PHP and Node.js nodes. Each library reads the tokens and verifies the seals of the other: see [Interoperability](#interoperability) and [Compatible versions](#compatible-versions). The tokens being standard XML digital signatures and XML Encryption, other libraries can also create and read them, such as **xml-crypto** and **xml-encryption** for Node.js, provided the receiver makes the checks **ezxmldsig** makes besides the signature; the seals are validated by DSS, the validator of the European Commission.
 
 The author of the **ezxmldsig** library is Thierry Thiers.
 
@@ -16,43 +16,46 @@ The author of the **ezxmldsig** library is Thierry Thiers.
 ## Contents
 
 * [Requirements](#requirements)
-* [How to Install?](#how-to-install)
+* [Installation](#installation)
 * [What's in the box?](#whats-in-the-box)
 * [Why?](#why)
 * [How does it work?](#how-does-it-work)
 * [How to use?](#how-to-use)
-    * [Creating a signed XML token](#xmldsigtoken-creating-a-signed-xml-token)
-    * [Creating a signed XML token with encrypted user data](#xmldsigtoken-creating-a-signed-xml-token-with-encrypted-user-data)
-    * [Checking an XML token](#xmldsigtoken-checking-an-xml-token)
+    * [Creating a signed XML token](#creating-a-signed-xml-token)
+    * [Creating a signed XML token with encrypted user data](#creating-a-signed-xml-token-with-encrypted-user-data)
+    * [Checking an XML token](#checking-an-xml-token)
     * [Replay](#replay)
     * [Audience and expiry](#audience-and-expiry)
     * [XML parsing](#xml-parsing)
     * [Trust anchor](#trust-anchor)
     * [Encryption](#encryption)
-    * [Interoperability](#interoperability)
-    * [Compatible versions](#compatible-versions)
     * [Certificates and keys](#certificates-and-keys)
     * [Options](#options)
     * [Seals (experimental)](#seals-experimental)
+    * [Interoperability](#interoperability)
+    * [Compatible versions](#compatible-versions)
     * [Upgrading from 1.x](#upgrading-from-1x)
     * [Upgrading from 0.x](#upgrading-from-0x)
-* [Demo](#demo)
+* [Signed token demo](#signed-token-demo)
 * [Single sign-on demo](#single-sign-on-demo)
+* [Differences with the Node.js library](#differences-with-the-nodejs-library)
 * [Tests](#tests)
     * [What is checked, and by whom](#what-is-checked-and-by-whom)
 * [Documentation](#documentation)
+* [Releasing a version](#releasing-a-version)
 * [Security](#security)
+* [License](#license)
 * [How to Contribute?](#how-to-contribute)
 
 
 ## Requirements
 
-The library **ezxmldsig** requires PHP version 7.4 or greater, with the OpenSSL extension, and the library **xmlseclibs** developed by Rob Richards, version ^3.1.5 (3.1.5 or a later 3.x version).
+The library **ezxmldsig** requires PHP version 7.4 or greater, with the OpenSSL extension, and the library **xmlseclibs** developed by Rob Richards, version ^3.1.5 (3.1.5 or a later 3.x version). The seals also need the zlib extension; with the intl extension, the names of their files are compared in Unicode normalization form C, and as bytes without it (see [Seals](#seals-experimental)).
 
-The [demo](#demo), the [single sign-on demo](#single-sign-on-demo) and the [tests](#tests) are not part of the Composer package and have their own requirements (a running Docker daemon).
+The [signed token demo](#signed-token-demo), the [single sign-on demo](#single-sign-on-demo) and the [tests](#tests) are not part of the Composer package and have their own requirements (a running Docker daemon).
 
 
-## How to Install?
+## Installation
 
 The library **ezxmldsig** is available on [Packagist](https://packagist.org/packages/webcoder31/ezxmldsig) and you can install it for your project with [`composer.phar`](http://getcomposer.org).
 
@@ -95,7 +98,7 @@ The token protects its own content only: not the request that carries it (URL, h
 
 A signature proves that the data of a token were not changed; what matters most is to prove **who issued it**. A receiver accepts a token only if its signing certificate descends, through a chain of trust, from the CA certificates it declares and, when it asks for it, has the subject it expects or is the very certificate it pinned (see [Trust anchor](#trust-anchor)).
 
-**Revocation is not checked**: the library consults neither certificate revocation lists (CRL) nor OCSP responders, so a revoked certificate is accepted until it expires. What to do when a key leaks, signing key, CA key or decryption key: see [When a key is compromised](https://webcoder31.github.io/ezxmldsig-doc/certificates/#when-a-key-is-compromised) on the documentation site.
+**The tokens do not check revocation**: for them, the library consults neither certificate revocation lists (CRL) nor OCSP responders, so a revoked certificate is accepted until it expires. The seals check it (see [Seals](#seals-experimental)). What to do when a key leaks, signing key, CA key or decryption key: see [When a key is compromised](https://webcoder31.github.io/ezxmldsig-doc/certificates/#when-a-key-is-compromised) on the documentation site.
 
 The chain of trust, a root of a company's own for an internal single sign-on, and why this library exists: see [Why?](https://webcoder31.github.io/ezxmldsig-doc/why/) on the documentation site.
 
@@ -104,19 +107,19 @@ The chain of trust, a root of a company's own for an internal single sign-on, an
 
 A token is an enveloping XML digital signature: the node ``Token`` holds the user data, a timestamp and a random identifier; its digest is written in ``ds:SignedInfo``, which the sender signs with its private key; its certificate travels in ``ds:KeyInfo``. The receiver answers three questions: were the data changed (the digest), is the seal intact (the signature), and who sealed it (the trust in the certificate). The last one decides: an attacker who alters the data and signs them again with a key of their own passes the first two.
 
-``isSignatureValid()`` also checks the algorithms and the audience; **the freshness, the expiry and the replay are up to the receiver** (see [Checking an XML token](#xmldsigtoken-checking-an-xml-token)).
+``isSignatureValid()`` also checks the algorithms and the audience; **the freshness, the expiry and the replay are up to the receiver** (see [Checking an XML token](#checking-an-xml-token)).
 
-A token block by block, each check and the attack it stops: see [How does it work?](https://webcoder31.github.io/ezxmldsig-doc/how-it-works/) on the documentation site. The [demo](#demo) plays these checks out on real tokens, and replays the attacks the library rejects.
+A token block by block, each check and the attack it stops: see [How does it work?](https://webcoder31.github.io/ezxmldsig-doc/how-it-works/) on the documentation site. The [signed token demo](#signed-token-demo) plays these checks out on real tokens, and replays the attacks the library rejects.
 
 
 ## How to use?
 
 **NOTE:** The library **ezxmldsig** is designed to work with cryptographic material in PEM format.
 
-To see it work before writing any code, open the [demo](#demo) online (https://ezxmldsig.wbcdr.dev/) or run it on your machine (`bin/demo`): it creates, explains and verifies tokens, and replays the attacks the library refuses.
+To see it work before writing any code, open the [signed token demo](#signed-token-demo) online (https://ezxmldsig.wbcdr.dev/) or run it on your machine (`bin/demo`): it creates, explains and verifies tokens, and replays the attacks the library refuses.
 
 
-### XMLDSigToken: Creating a signed XML token
+### Creating a signed XML token
 
 The example below shows basic usage of the ``XMLDSigToken`` class for creating a signed token enveloped in an XML Digital Signature.
 
@@ -199,7 +202,7 @@ The result below was produced by this code with the certificates of `demo/certs/
 </ds:Signature>
 ```
 
-### XMLDSigToken: Creating a signed XML token with encrypted user data
+### Creating a signed XML token with encrypted user data
 
 The example below shows how to use the ``XMLDSigToken`` class for creating a signed token whose user data will be encrypted.
 
@@ -295,7 +298,7 @@ The result below was produced by this code with the certificates of `demo/certs/
 ```
 
 
-### XMLDSigToken: Checking an XML token
+### Checking an XML token
 
 In the following example, we will assume that we will receive the XML digital signature (in a Base64 coded field of an HTTP POST request) from an approved source that we want to ensure is the issuer. We will extract the signature from the POST request and we will perform all the checks needed to make sure we can trust the received user data.
 
@@ -518,42 +521,9 @@ The token data are encrypted with a session key generated for each token, and th
 What encryption protects and what it does not, and the attacks these choices stop (padding oracles, Bleichenbacher's attack on RSA 1.5, Jager and Somorovsky's attack on CBC): see [Encryption](https://webcoder31.github.io/ezxmldsig-doc/encryption/) on the documentation site.
 
 
-### Interoperability
-
-**In Node.js, use the Node.js version of this library**, [@webcoder31/ezxmldsig](https://www.npmjs.com/package/@webcoder31/ezxmldsig) (Node.js 22.12 or later), which makes every check this one makes:
-
-```sh
-npm install @webcoder31/ezxmldsig
-```
-
-See its [README](https://github.com/webcoder31/ezxmldsig-js#readme) and its [API documentation](https://webcoder31.github.io/ezxmldsig-js/). A token created by either library is valid for the other, signed or encrypted, with every algorithm and option both share. Its tests check it against this library under PHP 7.4 and 8.3, and replay the attack lab of the [demo](#demo): every forged token gets the same verdict from both. The few cases where they differ are listed in its README (section "Differences with the PHP library"); those that came from defects of version 1.2.0 of this library (keys that are not RSA keys, values holding ``&`` without base64, certificates dated from 2050 on) are fixed in 1.2.1.
-
-**With other libraries.** A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check its exact format. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways. The format of a token, element by element, and the code that creates and reads one with these libraries: see [Interoperability](https://webcoder31.github.io/ezxmldsig-doc/interoperability/) on the documentation site.
-
-These libraries only verify a signature, with the key they are given, and only decrypt: a receiver that uses them directly must make all the other checks of ``isSignatureValid()`` itself.
-
-
-### Compatible versions
-
-The versions of the two libraries that work together. A pair has the same features when each library creates and verifies what the other creates and verifies: the same tokens, and the same seals when both have them. In every pair, the cases listed in "[Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library)" in the README of the Node.js library differ.
-
-| PHP library | Node.js library | Tokens | Seals | Same features |
-|---|---|---|---|---|
-| **2.1.0** | **2.0.0** | exchanged both ways (1) | exchanged both ways, experimental (2) | **yes** |
-| 2.0.0 | 2.0.0 | exchanged both ways | only in the Node.js library | no |
-| 1.2.1 | 1.0.3 | exchanged both ways | in neither library | yes |
-| 1.2.1 | 1.0.2 | exchanged both ways | in neither library | no: `getPrettyXML()` comes to the Node.js library in 1.0.3 |
-| 1.2.0 | 1.0.0, 1.0.1 | exchanged both ways, but for three defects of the PHP library 1.2.0, fixed in 1.2.1 (3) | in neither library | no: `getPrettyXML()` comes to the Node.js library in 1.0.3 |
-
-1. The tests of the Node.js library 2.0.0 exchange tokens with the PHP library 2.0.0; the PHP library 2.1.0 does not change the tokens.
-2. The tests of the PHP library 2.1.0 verify seals made by the Node.js library 2.0.0. The seals of the PHP library 2.1.0 were verified by the Node.js library 2.0.0 and validated by DSS by hand (see [What is checked, and by whom](#what-is-checked-and-by-whom)).
-3. Listed in "[Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library)" in the README of the Node.js library.
-
-Each pair of the table is the one the tests of these versions check. The tokens do not change from the PHP library 1.2.1 and the Node.js library 1.0.2 on: later versions exchange them too, although the tests do not check every pair. A receiver of the PHP library 1.0 or 1.1 refuses the encrypted tokens of the PHP library 1.2.0 and later, and those of every version of the Node.js library.
-
 ### Certificates and keys
 
-A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signing certificate of the sender, the CA certificates the recipient trusts (``caCertPath``), and, for encrypted tokens, the encryption certificate of the recipient. EC and DSA keys are not supported. A signing key of another type is refused: at creation (``The signing key is not an RSA key``), and at analysis, where the signature of a certificate whose key is not an RSA key is not verified (``Token hash signature verification failed!``).
+A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signing certificate of the sender, the CA certificates the recipient trusts (``caCertPath``), and, for encrypted tokens, the encryption certificate of the recipient. EC and DSA keys are not supported. A signing key of another type is refused: at creation (``The signing key is not an RSA key``), and at analysis, where the signature of a certificate whose key is not an RSA key is not verified (``Token hash signature verification failed!``). These rules are those of the tokens: the seals take RSA keys of 2048 bits or more, and EC keys on P-256, P-384 and P-521 (see [Seals](#seals-experimental)).
 
 The signing certificate must be valid at the current date and, if it has a ``keyUsage`` extension, allow ``digitalSignature`` or ``nonRepudiation``. With ``caCertPath``, OpenSSL also checks every certificate of the chain: validity dates, signature, and, for each issuer, ``basicConstraints`` with ``CA:TRUE`` and a ``keyUsage`` that allows ``keyCertSign`` (see [Trust anchor](#trust-anchor)).
 
@@ -651,6 +621,42 @@ if (!$verification->isValid()) {
 The seals need the zlib extension of PHP besides OpenSSL; the ZIP extension is not used. Without the intl extension, two names of a container are compared as bytes rather than in Unicode normalization form C.
 
 
+### Interoperability
+
+**In Node.js, use the Node.js version of this library**, [@webcoder31/ezxmldsig](https://www.npmjs.com/package/@webcoder31/ezxmldsig) (Node.js 22.12 or later), which makes every check this one makes:
+
+```sh
+npm install @webcoder31/ezxmldsig
+```
+
+See its [README](https://github.com/webcoder31/ezxmldsig-js#readme) and its [API documentation](https://webcoder31.github.io/ezxmldsig-js/). A token created by either library is valid for the other, signed or encrypted, with every algorithm and option both share. Its tests check it against this library under PHP 7.4 and 8.3, and replay the attack lab of the [signed token demo](#signed-token-demo): every forged token gets the same verdict from both. The few cases where they differ are listed in its README (section "Differences with the PHP library"); those that came from defects of version 1.2.0 of this library (keys that are not RSA keys, values holding ``&`` without base64, certificates dated from 2050 on) are fixed in 1.2.1.
+
+**Seals.** The seals of both libraries are the same: each library verifies the seals of the other, at levels B, T and LT, and DSS validates them (see [What is checked, and by whom](#what-is-checked-and-by-whom)).
+
+**With other libraries.** A token is an XML digital signature and, when encrypted, XML Encryption: other libraries can create or read one, as long as they produce or check its exact format. Checked with [xml-crypto](https://www.npmjs.com/package/xml-crypto) 6.4.0 and [xml-encryption](https://www.npmjs.com/package/xml-encryption) 6.0.2 for Node.js, both ways. The format of a token, element by element, and the code that creates and reads one with these libraries: see [Interoperability](https://webcoder31.github.io/ezxmldsig-doc/interoperability/) on the documentation site.
+
+These libraries only verify a signature, with the key they are given, and only decrypt: a receiver that uses them directly must make all the other checks of ``isSignatureValid()`` itself.
+
+
+### Compatible versions
+
+The versions of the two libraries that work together. A pair has the same features when each library creates and verifies what the other creates and verifies: the same tokens, and the same seals when both have them. In every pair, the cases listed in "[Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library)" in the README of the Node.js library differ.
+
+| PHP library | Node.js library | Tokens | Seals | Same features |
+|---|---|---|---|---|
+| **2.1.0** | **2.0.0** | exchanged both ways (1) | exchanged both ways, experimental (2) | **yes** |
+| 2.0.0 | 2.0.0 | exchanged both ways | only in the Node.js library | no |
+| 1.2.1 | 1.0.3 | exchanged both ways | in neither library | yes |
+| 1.2.1 | 1.0.2 | exchanged both ways | in neither library | no: `getPrettyXML()` comes to the Node.js library in 1.0.3 |
+| 1.2.0 | 1.0.0, 1.0.1 | exchanged both ways, but for three defects of the PHP library 1.2.0, fixed in 1.2.1 (3) | in neither library | no: `getPrettyXML()` comes to the Node.js library in 1.0.3 |
+
+1. The tests of the Node.js library 2.0.0 exchange tokens with the PHP library 2.0.0; the PHP library 2.1.0 does not change the tokens.
+2. The tests of the PHP library 2.1.0 verify seals made by the Node.js library 2.0.0. The seals of the PHP library 2.1.0 were verified by the Node.js library 2.0.0 and validated by DSS by hand (see [What is checked, and by whom](#what-is-checked-and-by-whom)).
+3. Listed in "[Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library)" in the README of the Node.js library.
+
+Each pair of the table is the one the tests of these versions check. The tokens do not change from the PHP library 1.2.1 and the Node.js library 1.0.2 on: later versions exchange them too, although the tests do not check every pair. A receiver of the PHP library 1.0 or 1.1 refuses the encrypted tokens of the PHP library 1.2.0 and later, and those of every version of the Node.js library.
+
+
 ### Upgrading from 1.x
 
 * **Namespaces.** ``XMLDSigToken`` moves to ``webcoder31\ezxmldsig\token``, ``X509Cert`` to ``webcoder31\ezxmldsig\core``: replace ``use webcoder31\ezxmldsig\XMLDSigToken;`` with ``use webcoder31\ezxmldsig\token\XMLDSigToken;``, and ``use webcoder31\ezxmldsig\X509Cert;`` with ``use webcoder31\ezxmldsig\core\X509Cert;``. Nothing else changes: the same methods, constants, options, verdicts and error messages, and the same tokens.
@@ -687,7 +693,7 @@ The seals need the zlib extension of PHP besides OpenSSL; the ZIP extension is n
     * The sender no longer needs the private key of the recipient: ``createSecureXMLToken()`` accepts ``null`` as ``$cryptKeyPath`` (see [Encryption](#encryption)). Calls that pass it keep working.
 
 
-## Demo
+## Signed token demo
 
 An interactive demo is online at **https://ezxmldsig.wbcdr.dev/**: nothing to install, and each visitor has a replay memory of their own. It also runs on your machine, which requires a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory); neither PHP nor Composer has to be installed locally.
 
@@ -725,7 +731,7 @@ The demo is not part of the Composer package: `.gitattributes` leaves `demo/`, `
 
 ## Single sign-on demo
 
-A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **IDP**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **MAIL** and **CRM**, which have no password and trust the tokens of IDP. It is online at **https://sso.wbcdr.dev/**, each visitor with sessions, a trace and protections of their own. It also runs on your machine, with the same requirements as the [demo](#demo); browsers resolve `*.localhost` to the local machine.
+A second demo plays a single sign-on with ezxmldsig tokens, between three sites on three host names: **IDP**, the identity provider, which alone knows the users and their passwords and signs the tokens, and two applications, **MAIL** and **CRM**, which have no password and trust the tokens of IDP. It is online at **https://sso.wbcdr.dev/**, each visitor with sessions, a trace and protections of their own. It also runs on your machine, with the same requirements as the [signed token demo](#signed-token-demo); browsers resolve `*.localhost` to the local machine.
 
 ```
 git clone https://github.com/webcoder31/ezxmldsig-php.git
@@ -754,7 +760,12 @@ The home page (`http://localhost:8090/`) holds:
 
 The private keys of `demo-sso/certs/` are public, like those of `demo/certs/` (see `demo-sso/certs/README.md`); to issue new ones, run `bin/gen-test-certs --demo-sso`. The sessions, the trace and the replay memories are kept in `demo-sso/var/` (ignored by git).
 
-To serve it online, `demo-sso/Dockerfile` builds an image like the one of the [demo](#demo) (Apache and PHP 8.3, port 8000, user `www-data`, `GET /health`). `DEMO_SSO_PUBLIC_DOMAIN` names the domain whose subdomains are the sites, served over HTTPS by a proxy in front of it: with `sso.example.org`, the home page is `https://sso.example.org/`, and the sites `idp.sso.example.org`, `mail.sso.example.org` and `crm.sso.example.org`. Each visitor then has a directory of their own in `demo-sso/var/visitors/` (sessions, trace, protections, replay memories), named by a cookie set on that domain, which the browser sends to the four host names and to no other; "Reset the demo" only resets theirs. The directories left unwritten for two days are removed. Build it from the root of the repository: `docker build -f demo-sso/Dockerfile -t ezxmldsig-sso .`
+To serve it online, `demo-sso/Dockerfile` builds an image like the one of the [signed token demo](#signed-token-demo) (Apache and PHP 8.3, port 8000, user `www-data`, `GET /health`). `DEMO_SSO_PUBLIC_DOMAIN` names the domain whose subdomains are the sites, served over HTTPS by a proxy in front of it: with `sso.example.org`, the home page is `https://sso.example.org/`, and the sites `idp.sso.example.org`, `mail.sso.example.org` and `crm.sso.example.org`. Each visitor then has a directory of their own in `demo-sso/var/visitors/` (sessions, trace, protections, replay memories), named by a cookie set on that domain, which the browser sends to the four host names and to no other; "Reset the demo" only resets theirs. The directories left unwritten for two days are removed. Build it from the root of the repository: `docker build -f demo-sso/Dockerfile -t ezxmldsig-sso .`
+
+## Differences with the Node.js library
+
+The tokens and the seals of both libraries are the same, and so are their verdicts and error messages, but in the cases that the README of the Node.js library lists in [Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library): the types of the values, which follow each language, a few checks of the certificates, and the display and test helpers of this library (``getHTMLDump()``, ``alterXML()``), which the Node.js library does not have.
+
 
 ## Tests
 
@@ -772,7 +783,7 @@ Before running anything, it calls `bin/deps`, which brings `vendor/` in line wit
 
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
 
-The suite also runs each attack of the attack lab of the [demo](#demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
+The suite also runs each attack of the attack lab of the [signed token demo](#signed-token-demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
 
 The seals of `tests/fixtures/seal/containers/` are made by the Node.js library, and the tests check that this library gives the verdicts the Node.js library gave on them (`tests/fixtures/seal/verdicts.json`). Run `bin/gen-seal-fixtures` to make them again: it clones the Node.js library at a tag into `tests/.cache/`, and runs it in the `node` Docker image (see `tests/fixtures/seal/README.md`). The seals the tests make are time-stamped by the `openssl ts` command, and their CRLs and OCSP responses are issued by the `openssl ca` and `openssl ocsp` commands. The faults these commands cannot write (a delta CRL, an altered TSTInfo, a responder without the right extension, an ambiguous ZIP archive...) are built by the helpers of `tests/helpers/`, written apart from the library and ported from those of the Node.js library: a DER writer, a CRL issuer, an OCSP responder, a time-stamping authority and a ZIP builder. The tests ported from the Node.js library (`SealAttacksTest`, `SealOcspTest`, `SealRevocationTest`, `SealStructureTest`, `SealTimestampTest`, `SealValidationTest`, `ZipRawTest`) keep its cases.
 
@@ -812,9 +823,25 @@ bin/gen-docs
 The script runs the official `apigen/apigen` image, pinned by digest since ApiGen publishes no versioned image, and installs the dependencies with `composer install` when `vendor/` is missing (ApiGen also documents the classes of PHP and xmlseclibs the code refers to). ApiGen runs with the configuration of `bin/apigen/`, which keeps the blank lines and the indentation of the docblocks: ApiGen alone drops them, and with them the lists and code blocks of the docblocks. Docblocks are written in Markdown: a code example is a fenced code block (```` ```php ````, ```` ```xml ````), not a `<code>` tag. It replaces `docs/` as a whole, so that the pages of removed classes or methods do not remain, and refuses to do so if a generated file holds an absolute path. The pages load their style sheet and scripts from `docs/assets/` only: the site loads nothing from other servers.
 
 
+## Releasing a version
+
+A version is published on Packagist by its tag: Packagist reads the tags of the GitHub repository, and installs the version a tag names.
+
+1. Set the version in the docblocks (``@version``) of ``ezxmldsig.php`` and of ``src/``, and describe it in ``CHANGELOG.txt``.
+2. Regenerate the documentation (``bin/gen-docs``): its pages show the version.
+3. Run ``bin/test``, under PHP 7.4 and 8.3, and make the checks that are made by hand (see [What is checked, and by whom](#what-is-checked-and-by-whom)).
+4. Commit and push to ``main``.
+5. Tag the commit, with an annotated tag ``v`` followed by the version, push the tag, and publish the release on GitHub: ``git tag -a v1.2.3 -m "ezxmldsig 1.2.3"``, ``git push origin v1.2.3``, ``gh release create v1.2.3 --title 1.2.3 --notes-file <notes>``.
+
+
 ## Security
 
-To report a vulnerability, see [SECURITY.md](SECURITY.md): report it privately, not in a public issue. Only the 1.x versions are maintained; the 0.x versions must no longer be used.
+To report a vulnerability, see [SECURITY.md](SECURITY.md): report it privately, not in a public issue. It lists the supported versions; the 0.x versions must no longer be used.
+
+
+## License
+
+[CeCILL-C](LICENSE), the license of both libraries.
 
 
 ## How to Contribute?
