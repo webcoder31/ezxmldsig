@@ -1,0 +1,100 @@
+#!/bin/sh
+#
+# Serves the Node.js library ezxmldsig-js to the tests, in Docker, for the
+# tests of the interoperability between the two libraries.
+#
+# Usage:
+#   bin/js-ezxmldsig start NETWORK   starts the service on a Docker network
+#   bin/js-ezxmldsig stop NETWORK    stops it
+#   bin/js-ezxmldsig --prepare       only fetches and builds the library
+#
+# bin/test runs it: the PHPUnit container joins the network and reaches the
+# service at http://ezxmldsig-js:8080, the URL it is given in
+# EZXMLDSIG_JS_URL (see tests/js/ezxmldsig.ts for the requests and their
+# results). The service sees the repository read-only, at /app, where the
+# PHPUnit container sees it.
+#
+# The Node.js library is the tag v2.0.0 of
+# https://github.com/webcoder31/ezxmldsig-js, cloned once into
+# tests/.cache/ezxmldsig-js-v2.0.0/ (ignored by git), and installed and built
+# in the node image. The environment variable EZXMLDSIG_JS_DIR names another
+# copy instead (a working copy, for instance), which must be built
+# (npm ci && npm run build in that copy).
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+JS_TAG=v2.0.0
+JS_REPO=https://github.com/webcoder31/ezxmldsig-js.git
+NODE_IMAGE=node:24-slim
+ALIAS=ezxmldsig-js
+
+case "${1:-}" in
+    -h|--help) sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    start|stop) [ $# -eq 2 ] || { echo "Usage: bin/js-ezxmldsig $1 NETWORK" >&2; exit 1; } ;;
+    --prepare) ;;
+    *) echo "Usage: bin/js-ezxmldsig start NETWORK | stop NETWORK | --prepare" >&2; exit 1 ;;
+esac
+
+if ! docker info >/dev/null 2>&1; then
+    echo "Docker is not reachable (with Colima: colima start)." >&2
+    exit 1
+fi
+
+DOCKER_USER="$(id -u):$(id -g)"
+
+if [ "$1" = stop ]; then
+    docker rm -f "$2-js" >/dev/null 2>&1 || true
+    exit 0
+fi
+
+ready() { [ -f "$1/dist/token/index.js" ] && [ -d "$1/node_modules" ]; }
+
+if [ -n "${EZXMLDSIG_JS_DIR:-}" ]; then
+    JS_DIR=$(cd "$EZXMLDSIG_JS_DIR" && pwd)
+    if ! ready "$JS_DIR"; then
+        echo "$JS_DIR is not built (npm ci && npm run build in that copy)." >&2
+        exit 1
+    fi
+else
+    # The directory is named after the tag: a copy of another version is
+    # never taken for this one. bin/gen-seal-fixtures uses the same clone.
+    JS_DIR="$ROOT_DIR/tests/.cache/ezxmldsig-js-$JS_TAG"
+    if [ ! -d "$JS_DIR" ]; then
+        echo "Cloning ezxmldsig-js $JS_TAG into tests/.cache/." >&2
+        rm -rf "$JS_DIR.tmp"
+        git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$JS_TAG" "$JS_REPO" "$JS_DIR.tmp" >&2
+        mv "$JS_DIR.tmp" "$JS_DIR"
+    fi
+    if ! ready "$JS_DIR"; then
+        echo "Installing and building ezxmldsig-js $JS_TAG ($NODE_IMAGE image)." >&2
+        docker run --rm -u "$DOCKER_USER" -e HOME=/tmp -v "$JS_DIR:/js" -w /js "$NODE_IMAGE" \
+            sh -c 'npm ci --silent --no-audit --no-fund && npm run --silent build' >&2
+    fi
+fi
+
+if [ "$1" = --prepare ]; then
+    exit 0
+fi
+
+# The service, on the network only: the network of bin/test has no way out.
+NAME="$2-js"
+docker rm -f "$NAME" >/dev/null 2>&1 || true
+docker run -d --rm --name "$NAME" --network "$2" --network-alias "$ALIAS" -u "$DOCKER_USER" \
+    -v "$JS_DIR:/ezxmldsig-js:ro" -v "$ROOT_DIR:/app:ro" -w /app \
+    "$NODE_IMAGE" node tests/js/ezxmldsig.ts >/dev/null
+
+# Waits until it answers, from inside its container: the host does not
+# reach the network.
+WAITED=0
+until docker exec "$NAME" node -e "fetch('http://127.0.0.1:8080/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))" 2>/dev/null; do
+    if ! docker inspect "$NAME" >/dev/null 2>&1 || [ "$WAITED" -ge 30 ]; then
+        echo "The ezxmldsig-js service did not start:" >&2
+        docker logs "$NAME" >&2 2>&1 || true
+        docker rm -f "$NAME" >/dev/null 2>&1 || true
+        exit 1
+    fi
+    sleep 1
+    WAITED=$((WAITED + 1))
+done

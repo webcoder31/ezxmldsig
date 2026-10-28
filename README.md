@@ -769,7 +769,7 @@ The tokens and the seals of both libraries are the same, and so are their verdic
 
 ## Tests
 
-The PHPUnit test suite runs in Docker, so neither PHP nor PHPUnit has to be installed locally. Requirements: a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory), `curl` and a POSIX shell.
+The PHPUnit test suite runs in Docker, so neither PHP nor PHPUnit has to be installed locally. Requirements: a running Docker daemon (e.g. Docker Desktop, or Colima with the repository under your home directory), `curl`, `git` and a POSIX shell.
 
 ```
 bin/test                        # PHP 7.4, then PHP 8.3
@@ -784,6 +784,8 @@ Before running anything, it calls `bin/deps`, which brings `vendor/` in line wit
 Tests that need a feature the current environment lacks are skipped, and PHPUnit prints the reason.
 
 The continuous integration (`.github/workflows/ci.yml`) runs `bin/test` under PHP 7.4 and 8.3 on each push to `main` and each pull request, with `--fail-on-skipped`: there, a skipped test fails the run, so that a check that does not run never passes for one that does.
+
+The tests of the interoperability with the Node.js library (`tests/JsBridgeTest.php`) call it through `tests/helpers/Js.php`. `bin/test` runs the tests on a Docker network of their own, with no way out, where `bin/js-ezxmldsig` serves the Node.js library over HTTP (`tests/js/ezxmldsig.ts`, in the `node:24-slim` image), and removes both at the end. The library is the tag named in `bin/js-ezxmldsig`, cloned once into `tests/.cache/` and built there; `EZXMLDSIG_JS_DIR` names a built working copy instead (`EZXMLDSIG_JS_DIR=../ezxmldsig-js bin/test`). Run outside `bin/test`, these tests are skipped; in continuous integration (`CI=true`), they fail.
 
 The suite also runs each attack of the attack lab of the [signed token demo](#signed-token-demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
 

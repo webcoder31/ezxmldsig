@@ -5,6 +5,7 @@
 /.dockerignore export-ignore
 /.drove.json export-ignore
 /.gitattributes export-ignore
+/.github export-ignore
 /.gitignore export-ignore
 /bin export-ignore
 /demo export-ignore

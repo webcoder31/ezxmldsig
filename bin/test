@@ -17,6 +17,13 @@
 # tests/.cache/ (ignored by git) and checked against a pinned SHA-256.
 # Before that, bin/deps brings vendor/ in line with composer.json (in the
 # composer:2 image), updating it when it is missing or outdated.
+#
+# The tests run on a Docker network of their own, with no way out, where
+# bin/js-ezxmldsig serves the Node.js library to the tests of the
+# interoperability (EZXMLDSIG_JS_URL); the network and the service are
+# removed at the end. CI, when set, is passed to the tests: in continuous
+# integration, a test that cannot reach the Node.js library fails instead of
+# being skipped.
 
 set -eu
 
@@ -30,7 +37,7 @@ VERSIONS=
 while [ $# -gt 0 ]; do
     case "$1" in
         --) shift; break ;;
-        -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) VERSIONS="$VERSIONS $1"; shift ;;
     esac
 done
@@ -67,11 +74,19 @@ if [ "$(sha256 "$ROOT_DIR/$PHPUNIT_PHAR")" != "$PHPUNIT_SHA256" ]; then
     exit 1
 fi
 
+# The network, and the Node.js library on it (see bin/js-ezxmldsig).
+NETWORK="ezxmldsig-test-$$"
+docker network create --internal "$NETWORK" >/dev/null
+trap '"$ROOT_DIR/bin/js-ezxmldsig" stop "$NETWORK"; docker network rm "$NETWORK" >/dev/null' EXIT
+trap 'exit 1' INT TERM
+"$ROOT_DIR/bin/js-ezxmldsig" start "$NETWORK"
+
 # Test runs.
 STATUS=0
 for version in $VERSIONS; do
     echo "==> PHP $version" >&2
-    docker run --rm -u "$DOCKER_USER" \
+    docker run --rm -u "$DOCKER_USER" --network "$NETWORK" \
+        -e EZXMLDSIG_JS_URL=http://ezxmldsig-js:8080 -e CI \
         -v "$ROOT_DIR:/app" -w /app "php:$version-cli" \
         php "$PHPUNIT_PHAR" "$@" || STATUS=1
 done

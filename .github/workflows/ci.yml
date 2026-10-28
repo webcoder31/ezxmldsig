@@ -1,7 +1,8 @@
 # The test suite under PHP 7.4 and 8.3, as bin/test runs it on a developer
 # machine: in the official php:<version>-cli images, with Docker, which the
-# runners have. A skipped test fails the run: a check that does not run
-# must not pass for one that does.
+# runners have, and with the Node.js library served by bin/js-ezxmldsig. A
+# skipped test fails the run: a check that does not run must not pass for
+# one that does.
 name: CI
 
 on:
