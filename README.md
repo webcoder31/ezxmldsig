@@ -30,6 +30,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
     * [Trust anchor](#trust-anchor)
     * [Encryption](#encryption)
     * [Interoperability](#interoperability)
+    * [Compatible versions](#compatible-versions)
     * [Certificates and keys](#certificates-and-keys)
     * [Options](#options)
     * [Seals (experimental)](#seals-experimental)
@@ -38,6 +39,7 @@ The author of the **ezxmldsig** library is Thierry Thiers.
 * [Demo](#demo)
 * [Single sign-on demo](#single-sign-on-demo)
 * [Tests](#tests)
+    * [What is checked, and by whom](#what-is-checked-and-by-whom)
 * [Documentation](#documentation)
 * [Security](#security)
 * [How to Contribute?](#how-to-contribute)
@@ -531,6 +533,24 @@ See its [README](https://github.com/webcoder31/ezxmldsig-js#readme) and its [API
 These libraries only verify a signature, with the key they are given, and only decrypt: a receiver that uses them directly must make all the other checks of ``isSignatureValid()`` itself.
 
 
+### Compatible versions
+
+The versions of the two libraries that work together. A pair has the same features when each library creates and verifies what the other creates and verifies: the same tokens, and the same seals when both have them. In every pair, the cases listed in "[Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library)" in the README of the Node.js library differ.
+
+| PHP library | Node.js library | Tokens | Seals | Same features |
+|---|---|---|---|---|
+| **2.1.0** | **2.0.0** | exchanged both ways (1) | exchanged both ways, experimental (2) | **yes** |
+| 2.0.0 | 2.0.0 | exchanged both ways | only in the Node.js library | no |
+| 1.2.1 | 1.0.3 | exchanged both ways | in neither library | yes |
+| 1.2.1 | 1.0.2 | exchanged both ways | in neither library | no: `getPrettyXML()` comes to the Node.js library in 1.0.3 |
+| 1.2.0 | 1.0.0, 1.0.1 | exchanged both ways, but for three defects of the PHP library 1.2.0, fixed in 1.2.1 (3) | in neither library | no: `getPrettyXML()` comes to the Node.js library in 1.0.3 |
+
+1. The tests of the Node.js library 2.0.0 exchange tokens with the PHP library 2.0.0; the PHP library 2.1.0 does not change the tokens.
+2. The tests of the PHP library 2.1.0 verify seals made by the Node.js library 2.0.0. The seals of the PHP library 2.1.0 were verified by the Node.js library 2.0.0 and validated by DSS by hand (see [What is checked, and by whom](#what-is-checked-and-by-whom)).
+3. Listed in "[Differences with the PHP library](https://github.com/webcoder31/ezxmldsig-js#differences-with-the-php-library)" in the README of the Node.js library.
+
+Each pair of the table is the one the tests of these versions check. The tokens do not change from the PHP library 1.2.1 and the Node.js library 1.0.2 on: later versions exchange them too, although the tests do not check every pair. A receiver of the PHP library 1.0 or 1.1 refuses the encrypted tokens of the PHP library 1.2.0 and later, and those of every version of the Node.js library.
+
 ### Certificates and keys
 
 A token involves up to three kinds of certificates, all X.509 certificates in PEM format with **RSA keys**: the signing certificate of the sender, the CA certificates the recipient trusts (``caCertPath``), and, for encrypted tokens, the encryption certificate of the recipient. EC and DSA keys are not supported. A signing key of another type is refused: at creation (``The signing key is not an RSA key``), and at analysis, where the signature of a certificate whose key is not an RSA key is not verified (``Token hash signature verification failed!``).
@@ -757,6 +777,26 @@ The suite also runs each attack of the attack lab of the [demo](#demo) with the 
 The seals of `tests/fixtures/seal/containers/` are made by the Node.js library, and the tests check that this library gives the verdicts the Node.js library gave on them (`tests/fixtures/seal/verdicts.json`). Run `bin/gen-seal-fixtures` to make them again: it clones the Node.js library at a tag into `tests/.cache/`, and runs it in the `node` Docker image (see `tests/fixtures/seal/README.md`). The seals the tests make are time-stamped by the `openssl ts` command, and their CRLs and OCSP responses are issued by the `openssl ca` and `openssl ocsp` commands. The faults these commands cannot write (a delta CRL, an altered TSTInfo, a responder without the right extension, an ambiguous ZIP archive...) are built by the helpers of `tests/helpers/`, written apart from the library and ported from those of the Node.js library: a DER writer, a CRL issuer, an OCSP responder, a time-stamping authority and a ZIP builder. The tests ported from the Node.js library (`SealAttacksTest`, `SealOcspTest`, `SealRevocationTest`, `SealStructureTest`, `SealTimestampTest`, `SealValidationTest`, `ZipRawTest`) keep its cases.
 
 The certificates used by the tests live in `tests/fixtures/certs/`: a root CA, an intermediate CA, signing and encryption certificates issued by the intermediate, and a certificate signed by its own key that copies the subject and issuer names of the signing certificate. Run `bin/gen-test-certs` to generate them again (it runs OpenSSL in the `alpine:3.22` Docker image, whatever OpenSSL the host has). The tests of the trust anchor also issue certificates on the fly (expired, issued by another intermediate CA, issued by a certificate that is not a CA) in a temporary directory removed after each test.
+
+### What is checked, and by whom
+
+Each library checks, for its tokens and for its seals:
+
+1. that it verifies what it creates;
+2. that the other library verifies what it creates;
+3. that third-party tools verify what it creates: xml-crypto and xml-encryption for the tokens, DSS (Digital Signature Service, the validator of the European Commission) for the seals;
+4. that it verifies what these tools create.
+
+Each check belongs in the tests of the library itself, and runs in its continuous integration. Where each one is made:
+
+| Check | Tokens of the PHP library | Tokens of the Node.js library | Seals of the PHP library | Seals of the Node.js library |
+|---|---|---|---|---|
+| 1. It verifies what it creates | tests of the PHP library | tests and continuous integration of the Node.js library | tests of the PHP library | tests and continuous integration of the Node.js library |
+| 2. The other library verifies what it creates | tests of the Node.js library, against the PHP library 2.0.0 | tests and continuous integration of the Node.js library, by the PHP library 2.0.0 | by hand | tests of the PHP library, on seals made by the Node.js library 2.0.0 |
+| 3. Third-party tools verify what it creates | by hand | tests and continuous integration of the Node.js library | by hand | tests and continuous integration of the Node.js library |
+| 4. It verifies what these tools create | by hand | tests and continuous integration of the Node.js library | tests of the PHP library, on a seal made by DSS | tests and continuous integration of the Node.js library, on a seal made by DSS |
+
+The tests of the PHP library run with `bin/test`; the repository of the PHP library has no continuous integration. The Node.js library depends on xml-crypto, which canonicalizes its XML: for its tokens, xml-crypto is not a checker wholly apart from the code under test.
 
 
 ## Documentation
