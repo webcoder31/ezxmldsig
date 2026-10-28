@@ -11,6 +11,7 @@ The seals of this directory are made by the Node.js library [ezxmldsig-js](https
 | `containers/lt-crl.asice`, `containers/lt-ocsp.asice` | Level LT: the seal of level T with its CRLs, or with OCSP responses for the signer and the authority |
 | `revocation/` | The CRLs and OCSP responses `generate.ts` issued after the time-stamp |
 | `verdicts.json` | What `verifySeal()` of the Node.js library said of each seal when it was made |
+| `dss/` | A seal of level B built by DSS 6.5.1, a third producer, and the certificate of its signer (a self-signed test certificate of the European Commission, PKI-TEST), copied from the Node.js library |
 | `zip/` | ZIP archives written by the zipfile module of Python, for the tests of the ZIP reader (`generate.py`) |
 
 The times are relative to the run of the generator: the seals are signed a minute before it, time-stamped 50 seconds before, and their CRLs and OCSP responses are issued 40 seconds before. Data issued after the time-stamp keep proving the status of the signer at that time, so that the seals of levels T and LT stay valid as long as the certificates of the PKI (2036). A seal of level B needs current CRLs: the tests issue them with the `openssl ca` command when they run.
