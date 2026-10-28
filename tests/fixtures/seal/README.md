@@ -5,7 +5,8 @@ The seals of this directory are made by the Node.js library [ezxmldsig-js](https
 | Path | Content |
 |---|---|
 | `certs/` | The test PKI of the seals, copied from the Node.js library (see its README) |
-| `containers/b-*.asice` | Level B, each signature algorithm (RSA-PSS, RSA PKCS#1 v1.5, ECDSA P-256 and P-384, RSA-PSS SHA-512), a revoked signer, and a seal without its intermediate CA |
+| `p521/` | A P-521 signer, which the PKI of the Node.js library has not: issued once by `bin/gen-seal-fixtures` under the same intermediate CA, with the extensions of the P-384 signer and the validity of the intermediate, and kept when the seals are made again (its key is encrypted with the password of the others) |
+| `containers/b-*.asice` | Level B, each signature algorithm (RSA-PSS, RSA PKCS#1 v1.5, ECDSA P-256, P-384 and P-521, RSA-PSS SHA-512), a revoked signer, and a seal without its intermediate CA |
 | `containers/t-rsa-pss-sha256.asice` | Level T: the seal `b-rsa-pss-sha256`, time-stamped by the test authority of the Node.js library |
 | `containers/lt-crl.asice`, `containers/lt-ocsp.asice` | Level LT: the seal of level T with its CRLs, or with OCSP responses for the signer and the authority |
 | `revocation/` | The CRLs and OCSP responses `generate.ts` issued after the time-stamp |

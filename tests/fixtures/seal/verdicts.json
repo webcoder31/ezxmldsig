@@ -17,7 +17,7 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
   },
@@ -39,7 +39,7 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
   },
@@ -61,7 +61,7 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 2048 Seal Dept/CN=Lothbrok Seal Test"
   },
@@ -83,7 +83,7 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=P-256 Seal Dept/CN=Lothbrok Seal Test"
   },
@@ -105,16 +105,38 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=P-384 Seal Dept/CN=Lothbrok Seal Test"
   },
+  "b-ecdsa-p521": {
+    "valid": true,
+    "error": null,
+    "level": "B",
+    "files": [
+      {
+        "name": "contract.txt",
+        "mimeType": "text/plain"
+      },
+      {
+        "name": "annexes/résumé 1.md",
+        "mimeType": "text/markdown"
+      },
+      {
+        "name": "data.bin",
+        "mimeType": "application/octet-stream"
+      }
+    ],
+    "signingTime": "2026-10-28T07:11:27.000Z",
+    "timestampTime": null,
+    "signer": "/C=DK/O=Lothbrok Ltd/OU=P-521 Seal Dept/CN=Lothbrok Seal Test"
+  },
   "b-revoked": {
     "valid": false,
-    "error": "The certificate \"/C=DK/O=Lothbrok Ltd/OU=Revoked Seal Dept/CN=Lothbrok Seal Test\" is revoked since 2026-10-28T03:00:53.000Z. (the option revocation: false verifies the seal without revocation.)",
+    "error": "The certificate \"/C=DK/O=Lothbrok Ltd/OU=Revoked Seal Dept/CN=Lothbrok Seal Test\" is revoked since 2026-10-28T07:11:32.000Z. (the option revocation: false verifies the seal without revocation.)",
     "level": null,
     "files": [],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=Revoked Seal Dept/CN=Lothbrok Seal Test"
   },
@@ -123,7 +145,7 @@
     "error": "The signing certificate is not trusted: no valid chain up to a trusted CA certificate.",
     "level": null,
     "files": [],
-    "signingTime": "2026-10-28T03:00:48.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
     "timestampTime": null,
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
   },
@@ -145,8 +167,8 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
-    "timestampTime": "2026-10-28T03:00:58.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
+    "timestampTime": "2026-10-28T07:11:37.000Z",
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
   },
   "lt-crl": {
@@ -167,8 +189,8 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
-    "timestampTime": "2026-10-28T03:00:58.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
+    "timestampTime": "2026-10-28T07:11:37.000Z",
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
   },
   "lt-ocsp": {
@@ -189,8 +211,8 @@
         "mimeType": "application/octet-stream"
       }
     ],
-    "signingTime": "2026-10-28T03:00:48.000Z",
-    "timestampTime": "2026-10-28T03:00:58.000Z",
+    "signingTime": "2026-10-28T07:11:27.000Z",
+    "timestampTime": "2026-10-28T07:11:37.000Z",
     "signer": "/C=DK/O=Lothbrok Ltd/OU=RSA 3072 Seal Dept/CN=Lothbrok Seal Test"
   }
 }

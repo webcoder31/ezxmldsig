@@ -24,8 +24,10 @@ import { makeOcspResponse } from './test/helpers/ocsp.ts';
 
 const out = process.argv[2] as string;
 const CERTS = 'test/fixtures/seal/certs';
-const cert = (name: string) => `${CERTS}/${name}.cert.pem`;
-const key = (name: string) => `${CERTS}/${name}.key.pem`;
+// The P-521 signer is issued by bin/gen-seal-fixtures, under the same intermediate CA.
+const dir = (name: string) => (name === 'p521' ? join(out, 'p521') : CERTS);
+const cert = (name: string) => `${dir(name)}/${name}.cert.pem`;
+const key = (name: string) => `${dir(name)}/${name}.key.pem`;
 const ROOT = cert('root');
 const TSA_ROOT = cert('tsa-root');
 const NOW = Date.now();
@@ -68,6 +70,7 @@ const containers: Record<string, Buffer> = {
   'b-rsa2048-pss-sha512': seal('rsa2048', { signatureAlgorithm: RSA_PSS_SHA512, digestAlgorithm: SHA512 }),
   'b-ecdsa-p256': seal('p256'),
   'b-ecdsa-p384': seal('p384'),
+  'b-ecdsa-p521': seal('p521'),
   'b-revoked': seal('revoked'),
   'b-rsa1024': (() => { try { return seal('rsa1024'); } catch { return null; } })() as Buffer,
   'b-no-chain': createSeal(files, key('rsa3072'), cert('rsa3072'), 'signKeyPassword', { signingTime }),

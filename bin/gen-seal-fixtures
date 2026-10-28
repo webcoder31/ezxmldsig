@@ -46,6 +46,34 @@ if ! diff -r "$JS_DIR/test/fixtures/seal/certs" "$ROOT_DIR/tests/fixtures/seal/c
     exit 1
 fi
 
+# The PKI of the Node.js library has no P-521 signer. One is issued here
+# once, under the same intermediate CA, with the extensions of the P-384
+# signer, valid while the intermediate is: in tests/fixtures/seal/p521/, apart
+# from the copied certificates, and kept when the seals are made again.
+P521_DIR="$ROOT_DIR/tests/fixtures/seal/p521"
+if [ ! -f "$P521_DIR/p521.cert.pem" ]; then
+    echo "Issuing the P-521 signer into tests/fixtures/seal/p521/." >&2
+    mkdir -p "$P521_DIR"
+    docker run --rm --user "$(id -u):$(id -g)" \
+        -v "$ROOT_DIR/tests/fixtures/seal/certs":/certs:ro -v "$P521_DIR":/out -w /tmp php:8.3-cli sh -c '
+        set -eu
+        cat > ext.cnf <<EOF
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, nonRepudiation
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+crlDistributionPoints = URI:http://pki.ezxmlseal.test/intermediate.crl
+authorityInfoAccess = OCSP;URI:http://pki.ezxmlseal.test/ocsp, caIssuers;URI:http://pki.ezxmlseal.test/intermediate.cer
+EOF
+        date_of() { date -u -d "$(openssl x509 -in /certs/intermediate.cert.pem -noout "-$1" | cut -d= -f2)" +%Y%m%d%H%M%SZ; }
+        openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-521 -out p521.key.pem 2>/dev/null
+        openssl req -new -key p521.key.pem -subj "/C=DK/O=Lothbrok Ltd/OU=P-521 Seal Dept/CN=Lothbrok Seal Test" -out p521.csr
+        openssl x509 -req -in p521.csr -sha256 -CA /certs/intermediate.cert.pem -CAkey /certs/intermediate.key.pem \
+            -set_serial "0x$(openssl rand -hex 16)" -not_before "$(date_of startdate)" -not_after "$(date_of enddate)" -extfile ext.cnf -out /out/p521.cert.pem 2>/dev/null
+        openssl pkey -in p521.key.pem -aes256 -passout pass:signKeyPassword -out /out/p521.key.pem
+        openssl verify -CAfile /certs/root.cert.pem -untrusted /certs/intermediate.cert.pem /out/p521.cert.pem >/dev/null'
+fi
+
 cp "$ROOT_DIR/tests/fixtures/seal/generate.ts" "$JS_DIR/generate-php-fixtures.ts"
 docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
     -v "$JS_DIR":/js -v "$ROOT_DIR/tests/fixtures/seal":/out -w /js "$NODE_IMAGE" \
