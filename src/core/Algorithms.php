@@ -48,7 +48,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * them: canonicalization, digest and signature. The tokens and the seals
  * take their identifiers from here; which ones each accepts is its own
  * policy. `XMLDSigToken` has the same constants, with the algorithms of XML
- * Encryption.
+ * Encryption. RSA-PSS and ECDSA, of the seals, are those of RFC 6931.
  */
 class Algorithms
 {
@@ -80,4 +80,18 @@ class Algorithms
     const RSA_SHA384 = XMLSecurityKey::RSA_SHA384;
     /** RSA-SHA512. */
     const RSA_SHA512 = XMLSecurityKey::RSA_SHA512;
+
+    /** RSASSA-PSS with SHA-256, MGF1 with the same digest, salt as long as the digest (RFC 6931, 2.3.10). */
+    const RSA_PSS_SHA256 = 'http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1';
+    /** RSASSA-PSS with SHA-384. */
+    const RSA_PSS_SHA384 = 'http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1';
+    /** RSASSA-PSS with SHA-512. */
+    const RSA_PSS_SHA512 = 'http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1';
+
+    /** ECDSA with SHA-256, the value written as r || s (RFC 6931, 2.3.6; RFC 4050). */
+    const ECDSA_SHA256 = 'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256';
+    /** ECDSA with SHA-384. */
+    const ECDSA_SHA384 = 'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384';
+    /** ECDSA with SHA-512. */
+    const ECDSA_SHA512 = 'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512';
 }
