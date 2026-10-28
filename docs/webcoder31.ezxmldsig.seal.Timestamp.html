@@ -1,0 +1,531 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\Timestamp | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.Timestamp.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.Timestamp.html">Timestamp</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>Time-stamps (RFC 3161, updated by RFC 5816): the request, the response,
+and the verification of a time-stamp token, a CMS SignedData (RFC 5652)
+whose content is a TSTInfo.</p>
+<p>No network access: the caller sends the request to the time-stamping
+authority of its choice. The token is checked as a signature of its own:
+one signer, the signed attributes that bind the content and the
+certificate of the authority (ESS signing-certificate, RFC 2634 and
+RFC 5035), the extended key usage timeStamping of that certificate
+(RFC 3161, 2.3), the algorithms of the seals. Whether the authority is
+trusted is decided by the caller, with the certificate returned.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="buildRequest" id="_buildRequest">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>buildRequest(<span>string <var>$imprint</var></span>, <span>string <var>$hash</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>A TimeStampReq (RFC 3161, 2.4.1): version 1, the imprint, and the
+request of the certificate of the authority in the token (certReq),
+which the verifier needs.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>A TimeStampReq (RFC 3161, 2.4.1): version 1, the imprint, and the
+request of the certificate of the authority in the token (certReq),
+which the verifier needs.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$imprint</var>&nbsp;&nbsp;</td>
+										<td><p>The digest of the data to time-stamp.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$hash</var>&nbsp;&nbsp;</td>
+										<td><p>Its algorithm, as hash() names it: sha256, sha384, sha512.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The request, in DER.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the digest is not supported.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_buildRequest">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="readResponse" id="_readResponse">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>readResponse(<span>string <var>$response</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The token of a TimeStampResp (RFC 3161, 2.4.2), if the authority
+granted it.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The token of a TimeStampResp (RFC 3161, 2.4.2), if the authority
+granted it.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$response</var>&nbsp;&nbsp;</td>
+										<td><p>The response, in DER.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The token, in DER.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the response is malformed, or the authority did
+not grant the time-stamp.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_readResponse">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="verifyToken" id="_verifyToken">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>verifyToken(<span>string <var>$token</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Verify a time-stamp token, and read it.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Verify a time-stamp token, and read it.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$token</var>&nbsp;&nbsp;</td>
+										<td><p>The token, in DER.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>'time' (float, UNIX time), 'imprintAlgorithm' (hash()
+name), 'imprint', 'certificate' (X509Cert of the authority),
+'chain' (the other certificates of the token), 'policy',
+'serialNumber'.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>Why the token is not valid.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_verifyToken">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="OID_SIGNED_DATA" id="OID_SIGNED_DATA">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_SIGNED_DATA = <span class="php-str">'1.2.840.113549.1.7.2'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_SIGNED_DATA">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_TST_INFO" id="OID_TST_INFO">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_TST_INFO = <span class="php-str">'1.2.840.113549.1.9.16.1.4'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_TST_INFO">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_CONTENT_TYPE" id="OID_CONTENT_TYPE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_CONTENT_TYPE = <span class="php-str">'1.2.840.113549.1.9.3'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_CONTENT_TYPE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_MESSAGE_DIGEST" id="OID_MESSAGE_DIGEST">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_MESSAGE_DIGEST = <span class="php-str">'1.2.840.113549.1.9.4'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_MESSAGE_DIGEST">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_SIGNING_CERTIFICATE" id="OID_SIGNING_CERTIFICATE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_SIGNING_CERTIFICATE = <span class="php-str">'1.2.840.113549.1.9.16.2.12'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_SIGNING_CERTIFICATE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_SIGNING_CERTIFICATE_V2" id="OID_SIGNING_CERTIFICATE_V2">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_SIGNING_CERTIFICATE_V2 = <span class="php-str">'1.2.840.113549.1.9.16.2.47'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_SIGNING_CERTIFICATE_V2">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_EXTENDED_KEY_USAGE" id="OID_EXTENDED_KEY_USAGE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_EXTENDED_KEY_USAGE = <span class="php-str">'2.5.29.37'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_EXTENDED_KEY_USAGE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OID_TIME_STAMPING" id="OID_TIME_STAMPING">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OID_TIME_STAMPING = <span class="php-str">'1.3.6.1.5.5.7.3.8'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OID_TIME_STAMPING">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="PKI_STATUS" id="PKI_STATUS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>PKI_STATUS = [
+	<span class="php-str">'granted'</span>,
+	<span class="php-str">'grantedWithMods'</span>,
+	<span class="php-str">'rejection'</span>,
+	<span class="php-str">'waiting'</span>,
+	<span class="php-str">'revocationWarning'</span>,
+	<span class="php-str">'revocationNotification'</span>,
+]</code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#PKI_STATUS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="OIDS_OF_DIGESTS" id="OIDS_OF_DIGESTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>OIDS_OF_DIGESTS = [<span class="php-str">'sha256'</span> =&gt; <a href="webcoder31.ezxmldsig.seal.Pkix.html"><span title="webcoder31\ezxmldsig\seal\Pkix">Pkix</span></a>::<a href="webcoder31.ezxmldsig.seal.Pkix.html#OID_SHA256">OID_SHA256</a>, <span class="php-str">'sha384'</span> =&gt; <a href="webcoder31.ezxmldsig.seal.Pkix.html"><span title="webcoder31\ezxmldsig\seal\Pkix">Pkix</span></a>::<a href="webcoder31.ezxmldsig.seal.Pkix.html#OID_SHA384">OID_SHA384</a>, <span class="php-str">'sha512'</span> =&gt; <a href="webcoder31.ezxmldsig.seal.Pkix.html"><span title="webcoder31\ezxmldsig\seal\Pkix">Pkix</span></a>::<a href="webcoder31.ezxmldsig.seal.Pkix.html#OID_SHA512">OID_SHA512</a>]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The OID of a digest, by its hash() name.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The OID of a digest, by its hash() name.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#OIDS_OF_DIGESTS">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

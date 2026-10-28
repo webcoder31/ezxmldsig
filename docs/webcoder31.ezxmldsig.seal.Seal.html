@@ -1,0 +1,956 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+
+	<title>Class webcoder31\ezxmldsig\seal\Seal | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li class="active">
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.Seal.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.Seal.html">Seal</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>Seals of files: an ASiC-E container (ETSI EN 319 162-1) holding the files
+and one detached XAdES baseline signature over them (ETSI EN 319 132-1),
+at level B, T (a signature time-stamp, RFC 3161) or LT (the certificates,
+CRLs and OCSP responses that validate it, embedded). The Node.js library
+ezxmldsig-js creates and verifies the same seals; its design document,
+design/seal.md, gives the structure and the rules followed.</p>
+<p>The seals are an experimental feature of the 2.x versions: their API may
+change in a minor version.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+			<b>Located at</b> <a href="source-seal.Seal.html#62" title="Go to source code">seal/Seal.php</a><br>
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="verifySeal" id="_verifySeal">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.Seal.html#81-128" title="Go to source code">verifySeal</a>(<span>string <var>$container</var></span>, <span>array <var>$options</var></span>): <a href="webcoder31.ezxmldsig.seal.SealVerification.html"><span title="webcoder31\ezxmldsig\seal\SealVerification">SealVerification</span></a></code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Verify a seal.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Verify a seal.</p>
+<p>The structure is read strictly: every element of the signature is
+where the baseline puts it, once, and anything this library does not
+process (a signature policy, a manifest of references, a transform)
+makes the seal invalid rather than ignored. A seal is valid only if
+every file of the container outside META-INF is covered, so that a
+file added to a sealed container cannot pass for a sealed one.</p>
+<p>The signing certificate is trusted at the time of the signature
+time-stamp, if any, and at the current date otherwise: SigningTime is
+claimed by the signer, and cannot date the check of its certificate.
+The certificate of the time-stamping authority is checked at the
+current date. The revocation of the certificates is checked, by CRLs
+or OCSP responses, unless 'revocation' is FALSE: the library sends no
+request, the data come from the seal (level LT) and from the options.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$container</var>&nbsp;&nbsp;</td>
+										<td><p>The ASiC-E container.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The result. An invalid seal does not throw:
+see its getError().</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>On a misuse: the options are not valid, or a CA
+certificate cannot be read.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_verifySeal">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="createSeal" id="_createSeal">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.Seal.html#1195-1375" title="Go to source code">createSeal</a>(<span>array <var>$files</var></span>, <span>string <var>$signKey</var></span>, <span>string <var>$signCert</var></span>, <span>string|null <var>$signKeyPassword</var></span>, <span>array <var>$options</var> = []</span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Seal files: an ASiC-E container that holds them, its manifest, and a
+XAdES-B-B signature over them.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Seal files: an ASiC-E container that holds them, its manifest, and a
+XAdES-B-B signature over them.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$files</var>&nbsp;&nbsp;</td>
+										<td><p>The files to seal, in the order of the container:
+each an array with 'name' (its path in the container, <code>/</code>
+separated, outside <code>META-INF/</code>), 'content' (its bytes) and,
+optionally, 'mimeType' (by default, from the extension of its
+name, see MEDIA_TYPES).</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$signKey</var>&nbsp;&nbsp;</td>
+										<td><p>The private key: the path of a PEM file, or its
+content.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$signCert</var>&nbsp;&nbsp;</td>
+										<td><p>The certificate of the key: the path of a PEM
+file, or its content; the certificates that follow the first
+one are embedded as its chain.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$signKeyPassword</var>&nbsp;&nbsp;</td>
+										<td><p>The password of the key, or NULL.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The container (<code>.asice</code>).</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>On a misuse: no file, a name or a media type that
+cannot be sealed, a key that does not match the certificate,
+an algorithm that does not suit the key, a certificate that
+cannot sign at the signing time.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_createSeal">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="timestampRequest" id="_timestampRequest">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.Seal.html#1596-1622" title="Go to source code">timestampRequest</a>(<span>string <var>$container</var></span>, <span>string <var>$digestAlgorithm</var> = <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#SHA256">SHA256</a></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The time-stamp request of a seal (RFC 3161 TimeStampReq, DER), to send
+to a time-stamping authority, with the media type
+<code>application/timestamp-query</code>. The library sends no request: the
+caller sends it to the authority of its choice, and gives the response
+to addSignatureTimestamp().</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The time-stamp request of a seal (RFC 3161 TimeStampReq, DER), to send
+to a time-stamping authority, with the media type
+<code>application/timestamp-query</code>. The library sends no request: the
+caller sends it to the authority of its choice, and gives the response
+to addSignatureTimestamp().</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$container</var>&nbsp;&nbsp;</td>
+										<td><p>The container.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$digestAlgorithm</var>&nbsp;&nbsp;</td>
+										<td><p>The digest of the imprint: SHA256
+(default), SHA384 or SHA512 of Algorithms.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The request.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the container does not hold one XAdES signature.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_timestampRequest">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="addSignatureTimestamp" id="_addSignatureTimestamp">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.Seal.html#1625-1689" title="Go to source code">addSignatureTimestamp</a>(<span>string <var>$container</var></span>, <span>string <var>$response</var></span>, <span>array <var>$options</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Add the signature time-stamp of a response to a seal: level B becomes
+level T (EN 319 132-1, 5.3). The signed parts of the signature file
+are left byte for byte as they are: the unsigned properties are
+inserted after the signed ones.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Add the signature time-stamp of a response to a seal: level B becomes
+level T (EN 319 132-1, 5.3). The signed parts of the signature file
+are left byte for byte as they are: the unsigned properties are
+inserted after the signed ones.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$container</var>&nbsp;&nbsp;</td>
+										<td><p>The container.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$response</var>&nbsp;&nbsp;</td>
+										<td><p>The response of the authority (RFC 3161
+TimeStampResp, DER).</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$options</var>&nbsp;&nbsp;</td>
+										<td><p>'tsaCertPath' (required): the trusted
+certificates of the time-stamping authority, its root and its
+intermediate CAs if the token does not embed them.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The container, with the time-stamp in its signature.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the authority did not grant the time-stamp, if
+the token is not valid, is not over this seal, or its
+authority is not trusted, or if the seal is already
+time-stamped.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_addSignatureTimestamp">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="validationDataRequests" id="_validationDataRequests">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.Seal.html#1692-1743" title="Go to source code">validationDataRequests</a>(<span>string <var>$container</var></span>, <span>array <var>$options</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The revocation data a seal needs: for each certificate of the chains
+of the signer and of the time-stamping authority, their trust anchors
+excepted, the CRL to fetch, and the OCSP request to send if the
+certificate names a responder. One of the two suffices for a
+certificate. Also useful at level B or T, to get the data
+verifySeal() needs.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The revocation data a seal needs: for each certificate of the chains
+of the signer and of the time-stamping authority, their trust anchors
+excepted, the CRL to fetch, and the OCSP request to send if the
+certificate names a responder. One of the two suffices for a
+certificate. Also useful at level B or T, to get the data
+verifySeal() needs.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$container</var>&nbsp;&nbsp;</td>
+										<td><p>The container.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$options</var>&nbsp;&nbsp;</td>
+										<td><p>'caCertPath' and 'tsaCertPath', as for
+verifySeal() (both required).</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>'crls': the CRLs to fetch, one per certificate, each
+with 'certificate', 'issuer' (X509Cert) and 'urls' (the http
+and https URLs of its CRL distribution points, empty if it
+names none); 'ocsp': the OCSP requests to send, each with
+'certificate', 'issuer', 'urls' (of its responders) and
+'request' (the OCSPRequest, DER, to POST with the media type
+<code>application/ocsp-request</code>).</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the seal is not valid, revocation aside.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_validationDataRequests">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="addValidationData" id="_addValidationData">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.Seal.html#1746-1832" title="Go to source code">addValidationData</a>(<span>string <var>$container</var></span>, <span>array <var>$options</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Add to a seal of level T the certificates, CRLs and OCSP responses
+that validate it: it becomes a seal of level LT (EN 319 132-1, 5.4,
+5.5.1, 6.3), which a third party can validate without reaching the
+CAs. The answers are checked before they are embedded, only those that
+told the status of a certificate; they must be issued after the
+time-stamp. The signed parts of the signature file are left byte for
+byte as they are.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Add to a seal of level T the certificates, CRLs and OCSP responses
+that validate it: it becomes a seal of level LT (EN 319 132-1, 5.4,
+5.5.1, 6.3), which a third party can validate without reaching the
+CAs. The answers are checked before they are embedded, only those that
+told the status of a certificate; they must be issued after the
+time-stamp. The signed parts of the signature file are left byte for
+byte as they are.</p>
+<p>What goes where: xades141:TimeStampValidationData, right after the
+time-stamp, the certificates of the chain of the time-stamping
+authority the token does not hold, and their CRLs or OCSP responses;
+xades:CertificateValues, the certificates of the chain of the signer
+ds:KeyInfo does not hold, its trust anchor included;
+xades:RevocationValues, a CRL or an OCSP response for each certificate
+of that chain, its trust anchor excepted. Each one is embedded once.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$container</var>&nbsp;&nbsp;</td>
+										<td><p>The container.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$options</var>&nbsp;&nbsp;</td>
+										<td><p>'caCertPath' and 'tsaCertPath', as for
+verifySeal(), and at least one of 'crls' (in DER or PEM) and
+'ocspResponses' (DER), fetched as validationDataRequests()
+lists.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The container, with the validation data in its
+signature.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the seal is not valid, is not of level T, or if
+the data do not tell the status of every certificate after the
+time-stamp.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_addValidationData">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="XMLDSIG_NS" id="XMLDSIG_NS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#64" title="Go to source code">XMLDSIG_NS</a> = <span class="php-str">'http://www.w3.org/2000/09/xmldsig#'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#XMLDSIG_NS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ASIC_NS" id="ASIC_NS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#65" title="Go to source code">ASIC_NS</a> = <span class="php-str">'http://uri.etsi.org/02918/v1.2.1#'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ASIC_NS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="XADES_NS" id="XADES_NS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#66" title="Go to source code">XADES_NS</a> = <span class="php-str">'http://uri.etsi.org/01903/v1.3.2#'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#XADES_NS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="XADES141_NS" id="XADES141_NS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#67-68" title="Go to source code">XADES141_NS</a> = <span class="php-str">'http://uri.etsi.org/01903/v1.4.1#'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The namespace of the properties XAdES 1.4.1 added, such as TimeStampValidationData.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The namespace of the properties XAdES 1.4.1 added, such as TimeStampValidationData.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#XADES141_NS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MANIFEST_NS" id="MANIFEST_NS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#69" title="Go to source code">MANIFEST_NS</a> = <span class="php-str">'urn:oasis:names:tc:opendocument:xmlns:manifest:1.0'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MANIFEST_NS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SIGNED_PROPERTIES_TYPE" id="SIGNED_PROPERTIES_TYPE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#70" title="Go to source code">SIGNED_PROPERTIES_TYPE</a> = <span class="php-str">'http://uri.etsi.org/01903#SignedProperties'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SIGNED_PROPERTIES_TYPE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ASICE_MIMETYPE" id="ASICE_MIMETYPE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#71" title="Go to source code">ASICE_MIMETYPE</a> = <span class="php-str">'application/vnd.etsi.asic-e+zip'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ASICE_MIMETYPE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SIGNATURE_PATH" id="SIGNATURE_PATH">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#73-74" title="Go to source code">SIGNATURE_PATH</a> = <span class="php-str">'META-INF/signatures001.xml'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The path of the signature in the container.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The path of the signature in the container.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SIGNATURE_PATH">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MANIFEST_PATH" id="MANIFEST_PATH">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#75" title="Go to source code">MANIFEST_PATH</a> = <span class="php-str">'META-INF/manifest.xml'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MANIFEST_PATH">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CANONICALIZATIONS" id="CANONICALIZATIONS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#77-78" title="Go to source code">CANONICALIZATIONS</a> = [<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#EXC_C14N">EXC_C14N</a>, <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#C14N">C14N</a>]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The canonicalizations accepted for SignedInfo and the signed properties.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The canonicalizations accepted for SignedInfo and the signed properties.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CANONICALIZATIONS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MEDIA_TYPES" id="MEDIA_TYPES">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#1172-1189" title="Go to source code">MEDIA_TYPES</a> = [
+	<span class="php-str">'pdf'</span> =&gt; <span class="php-str">'application/pdf'</span>,
+	<span class="php-str">'txt'</span> =&gt; <span class="php-str">'text/plain'</span>,
+	<span class="php-str">'md'</span> =&gt; <span class="php-str">'text/markdown'</span>,
+	<span class="php-str">'html'</span> =&gt; <span class="php-str">'text/html'</span>,
+	<span class="php-str">'htm'</span> =&gt; <span class="php-str">'text/html'</span>,
+	<span class="php-str">'xml'</span> =&gt; <span class="php-str">'application/xml'</span>,
+	<span class="php-str">'json'</span> =&gt; <span class="php-str">'application/json'</span>,
+	<span class="php-str">'csv'</span> =&gt; <span class="php-str">'text/csv'</span>,
+	<span class="php-str">'png'</span> =&gt; <span class="php-str">'image/png'</span>,
+	<span class="php-str">'jpg'</span> =&gt; <span class="php-str">'image/jpeg'</span>,
+	<span class="php-str">'jpeg'</span> =&gt; <span class="php-str">'image/jpeg'</span>,
+	<span class="php-str">'svg'</span> =&gt; <span class="php-str">'image/svg+xml'</span>,
+	<span class="php-str">'odt'</span> =&gt; <span class="php-str">'application/vnd.oasis.opendocument.text'</span>,
+	<span class="php-str">'docx'</span> =&gt; <span class="php-str">'application/vnd.openxmlformats-officedocument.wordprocessingml.document'</span>,
+	<span class="php-str">'xlsx'</span> =&gt; <span class="php-str">'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'</span>,
+]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The media types written for the most common extensions; any other file is application/octet-stream.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The media types written for the most common extensions; any other file is application/octet-stream.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MEDIA_TYPES">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MEDIA_TYPE" id="MEDIA_TYPE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#1191-1192" title="Go to source code">MEDIA_TYPE</a> = <span class="php-str">'/\A[A-Za-z0-9][A-Za-z0-9!#$&amp;^_.+-]&#123;0,126}\/[A-Za-z0-9][A-Za-z0-9!#$&amp;^_.+-]&#123;0,126}(\s*;\s*[A-Za-z0-9!#$&amp;^_.+-]+=("[^"\\\\\r\n]*"|[A-Za-z0-9!#$&amp;^_.+-]+))*\z/'</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>A media type: type/subtype, then parameters (RFC 6838, 4.2).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>A media type: type/subtype, then parameters (RFC 6838, 4.2).</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MEDIA_TYPE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="TIMESTAMP_CANONICALIZATION" id="TIMESTAMP_CANONICALIZATION">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#1588-1589" title="Go to source code">TIMESTAMP_CANONICALIZATION</a> = <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#EXC_C14N">EXC_C14N</a></code>
+
+	<div class="expandable-collapsedView">
+		<p>The canonicalization of ds:SignatureValue for its time-stamp.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The canonicalization of ds:SignatureValue for its time-stamp.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#TIMESTAMP_CANONICALIZATION">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CRL_DISTRIBUTION_POINTS" id="CRL_DISTRIBUTION_POINTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#1591" title="Go to source code">CRL_DISTRIBUTION_POINTS</a> = <span class="php-str">'2.5.29.31'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CRL_DISTRIBUTION_POINTS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AUTHORITY_INFO_ACCESS" id="AUTHORITY_INFO_ACCESS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#1592" title="Go to source code">AUTHORITY_INFO_ACCESS</a> = <span class="php-str">'1.3.6.1.5.5.7.1.1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AUTHORITY_INFO_ACCESS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ID_AD_OCSP" id="ID_AD_OCSP">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code><a href="source-seal.Seal.html#1593" title="Go to source code">ID_AD_OCSP</a> = <span class="php-str">'1.3.6.1.5.5.7.48.1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ID_AD_OCSP">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

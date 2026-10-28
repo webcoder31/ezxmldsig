@@ -1,3 +1,25 @@
+Unreleased
+----------
+- The seals of files, experimental: webcoder31\ezxmldsig\seal\Seal creates
+  and verifies ASiC-E containers (ETSI EN 319 162-1) holding files and one
+  detached XAdES baseline signature over them (ETSI EN 319 132-1), at
+  levels B, T (an RFC 3161 time-stamp) and LT (the certificates, CRLs and
+  OCSP responses embedded): createSeal(), verifySeal(), timestampRequest(),
+  addSignatureTimestamp(), validationDataRequests(), addValidationData().
+  They are the seals of the Node.js library 2.0.0: each library verifies
+  the seals of the other, and DSS validates them. The library sends no
+  request: the caller sends the time-stamp, CRL and OCSP requests. RSA-PSS,
+  the default for an RSA key, is written over the raw RSA operation of
+  OpenSSL, whose PHP extension signs with PKCS#1 v1.5 only. The API of the
+  seals may change in a minor version of 2.x. They need the zlib extension.
+- X509Cert gains getTrustedChain(), the chain isTrustedBy() verifies, at
+  the current date or at another one, with untrusted intermediate
+  certificates; and accessors of the DER encoding, the serial number, the
+  raw issuer and subject, the extensions, isCA() and canSignCrls().
+- Algorithms gains the identifiers of RSA-PSS (RSA_PSS_SHA256...) and ECDSA
+  (ECDSA_SHA256...) of RFC 6931, which the seals use; the tokens keep their
+  algorithms.
+
 2.0.0 (2026-10-28)
 -------------------
 In short: a major version for one change of names. XMLDSigToken and X509Cert

@@ -1,0 +1,607 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\Zip | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.Zip.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.Zip.html">Zip</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>The ZIP archives of ASiC containers (ETSI EN 319 162-1, 4.2): a writer of
+what a container needs, and a strict reader. The ZIP extension of PHP is
+not used: it is often missing, and it resolves what this reader refuses.</p>
+<p>A seal covers the files of its container: the reader refuses whatever lets
+two tools see different files in the same archive, which general ZIP
+readers accept. A local header that differs from its central directory
+entry, bytes between entries, two names that look the same, a path that
+leaves the container: each is refused, not resolved one way or the other.
+Two names are the same when they are the same in Unicode normalization
+form C, if the intl extension of PHP is loaded (class Normalizer), and
+when they are the same bytes otherwise.</p>
+<p>Neither ZIP64 nor encryption is supported, nor any method but stored (0)
+and deflate (8).</p>
+<p>An entry read is an array: 'name' (its path, <code>/</code> separated), 'content'
+(the uncompressed bytes), 'method' (0 or 8) and 'extra' (the extra field
+of its local header).</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="write" id="_write">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>write(<span>array <var>$inputs</var></span>, <span>int <var>$modified</var></span>): string</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Write an archive: names in UTF-8, sizes and CRC in the local headers
+(no data descriptor), deflate unless 'stored', no comment.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Write an archive: names in UTF-8, sizes and CRC in the local headers
+(no data descriptor), deflate unless 'stored', no comment.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$inputs</var>&nbsp;&nbsp;</td>
+										<td><p>The entries, each an array with 'name', 'content'
+and, optionally, 'stored' (TRUE to store the content
+uncompressed: the <code>mimetype</code> entry of a container).</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$modified</var>&nbsp;&nbsp;</td>
+										<td><p>The date of every entry, a UNIX time, in UTC. A
+fixed date makes the archive depend on its entries only.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The archive.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If a name is not acceptable to the reader, if two
+names collide, or if the archive would need ZIP64.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_write">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="read" id="_read">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>read(<span>string <var>$archive</var></span>, <span>int <var>$maxEntries</var> = <b><span class="active" title="webcoder31\ezxmldsig\seal\Zip">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Zip.html#MAX_ENTRIES">MAX_ENTRIES</a></span>, <span>int <var>$maxTotalSize</var> = <b><span class="active" title="webcoder31\ezxmldsig\seal\Zip">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Zip.html#MAX_TOTAL_SIZE">MAX_TOTAL_SIZE</a></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Read an archive, entries in their order. Directory entries (a name
+ending with <code>/</code>, empty) are checked and left out.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Read an archive, entries in their order. Directory entries (a name
+ending with <code>/</code>, empty) are checked and left out.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$archive</var>&nbsp;&nbsp;</td>
+										<td><p>The archive.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$maxEntries</var>&nbsp;&nbsp;</td>
+										<td><p>The largest number of entries.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$maxTotalSize</var>&nbsp;&nbsp;</td>
+										<td><p>The largest uncompressed size of the entries
+together, in bytes.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The entries.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the archive is malformed, ambiguous, or beyond the
+limits.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_read">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="MAX_ENTRIES" id="MAX_ENTRIES">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>MAX_ENTRIES = <span class="php-num">1000</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The default limits of the reader: entries, and uncompressed bytes in all.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The default limits of the reader: entries, and uncompressed bytes in all.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MAX_ENTRIES">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MAX_TOTAL_SIZE" id="MAX_TOTAL_SIZE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>MAX_TOTAL_SIZE = <span class="php-num">536870912</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MAX_TOTAL_SIZE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="LOCAL_SIGNATURE" id="LOCAL_SIGNATURE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>LOCAL_SIGNATURE = <span class="php-num">0x04034b50</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#LOCAL_SIGNATURE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CENTRAL_SIGNATURE" id="CENTRAL_SIGNATURE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>CENTRAL_SIGNATURE = <span class="php-num">0x02014b50</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CENTRAL_SIGNATURE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="END_SIGNATURE" id="END_SIGNATURE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>END_SIGNATURE = <span class="php-num">0x06054b50</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#END_SIGNATURE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="DESCRIPTOR_SIGNATURE" id="DESCRIPTOR_SIGNATURE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>DESCRIPTOR_SIGNATURE = <span class="php-num">0x08074b50</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#DESCRIPTOR_SIGNATURE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="LOCAL_SIZE" id="LOCAL_SIZE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>LOCAL_SIZE = <span class="php-num">30</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#LOCAL_SIZE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CENTRAL_SIZE" id="CENTRAL_SIZE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>CENTRAL_SIZE = <span class="php-num">46</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CENTRAL_SIZE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="END_SIZE" id="END_SIZE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>END_SIZE = <span class="php-num">22</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#END_SIZE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="FLAG_DESCRIPTOR" id="FLAG_DESCRIPTOR">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>FLAG_DESCRIPTOR = <span class="php-num">0x0008</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>General purpose flags: data descriptor and UTF-8 names.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>General purpose flags: data descriptor and UTF-8 names.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#FLAG_DESCRIPTOR">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="FLAG_UTF8" id="FLAG_UTF8">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>FLAG_UTF8 = <span class="php-num">0x0800</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#FLAG_UTF8">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ALLOWED_FLAGS" id="ALLOWED_FLAGS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>ALLOWED_FLAGS = <span class="php-num">0x0006</span> | <span class="php-num">0x0008</span> | <span class="php-num">0x0800</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>Flags a reader may meet: bits 1 and 2 only tell how deflate was tuned.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Flags a reader may meet: bits 1 and 2 only tell how deflate was tuned.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ALLOWED_FLAGS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="REFUSED_EXTRA_IDS" id="REFUSED_EXTRA_IDS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>REFUSED_EXTRA_IDS = [<span class="php-num">0x0001</span>, <span class="php-num">0x7075</span>]</code>
+
+	<div class="expandable-collapsedView">
+		<p>Extra fields that change the meaning of the header: ZIP64, and a second name (Info-ZIP Unicode path).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Extra fields that change the meaning of the header: ZIP64, and a second name (Info-ZIP Unicode path).</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#REFUSED_EXTRA_IDS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MAX_16" id="MAX_16">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>MAX_16 = <span class="php-num">0xffff</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MAX_16">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MAX_32" id="MAX_32">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>MAX_32 = <span class="php-num">0xffffffff</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MAX_32">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

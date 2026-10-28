@@ -1,0 +1,480 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\Policy | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.Policy.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.Policy.html">Policy</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>The algorithms of the seals: their digests and signature schemes, the
+curves of the EC keys, the smallest RSA key. The identifiers are those of
+the core; the digests are those of the tokens, SHA-1 and RIPEMD-160
+excepted (ETSI TS 119 312).</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="describeKey" id="_describeKey">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>describeKey(<span>resource|<a href="OpenSSLAsymmetricKey.html"><span title="OpenSSLAsymmetricKey">OpenSSLAsymmetricKey</span></a> <var>$key</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The type of a key and what the seals check of it.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The type of a key and what the seals check of it.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$key</var>&nbsp;&nbsp;</td>
+										<td><p>A key.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>'type' (&quot;rsa&quot;, &quot;ec&quot; or NULL), 'bits', 'curve' (NULL
+unless EC).</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_describeKey">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="keyProblem" id="_keyProblem">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>keyProblem(<span><var>$key</var></span>, <span><var>$what</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Why a key is refused for the seals, or NULL: an RSA key of less than
+MIN_RSA_BITS bits, an EC key on another curve than P-256, P-384 or
+P-521.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Why a key is refused for the seals, or NULL: an RSA key of less than
+MIN_RSA_BITS bits, an EC key on another curve than P-256, P-384 or
+P-521.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_keyProblem">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="verifyValue" id="_verifyValue">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>verifyValue(<span>array <var>$scheme</var></span>, <span>string <var>$data</var></span>, <span>string <var>$signature</var></span>, <span>resource|<a href="OpenSSLAsymmetricKey.html"><span title="OpenSSLAsymmetricKey">OpenSSLAsymmetricKey</span></a> <var>$publicKey</var></span>): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Verify a signature value of XML Signature with a scheme of the seals:
+RSASSA-PSS (see RsaPss), RSA PKCS#1 v1.5, or ECDSA whose value is
+written as r || s (RFC 4050), converted to the DER OpenSSL verifies.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Verify a signature value of XML Signature with a scheme of the seals:
+RSASSA-PSS (see RsaPss), RSA PKCS#1 v1.5, or ECDSA whose value is
+written as r || s (RFC 4050), converted to the DER OpenSSL verifies.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$scheme</var>&nbsp;&nbsp;</td>
+										<td><p>An entry of SIGNATURE_SCHEMES.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$data</var>&nbsp;&nbsp;</td>
+										<td><p>The signed data.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$signature</var>&nbsp;&nbsp;</td>
+										<td><p>The signature value.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$publicKey</var>&nbsp;&nbsp;</td>
+										<td><p>The public key.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>TRUE if the signature is valid.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_verifyValue">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="derToRaw" id="_derToRaw">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>derToRaw(<span><var>$signature</var></span>, <span><var>$curve</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>An ECDSA signature in DER, as OpenSSL gives it, written as r || s,
+each as long as the order of the curve.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>An ECDSA signature in DER, as OpenSSL gives it, written as r || s,
+each as long as the order of the curve.</p>
+</div>
+
+
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If the signature is malformed.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_derToRaw">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="rawToDer" id="_rawToDer">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>rawToDer(<span><var>$signature</var></span>, <span><var>$curve</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The DER of an ECDSA signature written as r || s, each as long as the
+order of the curve; NULL if its length does not suit the curve.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The DER of an ECDSA signature written as r || s, each as long as the
+order of the curve; NULL if its length does not suit the curve.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_rawToDer">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="DIGESTS" id="DIGESTS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>DIGESTS = [<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#SHA256">SHA256</a> =&gt; <span class="php-str">'sha256'</span>, <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#SHA384">SHA384</a> =&gt; <span class="php-str">'sha384'</span>, <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#SHA512">SHA512</a> =&gt; <span class="php-str">'sha512'</span>]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The digests of the seals, as hash() names them, by their URI.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The digests of the seals, as hash() names them, by their URI.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#DIGESTS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="SIGNATURE_SCHEMES" id="SIGNATURE_SCHEMES">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>SIGNATURE_SCHEMES = [
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#RSA_PSS_SHA256">RSA_PSS_SHA256</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'rsa'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha256'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'pss'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#RSA_PSS_SHA384">RSA_PSS_SHA384</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'rsa'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha384'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'pss'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#RSA_PSS_SHA512">RSA_PSS_SHA512</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'rsa'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha512'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'pss'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#RSA_SHA256">RSA_SHA256</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'rsa'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha256'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'pkcs1'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#RSA_SHA384">RSA_SHA384</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'rsa'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha384'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'pkcs1'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#RSA_SHA512">RSA_SHA512</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'rsa'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha512'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'pkcs1'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#ECDSA_SHA256">ECDSA_SHA256</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'ec'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha256'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'ecdsa'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#ECDSA_SHA384">ECDSA_SHA384</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'ec'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha384'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'ecdsa'</span>],
+	<a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#ECDSA_SHA512">ECDSA_SHA512</a> =&gt; [<span class="php-str">'keyType'</span> =&gt; <span class="php-str">'ec'</span>, <span class="php-str">'hash'</span> =&gt; <span class="php-str">'sha512'</span>, <span class="php-str">'padding'</span> =&gt; <span class="php-str">'ecdsa'</span>],
+]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The signature schemes of the seals, by their URI: the type of key, the digest, the padding.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The signature schemes of the seals, by their URI: the type of key, the digest, the padding.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#SIGNATURE_SCHEMES">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CURVES" id="CURVES">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>CURVES = [
+	<span class="php-str">'prime256v1'</span> =&gt; <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#ECDSA_SHA256">ECDSA_SHA256</a>,
+	<span class="php-str">'secp384r1'</span> =&gt; <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#ECDSA_SHA384">ECDSA_SHA384</a>,
+	<span class="php-str">'secp521r1'</span> =&gt; <a href="webcoder31.ezxmldsig.core.Algorithms.html"><span title="webcoder31\ezxmldsig\core\Algorithms">Algorithms</span></a>::<a href="webcoder31.ezxmldsig.core.Algorithms.html#ECDSA_SHA512">ECDSA_SHA512</a>,
+]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The curves of the EC keys accepted (TS 119 312, Table 2), and the signature algorithm each one takes by default.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The curves of the EC keys accepted (TS 119 312, Table 2), and the signature algorithm each one takes by default.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CURVES">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="MIN_RSA_BITS" id="MIN_RSA_BITS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>MIN_RSA_BITS = <span class="php-num">2048</span></code>
+
+	<div class="expandable-collapsedView">
+		<p>The smallest RSA key accepted, in bits. TS 119 312 (Table 6) lists no size below 1 900 bits, and keys below 3 000 bits as legacy.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The smallest RSA key accepted, in bits. TS 119 312 (Table 6) lists no size below 1 900 bits, and keys below 3 000 bits as legacy.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#MIN_RSA_BITS">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

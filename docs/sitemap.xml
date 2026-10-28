@@ -7,14 +7,19 @@
 			<url><loc>namespace-webcoder31.html</loc></url>
 			<url><loc>namespace-webcoder31.ezxmldsig.html</loc></url>
 			<url><loc>namespace-webcoder31.ezxmldsig.core.html</loc></url>
+			<url><loc>namespace-webcoder31.ezxmldsig.seal.html</loc></url>
 			<url><loc>namespace-webcoder31.ezxmldsig.token.html</loc></url>
 
 			<url><loc>webcoder31.ezxmldsig.core.Algorithms.html</loc></url>
 			<url><loc>webcoder31.ezxmldsig.core.X509Cert.html</loc></url>
+			<url><loc>webcoder31.ezxmldsig.seal.Seal.html</loc></url>
+			<url><loc>webcoder31.ezxmldsig.seal.SealVerification.html</loc></url>
 			<url><loc>webcoder31.ezxmldsig.token.XMLDSigToken.html</loc></url>
 
 
 			<url><loc>source-core.Algorithms.html</loc></url>
 			<url><loc>source-core.X509Cert.html</loc></url>
+			<url><loc>source-seal.Seal.html</loc></url>
+			<url><loc>source-seal.SealVerification.html</loc></url>
 			<url><loc>source-token.XMLDSigToken.html</loc></url>
 </urlset>

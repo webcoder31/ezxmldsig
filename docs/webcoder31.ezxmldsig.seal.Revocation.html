@@ -1,0 +1,281 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\Revocation | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.Revocation.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.Revocation.html">Revocation</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>The revocation status of the certificates of a chain, from CRLs and OCSP
+responses.</p>
+<p>Every certificate of the chain but its trust anchor needs a CRL of its
+issuer, or an OCSP response of its issuer or of a responder it delegated,
+that tells its status. Two questions are told apart:</p>
+<ul>
+<li>which CRLs count: current ones, their next update not passed (a seal of
+level B, the time-stamping authority of a seal of level T), or ones
+issued after a time-stamp (the signer of a seal of level T or LT, and
+its time-stamping authority at level LT, whose CRLs are embedded and no
+longer current when the seal is verified);</li>
+<li>which revocation makes the certificate unusable: any one, or one at or
+before the time-stamp only, the time-stamp proving that the seal
+existed before.</li>
+</ul>
+<p>The certificates of a time-stamping authority follow RFC 3161, 4: a
+revocation after the time-stamp leaves its tokens valid only if the CRL
+gives a reason that is not a compromise of a key. Without a reason, or
+for a key compromise, every token of the authority is distrusted.</p>
+<p>A CRL or a response issued after the certificate expired proves nothing
+of it, since a CA may drop the expired certificates from its CRLs and a
+responder forget them, unless they say they keep them (ExpiredCertsOnCRL,
+archive cutoff).</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="check" id="_check">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>check(<span>array <var>$chain</var></span>, <span>array <var>$sources</var></span>, <span>array <var>$check</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Check the revocation status of a chain.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Check the revocation status of a chain.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$chain</var>&nbsp;&nbsp;</td>
+										<td><p>The chain (X509Cert), from the certificate to its
+trust anchor.</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$sources</var>&nbsp;&nbsp;</td>
+										<td><p>The sources (RevocationSource).</p>
+</td>
+									</tr>
+									<tr>
+										<td><var>$check</var>&nbsp;&nbsp;</td>
+										<td><p>'now' (UNIX time); 'issuedAfter' (NULL: the
+sources must be current; a time: they must be issued after it);
+'time' (NULL: any revocation counts; a time: a revocation after
+it leaves the certificate usable); 'authority' (TRUE for the
+chain of a time-stamping authority: a revocation after 'time'
+must give a reason other than a compromise).</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>'error' (why it fails, or NULL), 'used' (the source used
+for each certificate).</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_check">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="iso" id="_iso">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>iso(<span><var>$time</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>A UNIX time in the ISO 8601 form JavaScript writes (milliseconds, Z).</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>A UNIX time in the ISO 8601 form JavaScript writes (milliseconds, Z).</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_iso">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="COMPROMISE_REASONS" id="COMPROMISE_REASONS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>COMPROMISE_REASONS = [<span class="php-num">1</span>, <span class="php-num">2</span>, <span class="php-num">10</span>]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The reason codes (RFC 5280, 5.3.1) of a compromise: keyCompromise, cACompromise, aACompromise.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The reason codes (RFC 5280, 5.3.1) of a compromise: keyCompromise, cACompromise, aACompromise.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#COMPROMISE_REASONS">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

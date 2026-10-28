@@ -1,0 +1,413 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+
+	<title>Class webcoder31\ezxmldsig\seal\SealVerification | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li class="active">
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.SealVerification.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.SealVerification.html">SealVerification</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>The result of the verification of a seal (see Seal::verifySeal()).</p>
+<p>The seals are an experimental feature of the 2.x versions: their API may
+change in a minor version.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+			<b>Located at</b> <a href="source-seal.SealVerification.html#53" title="Go to source code">seal/SealVerification.php</a><br>
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="isValid" id="_isValid">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#98-107" title="Go to source code">isValid</a>(): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Indicates whether the seal is valid: structure, algorithms, digests,
+signature, trust, revocation.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Indicates whether the seal is valid: structure, algorithms, digests,
+signature, trust, revocation.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_isValid">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getError" id="_getError">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#110-118" title="Go to source code">getError</a>(): string|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Why the seal is not valid, or NULL.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Why the seal is not valid, or NULL.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getError">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getLevel" id="_getLevel">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#121-131" title="Go to source code">getLevel</a>(): string|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The level of the seal: &quot;B&quot;; &quot;T&quot; if it has a signature time-stamp;
+&quot;LT&quot; if it also embeds the data that validate it (checked to suffice,
+unless verified with 'revocation' =&gt; FALSE); NULL if it is not valid.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The level of the seal: &quot;B&quot;; &quot;T&quot; if it has a signature time-stamp;
+&quot;LT&quot; if it also embeds the data that validate it (checked to suffice,
+unless verified with 'revocation' =&gt; FALSE); NULL if it is not valid.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getLevel">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getSigningTime" id="_getSigningTime">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#134-142" title="Go to source code">getSigningTime</a>(): <a href="DateTimeImmutable.html"><span title="DateTimeImmutable">DateTimeImmutable</span></a>|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The time the signer claims (SigningTime): not a proven one.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The time the signer claims (SigningTime): not a proven one.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The time, in UTC.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getSigningTime">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getTimestampTime" id="_getTimestampTime">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#145-154" title="Go to source code">getTimestampTime</a>(): <a href="DateTimeImmutable.html"><span title="DateTimeImmutable">DateTimeImmutable</span></a>|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The proven time of the seal: the time of its signature time-stamp
+(level T), or NULL.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The proven time of the seal: the time of its signature time-stamp
+(level T), or NULL.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>The time, in UTC.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getTimestampTime">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getFiles" id="_getFiles">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#157-167" title="Go to source code">getFiles</a>(): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The files the seal covers, in the order of its references; empty if
+it is not valid.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The files the seal covers, in the order of its references; empty if
+it is not valid.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>Each file: 'name' (its path in the container) and
+'mimeType' (the media type the signature gives it).</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getFiles">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="getSigningCertificate" id="_getSigningCertificate">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#170-178" title="Go to source code">getSigningCertificate</a>(): <a href="webcoder31.ezxmldsig.core.X509Cert.html"><span title="webcoder31\ezxmldsig\core\X509Cert">X509Cert</span></a>|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>The signing certificate, once it has been found.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The signing certificate, once it has been found.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_getSigningCertificate">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="isRevocationChecked" id="_isRevocationChecked">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code><a href="source-seal.SealVerification.html#181-189" title="Go to source code">isRevocationChecked</a>(): boolean</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Indicates whether the revocation of the certificates was checked.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Indicates whether the revocation of the certificates was checked.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_isRevocationChecked">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>

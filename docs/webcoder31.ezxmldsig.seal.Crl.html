@@ -1,0 +1,579 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex">
+	<title>Class webcoder31\ezxmldsig\seal\Crl | EZXMLDSIG API</title>
+	<link rel="stylesheet" href="assets/main.css">
+	<script src="assets/main.js" defer></script>
+</head>
+
+<body class="layout">
+	<div class="layout-aside">
+	<div class="menu">
+			<div class="menu-section">
+				<h3>Namespaces</h3>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.html">webcoder31</a>
+	<ul>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>
+	<ul>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.core.html">core</a>
+			</li>
+			<li class="menuGroup-item active">
+				<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>
+			</li>
+			<li class="menuGroup-item">
+				<a href="namespace-webcoder31.ezxmldsig.token.html">token</a>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</li>
+	</ul>
+			</div>
+
+		<div class="menu-section">
+			<h3>Classes</h3>
+			<ul>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.Seal.html">
+							Seal
+						</a>
+					</li>
+					<li>
+						<a href="webcoder31.ezxmldsig.seal.SealVerification.html">
+							SealVerification
+						</a>
+					</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+
+	<div class="layout-main">
+		<div class="layout-navbar">
+	<nav class="navbar">
+		<div class="navbar-left">
+			<ul class="navbar-links">
+				<li>
+					<a href="index.html">Overview</a>
+				</li>
+				<li>
+					
+						<a href="namespace-webcoder31.ezxmldsig.seal.html">Namespace</a>
+					
+				</li>
+<li class="active"><a href="webcoder31.ezxmldsig.seal.Crl.html">Class</a></li>				<li>
+					<a href="tree.html">Tree</a>
+				</li>
+			</ul>
+		</div>
+		<div class="navbar-right">
+	<div class="search" data-elements="assets/elements.js">
+		<input class="search-input" placeholder="Search class, function or namespace" autofocus>
+		<ul class="search-results"></ul>
+	</div>
+		</div>
+	</nav>
+		</div>
+
+		<div class="layout-content">
+		<h1>
+			Class <a href="namespace-webcoder31.html">webcoder31</a>\<a href="namespace-webcoder31.ezxmldsig.html">ezxmldsig</a>\<a href="namespace-webcoder31.ezxmldsig.seal.html">seal</a>\<a href="webcoder31.ezxmldsig.seal.Crl.html">Crl</a>
+		</h1>
+
+
+	<table class="classLikeSignatureTable">
+
+
+
+
+	</table>
+		<div class="classLikeDescription">
+	<div class="description"><p>Certificate revocation lists (RFC 5280, 5): their reading, the
+verification of their signature by the CA that issued the certificate,
+and the status of a certificate.</p>
+<p>Only complete, direct CRLs are used: a delta CRL, an indirect CRL, a CRL
+restricted to some reasons, or a critical extension this class does not
+know, make the CRL unusable rather than partly read.</p>
+<p>A CRL read is an array: 'der', 'issuer' (the DER of its issuer name),
+'thisUpdate', 'nextUpdate' (UNIX times, NULL if none), 'revoked' (by the
+serial number in hexadecimal: 'date' and 'reason'), 'onlyUserCerts',
+'onlyCACerts', 'expiredCertsOnCrl', 'tbs', 'signatureAlgorithm',
+'signature'.</p>
+</div>
+		</div>
+
+
+		<div class="classLikeSection">
+
+		</div>
+
+
+
+		<table class="table" id="methods">
+			<tr>
+				<th class="table-heading sortable" colspan="3" title="Switch between natural and alphabetical order">Methods</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="read" id="_read">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>read(<span>string <var>$data</var></span>): array</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Read a CRL, in DER or in PEM.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Read a CRL, in DER or in PEM.</p>
+</div>
+
+							<h4>Parameters</h4>
+							<table>
+									<tr>
+										<td><var>$data</var>&nbsp;&nbsp;</td>
+										<td><p>The CRL.</p>
+</td>
+									</tr>
+							</table>
+
+							<h4>Returns</h4>
+							<div><p>The CRL, read but not verified.</p>
+</div>
+
+							<h4>Throws</h4>
+							<table>
+									<tr>
+										<td><code><a href="Exception.html"><span>Exception</span></a></code>&nbsp;</td>
+										<td><p>If it is malformed, or if it is not a complete,
+direct CRL.</p>
+</td>
+									</tr>
+							</table>
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_read">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="readReasonCode" id="_readReasonCode">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>readReasonCode(<span><var>$value</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>CRLReason (RFC 5280, 5.3.1): an ENUMERATED of one byte.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>CRLReason (RFC 5280, 5.3.1): an ENUMERATED of one byte.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_readReasonCode">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="covers" id="_covers">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>covers(<span>array <var>$crl</var></span>, <span><a href="webcoder31.ezxmldsig.core.X509Cert.html"><span title="webcoder31\ezxmldsig\core\X509Cert">X509Cert</span></a> <var>$certificate</var></span>, <span><a href="webcoder31.ezxmldsig.core.X509Cert.html"><span title="webcoder31\ezxmldsig\core\X509Cert">X509Cert</span></a> <var>$issuer</var></span>): string|null</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>Whether a CRL can tell the status of a certificate: issued by the
+issuer of the certificate (its name, its signature, its key usage
+cRLSign), and of a scope that includes it.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>Whether a CRL can tell the status of a certificate: issued by the
+issuer of the certificate (its name, its signature, its key usage
+cRLSign), and of a scope that includes it.</p>
+</div>
+
+
+							<h4>Returns</h4>
+							<div><p>NULL if it can, or why it cannot.</p>
+</div>
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_covers">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="source" id="_source">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+					static
+					
+				</code>
+			</td>
+
+			<td class="table-cell">
+				<code>source(<span>array <var>$crl</var></span>)</code>
+
+
+	<div class="expandable-collapsedView">
+		<p>A CRL as a source of revocation status.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>A CRL as a source of revocation status.</p>
+</div>
+
+
+
+
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#_source">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+		<table class="table" id="constants">
+			<tr>
+				<th class="table-heading sortable" colspan="4" title="Switch between natural and alphabetical order">Constants</th>
+			</tr>
+
+	<tr class="expandable collapsed" data-order="AUTHORITY_KEY_ID" id="AUTHORITY_KEY_ID">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AUTHORITY_KEY_ID = <span class="php-str">'2.5.29.35'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AUTHORITY_KEY_ID">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CRL_NUMBER" id="CRL_NUMBER">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>CRL_NUMBER = <span class="php-str">'2.5.29.20'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CRL_NUMBER">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="DELTA_CRL_INDICATOR" id="DELTA_CRL_INDICATOR">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>DELTA_CRL_INDICATOR = <span class="php-str">'2.5.29.27'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#DELTA_CRL_INDICATOR">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="ISSUING_DISTRIBUTION_POINT" id="ISSUING_DISTRIBUTION_POINT">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>ISSUING_DISTRIBUTION_POINT = <span class="php-str">'2.5.29.28'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#ISSUING_DISTRIBUTION_POINT">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="FRESHEST_CRL" id="FRESHEST_CRL">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>FRESHEST_CRL = <span class="php-str">'2.5.29.46'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#FRESHEST_CRL">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="AUTHORITY_INFO_ACCESS" id="AUTHORITY_INFO_ACCESS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>AUTHORITY_INFO_ACCESS = <span class="php-str">'1.3.6.1.5.5.7.1.1'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#AUTHORITY_INFO_ACCESS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="EXPIRED_CERTS_ON_CRL" id="EXPIRED_CERTS_ON_CRL">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>EXPIRED_CERTS_ON_CRL = <span class="php-str">'2.5.29.60'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#EXPIRED_CERTS_ON_CRL">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="REASON_CODE" id="REASON_CODE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>REASON_CODE = <span class="php-str">'2.5.29.21'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#REASON_CODE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="INVALIDITY_DATE" id="INVALIDITY_DATE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>INVALIDITY_DATE = <span class="php-str">'2.5.29.24'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#INVALIDITY_DATE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="CERTIFICATE_ISSUER" id="CERTIFICATE_ISSUER">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>CERTIFICATE_ISSUER = <span class="php-str">'2.5.29.29'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#CERTIFICATE_ISSUER">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="HOLD_INSTRUCTION_CODE" id="HOLD_INSTRUCTION_CODE">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>HOLD_INSTRUCTION_CODE = <span class="php-str">'2.5.29.23'</span></code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#HOLD_INSTRUCTION_CODE">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="KNOWN_CRL_EXTENSIONS" id="KNOWN_CRL_EXTENSIONS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>KNOWN_CRL_EXTENSIONS = [
+	<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#AUTHORITY_KEY_ID">AUTHORITY_KEY_ID</a>,
+	<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#CRL_NUMBER">CRL_NUMBER</a>,
+	<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#ISSUING_DISTRIBUTION_POINT">ISSUING_DISTRIBUTION_POINT</a>,
+	<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#FRESHEST_CRL">FRESHEST_CRL</a>,
+	<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#AUTHORITY_INFO_ACCESS">AUTHORITY_INFO_ACCESS</a>,
+	<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#EXPIRED_CERTS_ON_CRL">EXPIRED_CERTS_ON_CRL</a>,
+]</code>
+
+	<div class="expandable-collapsedView">
+		<p>The extensions of a CRL it may have, critical or not; any other critical one makes it unusable.</p>
+
+	</div>
+
+	<div class="expandable-expandedView">
+	<div class="description"><p>The extensions of a CRL it may have, critical or not; any other critical one makes it unusable.</p>
+</div>
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#KNOWN_CRL_EXTENSIONS">#</a>
+		</td>
+	</tr>
+	<tr class="expandable collapsed" data-order="KNOWN_ENTRY_EXTENSIONS" id="KNOWN_ENTRY_EXTENSIONS">
+			<td class="table-cell table-shrink">
+				<code class="nowrap">
+					
+	public
+				</code>
+			</td>
+
+<td class="table-cell table-shrink"></td>
+			<td class="table-cell">
+<code>KNOWN_ENTRY_EXTENSIONS = [<b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#REASON_CODE">REASON_CODE</a>, <b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#INVALIDITY_DATE">INVALIDITY_DATE</a>, <b><span class="active" title="webcoder31\ezxmldsig\seal\Crl">self</span></b>::<a href="webcoder31.ezxmldsig.seal.Crl.html#HOLD_INSTRUCTION_CODE">HOLD_INSTRUCTION_CODE</a>]</code>
+
+
+	<div class="expandable-expandedView">
+	</div>
+			</td>
+		<td class="table-anchor">
+			<a href="#KNOWN_ENTRY_EXTENSIONS">#</a>
+		</td>
+	</tr>
+		</table>
+
+
+
+
+
+		</div>
+
+		<div class="layout-footer">
+			EZXMLDSIG API documentation generated by <a href="https://github.com/ApiGen/ApiGen">ApiGen dev-master</a>
+		</div>
+	</div>
+
+	<div class="layout-rest">
+		<div class="navbar"></div>
+	</div>
+</body>
+</html>
