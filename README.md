@@ -69,7 +69,7 @@ You can also clone it (or download it as a ZIP archive) from its [GitHub reposit
 
 ## What's in the box?
 
-The library has two branches, each in its own namespace: the tokens, ``webcoder31\ezxmldsig\token`` (``XMLDSigToken``), and the core they are built on, ``webcoder31\ezxmldsig\core`` (``X509Cert``, and the identifiers of the algorithms of XML Signature in ``Algorithms``). The seals of files will be a third branch, ``webcoder31\ezxmldsig\seal``, beside the tokens. The classes of the core marked ``@internal`` serve the branches of the library only.
+The library has two branches, each in its own namespace: the tokens, ``webcoder31\ezxmldsig\token`` (``XMLDSigToken``), and the core they are built on, ``webcoder31\ezxmldsig\core`` (``X509Cert``, and the identifiers of the algorithms of XML Signature in ``Algorithms``). The seals of files will be a third branch, ``webcoder31\ezxmldsig\seal``, beside the tokens. For now, only the [Node.js library](https://github.com/webcoder31/ezxmldsig-js#readme) seals files, from its version 2.0.0, as an experimental feature: detached XAdES signatures in an ASiC-E container, at levels B, T and LT. The classes of the core marked ``@internal`` serve the branches of the library only.
 
 **``XMLDSigToken``** creates and analyzes XML tokens:
 
