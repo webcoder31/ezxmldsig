@@ -22,7 +22,8 @@
 # bin/js-ezxmldsig serves the Node.js library to the tests of the
 # interoperability (EZXMLDSIG_JS_URL), and bin/dss runs DSS, the validator
 # of the seal tests of the group dss (EZXMLDSIG_DSS_URL); the network, the
-# service and DSS are removed at the end. DSS takes some 40 seconds to
+# service and DSS are removed at the end, even after an interruption, which
+# stops the command in progress at once. DSS takes some 40 seconds to
 # start: DSS=0 leaves it out, and the tests of the group dss are then
 # skipped (or left out: -- --exclude-group dss). CI, when set, is passed to
 # the tests: in continuous integration, a test that cannot reach the
@@ -40,7 +41,7 @@ VERSIONS=
 while [ $# -gt 0 ]; do
     case "$1" in
         --) shift; break ;;
-        -h|--help) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) VERSIONS="$VERSIONS $1"; shift ;;
     esac
 done
@@ -77,17 +78,30 @@ if [ "$(sha256 "$ROOT_DIR/$PHPUNIT_PHAR")" != "$PHPUNIT_SHA256" ]; then
     exit 1
 fi
 
+# A long command runs in the background, and the script waits for it: a
+# signal interrupts the wait at once, and the trap stops the command, where
+# the shell would otherwise run the trap only once the command is over.
+CHILD=
+run() {
+    "$@" &
+    CHILD=$!
+    wait "$CHILD" || { status=$?; CHILD=; return "$status"; }
+    CHILD=
+}
+
 # The network, and the Node.js library on it (see bin/js-ezxmldsig).
 NETWORK="ezxmldsig-test-$$"
 docker network create --internal "$NETWORK" >/dev/null
-trap '"$ROOT_DIR/bin/js-ezxmldsig" stop "$NETWORK"; "$ROOT_DIR/bin/dss" stop "$NETWORK"; docker network rm "$NETWORK" >/dev/null' EXIT
-trap 'exit 1' INT TERM
-"$ROOT_DIR/bin/js-ezxmldsig" start "$NETWORK"
+# The container of PHPUnit outlives its docker run when the run is stopped:
+# it is removed too.
+trap 'docker rm -f "$NETWORK-phpunit" >/dev/null 2>&1; "$ROOT_DIR/bin/js-ezxmldsig" stop "$NETWORK"; "$ROOT_DIR/bin/dss" stop "$NETWORK"; docker network rm "$NETWORK" >/dev/null' EXIT
+trap 'if [ -n "$CHILD" ]; then kill "$CHILD" 2>/dev/null || true; fi; exit 1' INT TERM
+run "$ROOT_DIR/bin/js-ezxmldsig" start "$NETWORK"
 
 # DSS on the network (see bin/dss), unless DSS=0.
 DSS_URL=
 if [ "${DSS:-1}" != 0 ]; then
-    "$ROOT_DIR/bin/dss" start "$NETWORK"
+    run "$ROOT_DIR/bin/dss" start "$NETWORK"
     DSS_URL=http://dss:8080
 fi
 
@@ -95,7 +109,7 @@ fi
 STATUS=0
 for version in $VERSIONS; do
     echo "==> PHP $version" >&2
-    docker run --rm -u "$DOCKER_USER" --network "$NETWORK" \
+    run docker run --rm --name "$NETWORK-phpunit" -u "$DOCKER_USER" --network "$NETWORK" \
         -e EZXMLDSIG_JS_URL=http://ezxmldsig-js:8080 -e EZXMLDSIG_DSS_URL="$DSS_URL" -e CI \
         -v "$ROOT_DIR:/app" -w /app "php:$version-cli" \
         php "$PHPUNIT_PHAR" "$@" || STATUS=1
