@@ -3,7 +3,10 @@
 namespace webcoder31\ezxmldsig\Tests;
 
 use webcoder31\ezxmldsig\Tests\helpers\SealPki;
+use webcoder31\ezxmldsig\Tests\helpers\TestCrl;
+use webcoder31\ezxmldsig\Tests\helpers\TestOcsp;
 use webcoder31\ezxmldsig\Tests\helpers\TestTsa;
+use webcoder31\ezxmldsig\core\Algorithms;
 use webcoder31\ezxmldsig\seal\Seal;
 use webcoder31\ezxmldsig\seal\Zip;
 
@@ -98,6 +101,74 @@ abstract class SealTestCase extends TestCase
             }
             return $entries;
         });
+    }
+
+    /**
+     * The files of the sample seals: names a verifier could get wrong
+     * (spaces, accents, a directory, # and %), and a media type with
+     * parameters; those of the validation by DSS in test/seal/seal.test.ts
+     * of the Node.js library.
+     */
+    protected static function sampleFiles()
+    {
+        return [
+            ['name' => 'contrat final.pdf', 'content' => "%PDF-1.4\n"],
+            ['name' => "notes d'\u{e9}t\u{e9}.md", 'content' => "# Notes d'\u{e9}t\u{e9}\n"],
+            ['name' => 'docs/a#b%c.txt', 'content' => "odd name\n"],
+            ['name' => 'data.bin', 'content' => "\x00\x01\x02\xff", 'mimeType' => 'application/x-test; charset="none"'],
+        ];
+    }
+
+    /**
+     * The seals made here that the verifiers apart from this library check
+     * (SealJsTest: the Node.js library; SealDssTest: DSS): each algorithm at
+     * level B, each level with RSA 3072, and level LT with an EC key. The
+     * keys are the names of sampleSeal().
+     */
+    public function sampleSeals()
+    {
+        $names = ['B, RSA 3072, RSA-PSS', 'B, RSA 3072, PKCS#1 v1.5', 'B, RSA 2048, SHA-512 digests', 'B, P-256', 'B, P-384', 'B, P-521',
+            'T, RSA 3072', 'LT by CRLs, RSA 3072', 'LT by OCSP, RSA 3072', 'LT by CRLs, P-384'];
+        return array_combine($names, array_map(function ($name) { return [$name]; }, $names));
+    }
+
+    /**
+     * A sample seal of sampleSeals(), of the files of sampleFiles():
+     * 'container', 'key', 'level', and 'crls', the CRLs its verifier needs (none at
+     * level LT: the seal embeds its own). It is signed 30 seconds ago and
+     * time-stamped 20 seconds ago, before its validation data is issued.
+     */
+    protected static function sampleSeal($name)
+    {
+        list($level, $what) = explode(', ', $name, 2);
+        $options = ['signingTime' => (int) microtime(true) - 30];
+        switch ($what)
+        {
+            case 'RSA 3072, PKCS#1 v1.5': $key = 'rsa3072'; $options['signatureAlgorithm'] = Algorithms::RSA_SHA256; break;
+            case 'RSA 2048, SHA-512 digests': $key = 'rsa2048'; $options['digestAlgorithm'] = Algorithms::SHA512; break;
+            case 'P-256': $key = 'p256'; break;
+            case 'P-384': $key = 'p384'; break;
+            case 'P-521': $key = 'p521'; break;
+            default: $key = 'rsa3072';
+        }
+        $container = self::seal($key, $options, self::sampleFiles());
+        if ('B' !== $level)
+        {
+            $container = self::timestamp($container, ['time' => microtime(true) - 20]);
+        }
+        if ('LT by CRLs' === $level)
+        {
+            $container = Seal::addValidationData($container, self::trust(['crls' => TestCrl::current()]));
+        }
+        if ('LT by OCSP' === $level)
+        {
+            $container = Seal::addValidationData($container, self::trust([
+                'crls' => [TestCrl::make(['issuer' => 'root']), TestCrl::make(['issuer' => 'tsa-root'])],
+                'ocspResponses' => [TestOcsp::make(['cert' => $key, 'signer' => 'ocsp'])],
+            ]));
+        }
+        $lt = 0 === strpos($level, 'LT');
+        return ['container' => $container, 'key' => $key, 'level' => $lt ? 'LT' : $level, 'crls' => $lt ? [] : TestCrl::current()];
     }
 
     /** Asserts that a call throws an exception whose message matches a pattern. */

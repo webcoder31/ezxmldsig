@@ -6,22 +6,18 @@ use webcoder31\ezxmldsig\Tests\helpers\Dss;
 
 /**
  * Seals made here, validated by DSS (tests/helpers/Dss.php), a validator
- * apart from this library. The files are those of the validation by DSS in
- * test/seal/seal.test.ts of the Node.js library.
+ * apart from this library: the sample seals of SealTestCase, of the profile
+ * XAdES-BASELINE of their level, and a seal whose file was changed, refused.
+ * A seal of level LT is validated by the revocation data it embeds; DSS
+ * fetches the CRLs of the others at pki.ezxmlseal.test, where they are
+ * published once for the class.
  *
  * @group dss
  */
 class SealDssTest extends SealTestCase
 {
-    private static function files()
-    {
-        return [
-            ['name' => 'contrat final.pdf', 'content' => "%PDF-1.4\n"],
-            ['name' => "notes d'\u{e9}t\u{e9}.md", 'content' => "# Notes d'\u{e9}t\u{e9}\n"],
-            ['name' => 'docs/a#b%c.txt', 'content' => "odd name\n"],
-            ['name' => 'data.bin', 'content' => "\x00\x01\x02\xff", 'mimeType' => 'application/x-test; charset="none"'],
-        ];
-    }
+    /** @var bool Whether the CRLs DSS fetches are published. */
+    private static $published = false;
 
     protected function setUp(): void
     {
@@ -31,31 +27,48 @@ class SealDssTest extends SealTestCase
         {
             $this->markTestSkipped($reason);
         }
-        Dss::publishTestCrls();
+        if (!self::$published)
+        {
+            Dss::publishTestCrls();
+            self::$published = true;
+        }
     }
 
-    public function testASealOfLevelBIsValidForDss()
+    /**
+     * @dataProvider sampleSeals
+     */
+    public function testASealMadeHereIsValidForDssAtTheProfileOfItsLevel($name)
     {
-        $report = Dss::validate(self::seal('rsa3072', [], self::files()));
+        $seal = self::sampleSeal($name);
+        $report = Dss::validate($seal['container']);
         $this->assertSame('ASiC-E', $report['containerType']);
         $this->assertCount(1, $report['signatures']);
         $signature = $report['signatures'][0];
-        $this->assertSame('XAdES-BASELINE-B', $signature['format']);
-        $this->assertSame(array_column(self::files(), 'name'), $signature['scope']);
+        $this->assertSame('XAdES-BASELINE-' . $seal['level'], $signature['format']);
+        $this->assertSame(array_column(self::sampleFiles(), 'name'), $signature['scope']);
         $this->assertTrue($signature['signatureIntact']);
-        $this->assertCount(count(self::files()) + 1, $signature['references']);
+        $this->assertCount(count(self::sampleFiles()) + 1, $signature['references']);
         foreach ($signature['references'] as $reference)
         {
             $this->assertTrue($reference['found'] && $reference['intact'], json_encode($reference));
         }
-        $this->assertSame(['CN=Lothbrok Seal Test,OU=Seal Root CA,O=Lothbrok Ltd,C=DK'], $signature['trusted']);
+        $this->assertContains('CN=Lothbrok Seal Test,OU=Seal Root CA,O=Lothbrok Ltd,C=DK', $signature['trusted']);
+        if ('B' !== $seal['level'])
+        {
+            $this->assertContains('CN=Lothbrok Seal Test,OU=TSA Root CA,O=Lothbrok Ltd,C=DK', $signature['trusted']);
+        }
         $this->assertSame('TOTAL_PASSED', $signature['indication'], json_encode($signature['errors']));
         $this->assertSame([], $signature['errors']);
+        if ('LT' === $seal['level'])
+        {
+            // The signer, the intermediate and the authority, by what the seal embeds.
+            $this->assertCount(3, array_keys($report['revocationOrigins'], 'INPUT_DOCUMENT'), json_encode($report['revocationOrigins']));
+        }
     }
 
     public function testASealWhoseFileWasChangedIsRefusedByDss()
     {
-        $container = self::rebuild(self::seal('rsa3072', [], self::files()), function ($entries) {
+        $container = self::rebuild(self::sampleSeal('B, RSA 3072, RSA-PSS')['container'], function ($entries) {
             return array_map(function ($e) { if ('contrat final.pdf' === $e['name']) { $e['content'] = "%PDF-1.5\n"; } return $e; }, $entries);
         });
         $signature = Dss::validate($container)['signatures'][0];

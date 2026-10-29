@@ -18,8 +18,16 @@
  *   "cryptKey", "cryptKeyPassword", "options", and "ttl" for isOutOfDate()
  *   (default: 60).
  *
+ * - "verifySeal": verifies the sealed container "container" ({"bytes":
+ *   base64}) with verifySeal(). Fields: "container", "options" (its CRLs and
+ *   OCSP responses as {"bytes": base64}). Result: the verdict, as
+ *   tests/fixtures/seal/generate.ts records it in verdicts.json ("valid",
+ *   "error", "level", "files", "signingTime", "timestampTime", "signer"),
+ *   and "revocationChecked".
+ *
  * The requests and results are those of test/php/ezxmldsig.php of the
- * Node.js library, which serves the same commands with the PHP library.
+ * Node.js library, which serves the same commands with the PHP library, but
+ * "verifySeal".
  * Paths of keys and certificates are those of the PHPUnit container: the
  * repository is seen at the same place, read-only. Token data that are not
  * UTF-8 text are given as {"bytes": base64}. An exception thrown by the
@@ -31,13 +39,17 @@ import { createServer } from 'node:http';
 
 // The library: a clone at a tag, or a working copy (see bin/js-ezxmldsig).
 const { XMLDSigToken } = await import('/ezxmldsig-js/dist/token/index.js');
+const { verifySeal } = await import('/ezxmldsig-js/dist/seal/index.js');
 
 const PORT = 8080;
 
 type Request = Record<string, any>;
 
-/** Token data from JSON: {"bytes": base64} becomes bytes. */
+/** Data from JSON: {"bytes": base64} becomes bytes. */
 function fromJson(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map(fromJson);
+  }
   if (data !== null && typeof data === 'object') {
     if (Object.keys(data).length === 1 && typeof data.bytes === 'string') {
       return new Uint8Array(Buffer.from(data.bytes, 'base64'));
@@ -47,10 +59,13 @@ function fromJson(data: any): any {
   return data;
 }
 
-/** Token data to JSON: bytes become {"bytes": base64}. */
+/** Data to JSON: bytes become {"bytes": base64}. */
 function toJson(data: any): any {
   if (data instanceof Uint8Array) {
     return { bytes: Buffer.from(data).toString('base64') };
+  }
+  if (Array.isArray(data)) {
+    return data.map(toJson);
   }
   if (data !== null && typeof data === 'object') {
     return Object.fromEntries(Object.entries(data).map(([name, value]) => [name, toJson(value)]));
@@ -85,6 +100,20 @@ function describe(token: any, ttl: number) {
   };
 }
 
+/** The verdict on a seal. */
+function verdict(result: any) {
+  return {
+    valid: result.isValid(),
+    error: result.getError(),
+    level: result.getLevel(),
+    files: result.getFiles(),
+    signingTime: result.getSigningTime()?.toISOString() ?? null,
+    timestampTime: result.getTimestampTime()?.toISOString() ?? null,
+    signer: result.getSigningCertificate()?.getDN() ?? null,
+    revocationChecked: result.isRevocationChecked(),
+  };
+}
+
 /** Runs one request. */
 function run(request: Request) {
   const options = request.options ?? {};
@@ -113,6 +142,8 @@ function run(request: Request) {
           : XMLDSigToken.analyzeXMLToken(request.xml, options),
         ttl,
       );
+    case 'verifySeal':
+      return verdict(verifySeal(fromJson(request.container), fromJson(options)));
     default:
       throw new Error('Unknown command!');
   }
