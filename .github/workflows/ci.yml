@@ -3,6 +3,15 @@
 # runners have, and with the Node.js library served by bin/js-ezxmldsig. A
 # skipped test fails the run: a check that does not run must not pass for
 # one that does.
+#
+# The seal tests that send the seals to DSS (Digital Signature Service, the
+# validator of the European Commission; the PHPUnit group dss) run in a job
+# of their own, under PHP 8.3, and are left out of the others (DSS=0,
+# --exclude-group dss). The image of DSS, built by Maven from
+# esig/dss-demonstrations, is kept in the cache of GitHub Actions (docker
+# save), under a key that changes with bin/dss: it is built again when
+# bin/dss changes, or when the cache has gone unused for 7 days and GitHub
+# removed it.
 name: CI
 
 on:
@@ -20,6 +29,34 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.3']
+    env:
+      DSS: '0'
     steps:
       - uses: actions/checkout@v4
-      - run: bin/test ${{ matrix.php }} -- --fail-on-skipped
+      - run: bin/test ${{ matrix.php }} -- --fail-on-skipped --exclude-group dss
+
+  dss:
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE_TAR: tests/.cache/dss-image.tar
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore the image of DSS
+        id: image
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.IMAGE_TAR }}
+          key: dss-image-${{ hashFiles('bin/dss') }}
+      - name: Load the image of DSS
+        if: steps.image.outputs.cache-hit == 'true'
+        run: docker load -i "$IMAGE_TAR"
+      - name: Build the image of DSS
+        if: steps.image.outputs.cache-hit != 'true'
+        run: bin/dss build && docker save -o "$IMAGE_TAR" dss-demo:6.5.1
+      - name: Keep the image of DSS in the cache
+        if: steps.image.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.IMAGE_TAR }}
+          key: dss-image-${{ hashFiles('bin/dss') }}
+      - run: bin/test 8.3 -- --fail-on-skipped --group dss

@@ -775,6 +775,7 @@ The PHPUnit test suite runs in Docker, so neither PHP nor PHPUnit has to be inst
 bin/test                        # PHP 7.4, then PHP 8.3
 bin/test 8.3                    # one PHP version
 bin/test 7.4 -- --filter Secure # arguments after -- go to PHPUnit
+DSS=0 bin/test                  # without DSS: its tests are skipped
 ```
 
 The script uses the official `php:<version>-cli` images. On first run, it downloads the PHPUnit 9.6 PHAR into `tests/.cache/` (checked against a pinned SHA-256).
@@ -786,6 +787,8 @@ Tests that need a feature the current environment lacks are skipped, and PHPUnit
 The continuous integration (`.github/workflows/ci.yml`) runs `bin/test` under PHP 7.4 and 8.3 on each push to `main` and each pull request, with `--fail-on-skipped`: there, a skipped test fails the run, so that a check that does not run never passes for one that does.
 
 The tests of the interoperability with the Node.js library (`tests/JsBridgeTest.php`) call it through `tests/helpers/Js.php`. `bin/test` runs the tests on a Docker network of their own, with no way out, where `bin/js-ezxmldsig` serves the Node.js library over HTTP (`tests/js/ezxmldsig.ts`, in the `node:24-slim` image), and removes both at the end. The library is the tag named in `bin/js-ezxmldsig`, cloned once into `tests/.cache/` and built there; `EZXMLDSIG_JS_DIR` names a built working copy instead (`EZXMLDSIG_JS_DIR=../ezxmldsig-js bin/test`). Run outside `bin/test`, these tests are skipped; in continuous integration (`CI=true`), they fail.
+
+The seal tests of the group `dss` (`tests/SealDssTest.php`) send the seals to DSS (Digital Signature Service, the validator of the European Commission) through `tests/helpers/Dss.php`. `bin/test` starts it on the same network with `bin/dss`, a copy of the script of the Node.js library: the same image `dss-demo:6.5.1`, built once from `esig/dss-demonstrations` (a Maven build, several minutes), the same trust anchors and the same configuration, which `tests/DssScriptTest.php` compares with the original. A second container serves the CRLs the tests publish in `tests/.cache/dss/pki/`. DSS takes some 40 seconds to start, and is removed at the end; `DSS=0` leaves it out, and its tests are then skipped. In continuous integration, they run in a job of their own, under PHP 8.3, with the image of DSS kept in the cache of GitHub Actions, and the other jobs leave them out (`--exclude-group dss`).
 
 The suite also runs each attack of the attack lab of the [signed token demo](#signed-token-demo) with the code of the demo, and checks that its API never returns a value of a token as markup (`tests/Demo*Test.php`).
 
@@ -808,7 +811,7 @@ Each check belongs in the tests of the library itself, and runs in its continuou
 |---|---|---|---|---|
 | 1. It verifies what it creates | tests and continuous integration of the PHP library | tests and continuous integration of the Node.js library | tests and continuous integration of the PHP library | tests and continuous integration of the Node.js library |
 | 2. The other library verifies what it creates | tests and continuous integration of the Node.js library, against the PHP library 2.0.0 | tests and continuous integration of the Node.js library, by the PHP library 2.0.0 | by hand | tests and continuous integration of the PHP library, on seals made by the Node.js library 2.0.0 |
-| 3. Third-party tools verify what it creates | by hand | tests and continuous integration of the Node.js library | by hand | tests and continuous integration of the Node.js library |
+| 3. Third-party tools verify what it creates | by hand | tests and continuous integration of the Node.js library | tests and continuous integration of the PHP library, by DSS, at level B; by hand at levels T and LT | tests and continuous integration of the Node.js library |
 | 4. It verifies what these tools create | by hand | tests and continuous integration of the Node.js library | tests and continuous integration of the PHP library, on a seal made by DSS | tests and continuous integration of the Node.js library, on a seal made by DSS |
 
 The tests of the PHP library run with `bin/test`, on a developer machine and in its continuous integration. The Node.js library depends on xml-crypto, which canonicalizes its XML: for its tokens, xml-crypto is not a checker wholly apart from the code under test.

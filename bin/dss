@@ -1,0 +1,138 @@
+#!/bin/sh
+#
+# Runs DSS (Digital Signature Service, the validator of the European
+# Commission) for the seal tests, in Docker, with its configuration.
+#
+# Usage:
+#   bin/dss start NETWORK   builds the image if needed, then starts DSS on a
+#                           Docker network
+#   bin/dss stop NETWORK    stops and removes its containers
+#   bin/dss build           builds the image dss-demo:6.5.1 (long: a Maven build)
+#
+# bin/test runs it, on the network of the tests, unless DSS=0: the PHPUnit
+# container reaches DSS at http://dss:8080, the URL it is given in
+# EZXMLDSIG_DSS_URL (see tests/helpers/Dss.php). DSS lives as long as one
+# run of the tests.
+#
+# A copy of bin/dss of the Node.js library ezxmldsig-js, which runs the same
+# DSS for its own seal tests: the same image, built from the Dockerfile of
+# esig/dss-demonstrations at the tag 6.5.1 (commit 3c79488), cloned into
+# tests/.cache/dss/src, and the same configuration. Only the names, the
+# paths and the network differ, so that both can run at once.
+# tests/DssScriptTest.php checks that the image and the configuration stay
+# those of the Node.js library.
+#
+# Its configuration is written to tests/.cache/dss/ and mounted in the lib/
+# directory of Tomcat, which is on the class path of DSS:
+# dss-custom.properties names a keystore of trust anchors, which holds the
+# roots of tests/fixtures/seal/certs/ (root, and tsa-root). Each start
+# writes it again. The CRLs and OCSP responses DSS fetches are kept one
+# second in its cache, not until their next update: a test that publishes
+# another CRL is then seen.
+#
+# A second container serves tests/.cache/dss/pki/ over HTTP at the name
+# pki.ezxmlseal.test, on the same network: the CRL distribution points and
+# OCSP responder the test certificates name.
+
+set -eu
+
+ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+CACHE="$ROOT_DIR/tests/.cache/dss"
+CERTS="$ROOT_DIR/tests/fixtures/seal/certs"
+
+IMAGE=dss-demo:6.5.1
+REPOSITORY=https://github.com/esig/dss-demonstrations.git
+TAG=6.5.1
+COMMIT=3c79488
+PKI_HOST=pki.ezxmlseal.test
+PKI_IMAGE=busybox:1.37
+KEYSTORE_PASSWORD=test-password
+
+usage() {
+    sed -n '2,35p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+docker_ready() {
+    if ! docker info >/dev/null 2>&1; then
+        echo "Docker is not reachable (with Colima: colima start)." >&2
+        exit 1
+    fi
+}
+
+build() {
+    if [ ! -d "$CACHE/src/.git" ]; then
+        mkdir -p "$CACHE"
+        git -c advice.detachedHead=false clone --quiet --branch "$TAG" --depth 1 "$REPOSITORY" "$CACHE/src"
+    fi
+    actual=$(git -C "$CACHE/src" rev-parse --short=7 HEAD)
+    if [ "$actual" != "$COMMIT" ]; then
+        echo "tests/.cache/dss/src is at $actual, not at $COMMIT (tag $TAG): remove it and run again." >&2
+        exit 1
+    fi
+    echo "Building $IMAGE (a Maven build, several minutes)." >&2
+    docker build --quiet -t "$IMAGE" "$CACHE/src" >/dev/null
+}
+
+configure() {
+    mkdir -p "$CACHE/config" "$CACHE/pki"
+    rm -f "$CACHE/config/test-trust.p12"
+    for name in root tsa-root; do
+        docker run --rm -u "$(id -u):$(id -g)" \
+            -v "$CERTS:/certs:ro" -v "$CACHE/config:/config" \
+            --entrypoint keytool "$IMAGE" -importcert -noprompt -alias "seal-$name" \
+            -file "/certs/$name.cert.pem" -keystore /config/test-trust.p12 \
+            -storetype PKCS12 -storepass "$KEYSTORE_PASSWORD" 2>/dev/null
+    done
+    cat > "$CACHE/config/dss-custom.properties" <<EOF
+trusted.source.keystore.type = PKCS12
+trusted.source.keystore.filename = test-trust.p12
+trusted.source.keystore.password = $KEYSTORE_PASSWORD
+cache.crl.default.next.update = 1
+cache.crl.max.next.update = 1
+cache.ocsp.default.next.update = 1
+cache.ocsp.max.next.update = 1
+EOF
+}
+
+stop() {
+    docker rm -f "$1-dss" "$1-pki" >/dev/null 2>&1 || true
+}
+
+start() {
+    if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+        build
+    fi
+    configure
+    stop "$1"
+    docker run -d --rm --name "$1-pki" --network "$1" --network-alias "$PKI_HOST" \
+        -v "$CACHE/pki:/srv:ro" "$PKI_IMAGE" httpd -f -p 80 -h /srv >/dev/null
+    docker run -d --rm --name "$1-dss" --network "$1" --network-alias dss \
+        -v "$CACHE/config/dss-custom.properties:/usr/local/tomcat/lib/dss-custom.properties:ro" \
+        -v "$CACHE/config/test-trust.p12:/usr/local/tomcat/lib/test-trust.p12:ro" \
+        "$IMAGE" >/dev/null
+    # Asked from the PKI container: the host does not reach the network.
+    echo "Waiting for DSS." >&2
+    tries=0
+    until docker exec "$1-pki" wget -q -O /dev/null http://dss:8080/ 2>/dev/null; do
+        tries=$((tries + 1))
+        if ! docker inspect "$1-dss" >/dev/null 2>&1 || [ "$tries" -gt 100 ]; then
+            echo "DSS does not answer after $((tries * 3)) s:" >&2
+            docker logs "$1-dss" 2>&1 | tail -20 >&2 || true
+            stop "$1"
+            exit 1
+        fi
+        sleep 3
+    done
+    echo "DSS answers; $PKI_HOST serves tests/.cache/dss/pki/." >&2
+}
+
+case "${1:-}" in
+    start|stop) [ $# -eq 2 ] || { usage >&2; exit 1; } ;;
+esac
+case "${1:-}" in
+    start) docker_ready; start "$2" ;;
+    stop) docker_ready; stop "$2" ;;
+    build) docker_ready; build ;;
+    -h|--help) usage ;;
+    *) usage >&2; exit 1 ;;
+esac
